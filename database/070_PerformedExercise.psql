@@ -1,3 +1,4 @@
+
 CREATE TABLE PerformedExercise (
     performed_exercise_id uuid DEFAULT uuid_generate_v1mc() PRIMARY KEY
     , exercise_id uuid REFERENCES Exercise(exercise_id)
@@ -5,7 +6,10 @@ CREATE TABLE PerformedExercise (
     , name text NOT NULL
     -- Sets is a list of reps e.g. [ 10, 10, 9, 8, 7, ], sets is the lenght
     , reps positive_int[] NOT NULL
-    , sets positive_int GENERATED ALWAYS AS (array_length(reps, 1)) stored
+    , sets positive_int GENERATED ALWAYS AS (array_length(reps, 1)) STORED
+    -- The generated column above is a PG12 feature, if you use PG11 comment
+    -- it out and use the row below for now.
+    -- , sets positive_int
     -- TODO: See if I can set default via session_schedule_id foreign key,
     -- for both rest and reps
     , rest interval[] DEFAULT ARRAY[
