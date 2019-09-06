@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.SCHEMA:workout_app.public</OriginalElement>
+  <nodes>
+    <node x="48.25" y="189.0">70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.sessionschedule</node>
+    <node x="78.75" y="0.0">70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.plan</node>
+    <node x="100.0" y="677.0">70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.performedexercise</node>
+    <node x="213.0" y="422.0">70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.performedsession</node>
+    <node x="0.0" y="400.0">70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.exercise</node>
+    <node x="296.25" y="200.0">70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.appuser</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.performedsession" target="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.sessionschedule">
+      <point x="-50.75" y="-91.5" />
+      <point x="263.75" y="375.0" />
+      <point x="193.0" y="375.0" />
+      <point x="48.25" y="80.5" />
+    </edge>
+    <edge source="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.performedsession" target="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.appuser">
+      <point x="50.75" y="-91.5" />
+      <point x="0.0" y="69.5" />
+    </edge>
+    <edge source="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.performedexercise" target="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.performedsession">
+      <point x="52.75" y="-146.5" />
+      <point x="258.25" y="652.0" />
+      <point x="314.5" y="652.0" />
+      <point x="0.0" y="91.5" />
+    </edge>
+    <edge source="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.sessionschedule" target="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.plan">
+      <point x="0.0" y="-80.5" />
+      <point x="0.0" y="69.5" />
+    </edge>
+    <edge source="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.performedexercise" target="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.exercise">
+      <point x="-52.75" y="-146.5" />
+      <point x="152.75" y="652.0" />
+      <point x="96.5" y="652.0" />
+      <point x="0.0" y="113.5" />
+    </edge>
+    <edge source="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.exercise" target="70fe36fb-8e3a-4f8b-9a23-1b4028b10bb1.TABLE:workout_app.public.sessionschedule">
+      <point x="0.0" y="-113.5" />
+      <point x="-48.25" y="80.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.1646464646464647" x="249.35993061578483" y="362.9956634865568" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Key columns</Category>
+    <Category>Columns</Category>
+  </Categories>
+</Diagram>
+
