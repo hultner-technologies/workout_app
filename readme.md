@@ -9,7 +9,7 @@
 - links
 - data
 
-**SessionSchedule** _Schedule for one session of a workout plan_
+**SessionSechedule** _Schedule for one session of a workout plan_
 - id
 - plan
 - name
@@ -53,7 +53,6 @@
 - name
 
 
-
 ### Notes about types
 _Unless otherwise specified_
 - Strings such as name, note, description are text
@@ -69,3 +68,41 @@ https://www.postgresql.org/docs/current/sql-createdomain.html
 CREATE DOMAIN positive_int AS int
     CHECK(VALUE >= 0)
 ```
+
+## Tech stack
+### Backend
+- Database
+    - Database first approach
+    - PostgresSQL
+    - Driver
+        - asyncpg 
+          https://github.com/MagicStack/asyncpg
+        - aiopg (backup)
+          https://github.com/aio-libs/aiopg
+        - psycopg2 (worst case fallback)
+- Application layer 
+    - Python
+    - FastAPI
+    - PyDantic
+        - Maybe write own object mapper/model generator with aiopg
+    - REST w. OpenAPI specs
+      and/or GraphQL w. apollo?
+    - Async IO
+
+### Frontend
+- Native App
+    - ReactNative
+    - iOS first
+    - Focus on experience in the gym, at your workout
+    - Healthkit integration
+    - Suggestion, create a mobile web-app using React Native for web for
+      platforms we don't officially support with goal to share most code.
+        - Also faster & easier to deploy 
+- Web cloud app
+    - Online app, desktop/mobile
+    - Focus on 
+        - Analyzing previous workouts
+        - Create new workout schedules
+        - See statistics and progress
+        - Social? (Not initial version)
+
