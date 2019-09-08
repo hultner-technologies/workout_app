@@ -1,0 +1,62 @@
+default_reps: 10
+default_sets: 3
+default_rest: "00:05:00"
+
+name: Julian Plan A
+description: |-
+  If your arms are already as muscular [as these](https://assets.website-files.com/54a5a40be53a05f34703dd18/5793f75a0ad17d3c2b64c172_https-%252F%252Fd2mxuefqeaa7sj.cloudfront.net%252Fs_47BA25183F58123E5E1B386359348E6870986C628A36A91739F8545AFA7EFAAB_1468603592749_Male%2BPart-way%2BBody%2BTarget.jpg), you can skip exercise Plan A to start with the intermediate Plan B detailed momentarily.
+
+  Otherwise, even if you’ve lifted before, start with exercise Plan A.
+
+  Plan A entails of hitting each muscle group once per workout. It's a starter plan without barbell squats and deadlifts, because these exercises can intimidate beginners from completing workouts. They're also harder to do at home with just dumbbells.
+
+  And the point of this ramp-up period is to get you acclimated to working out with as few excuses as possible. I want you to build the habit of working out — so that it sticks.
+
+  (Barbell squats and deadlifts, however, do become critical in the intermediate plan you quickly transition to.)
+
+  For your first two months of working out, your inexperienced muscles will grow efficiently even with the lesser stimulus of starter Plan A. In other words, Plan A will produce the same results as the more intensive Plan B while requiring less effort and less time. This means you’re more likely to complete this program.
+
+  Eventually Plan A will stop producing size gains for you. When you fail to measure size gains on your arms after a week of working out on Plan A, switch to Plan B. 
+
+  Gains on Plan A should stall around 8 weeks in if you're properly following all the advice in this handbook. If the stall occurs sooner than 6 weeks, and you haven’t worked out extensively in the past year, you may be prematurely plateauing and should refer to the overcoming plateaus section at the bottom of the [cheat sheet](https://www.julian.com/guide/muscle/workout-plans#workout-plans).
+
+links:
+  - https://www.julian.com/guide/muscle/workout-plans#plan-a-exercises
+  - https://www.julian.com/guide/muscle/workout-plans#workout-plans
+
+sessions:
+  - name: Day 1
+    links:
+      - https://www.julian.com/guide/muscle/workout-plans#plan-a-exercises
+    exercises:
+      - name: Dumbbell incline press
+        description: Do not bring your elbows below chest level.
+        vimeo: https://vimeo.com/177967959
+      - name: Bicep curl
+      - name: Overhead tricep extension
+      - name: Front raise
+      - name: Dumbbell squat
+      - name: Hanging leg raise †
+      - name: Forearm curl up (25 reps)
+        reps: 25
+
+  - name: Day 2
+    exercises:
+      - name: Dumbbell romanian deadlift
+      - name: Calf raise
+      - name: Shrug
+      - name: Seated pulley row†
+      - name: Lat pulldown†
+      - name: Dumbbell shoulder press
+      - name: Forearm curl in
+        reps: 15
+
+  - name: Day 3
+    exercises:
+      - name: Dumbbell press
+      - name: Bicep curl
+      - name: Overhead tricep extension
+      - name: Dumbbell squat
+      - name: Floor crunch
+      - name: Forearm curl back
+        reps: 15
