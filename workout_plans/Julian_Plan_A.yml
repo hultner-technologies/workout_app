@@ -24,6 +24,10 @@ links:
   - https://www.julian.com/guide/muscle/workout-plans#plan-a-exercises
   - https://www.julian.com/guide/muscle/workout-plans#workout-plans
 
+# Reps needed to progress into a heavier weight next time.
+# Value between 0.1-1
+progression_limit: 0.8
+
 sessions:
   - name: Day 1
     links:
