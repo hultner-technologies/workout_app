@@ -15,5 +15,5 @@ services:
       - app-db-data:/var/lib/postgresql/data/pgdata
       - ./database/:/docker-entrypoint-initdb.d/
 
-  
+volumes:  
   app-db-data:
