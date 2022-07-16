@@ -42,7 +42,7 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
             session_schedule_id=session_schedule.session_schedule_id,
             **{
                 "reps": plan_data["default_reps"],
-                "sets": plan_data["default_reps"],
+                "sets": plan_data["default_sets"],
                 "rest": plan_data["default_rest"],
                 **e,
             },
