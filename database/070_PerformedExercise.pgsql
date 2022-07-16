@@ -1,8 +1,8 @@
 
-CREATE TABLE PerformedExercise (
+CREATE TABLE performed_exercise (
     performed_exercise_id uuid DEFAULT uuid_generate_v1mc() PRIMARY KEY
-    , exercise_id uuid REFERENCES Exercise(exercise_id)
-    , performed_session_id uuid REFERENCES PerformedSession(performed_session_id) NOT NULL
+    , exercise_id uuid REFERENCES exercise(exercise_id)
+    , performed_session_id uuid REFERENCES performed_session(performed_session_id) NOT NULL
     , name text NOT NULL
     -- Sets is a list of reps e.g. [ 10, 10, 9, 8, 7, ], sets is the lenght
     , reps positive_int[] NOT NULL
