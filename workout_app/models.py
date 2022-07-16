@@ -61,7 +61,7 @@ class BaseExercise(SQLModel, table=True):
     exercise: List["Exercise"] = Relationship(back_populates="base_exercise")
 
 
-class Plan(SQLModel, table=True):
+class PlanBase(SQLModel):
     __tablename__ = "plan"
     __table_args__ = (PrimaryKeyConstraint("plan_id", name="plan_pkey"),)
 
@@ -77,10 +77,16 @@ class Plan(SQLModel, table=True):
     )
     data: Optional[dict] = Field(default=None, sa_column=Column("data", JSONB))
 
+
+class Plan(PlanBase, table=True):
     session_schedule: List["SessionSchedule"] = Relationship(back_populates="plan")
 
 
-class SessionSchedule(SQLModel, table=True):
+class PlanRead(PlanBase):
+    session_schedule: List["SessionScheduleRead"] = []
+
+
+class SessionScheduleBase(SQLModel):
     __tablename__ = "session_schedule"
     __table_args__ = (
         CheckConstraint(
@@ -98,7 +104,9 @@ class SessionSchedule(SQLModel, table=True):
             "session_schedule_id", UUID, server_default=text("uuid_generate_v1mc()")
         )
     )
-    plan_id: str = Field(sa_column=Column("plan_id", UUID, nullable=False))
+    plan_id: str = Field(
+        sa_column=Column("plan_id", UUID, nullable=False), foreign_key="plan.plan_id"
+    )
     name: str = Field(sa_column=Column("name", Text, nullable=False))
     progression_limit: Decimal = Field(
         sa_column=Column(
@@ -116,14 +124,21 @@ class SessionSchedule(SQLModel, table=True):
     )
     data: Optional[dict] = Field(default=None, sa_column=Column("data", JSONB))
 
-    plan: Optional["Plan"] = Relationship(back_populates="session_schedule")
+
+class SessionSchedule(SessionScheduleBase, table=True):
+    plan: Optional[Plan] = Relationship(back_populates="session_schedule")
     exercise: List["Exercise"] = Relationship(back_populates="session_schedule")
     performed_session: List["PerformedSession"] = Relationship(
         back_populates="session_schedule"
     )
 
 
-class Exercise(SQLModel, table=True):
+class SessionScheduleRead(SessionScheduleBase):
+    plan: Optional[Plan] = None
+    exercise: List["ExerciseRead"] = []
+
+
+class ExerciseBase(SQLModel):
     __tablename__ = "exercise"
     __table_args__ = (
         ForeignKeyConstraint(
@@ -166,6 +181,8 @@ class Exercise(SQLModel, table=True):
     )
     data: Optional[dict] = Field(default=None, sa_column=Column("data", JSONB))
 
+
+class Exercise(ExerciseBase, table=True):
     base_exercise: Optional["BaseExercise"] = Relationship(back_populates="exercise")
     session_schedule: Optional["SessionSchedule"] = Relationship(
         back_populates="exercise"
@@ -173,6 +190,10 @@ class Exercise(SQLModel, table=True):
     performed_exercise: List["PerformedExercise"] = Relationship(
         back_populates="exercise"
     )
+
+
+class ExerciseRead(ExerciseBase):
+    base_exercise: "BaseExercise"
 
 
 class PerformedSession(SQLModel, table=True):
@@ -244,10 +265,10 @@ class PerformedExercise(SQLModel, table=True):
     performed_session_id: str = Field(
         sa_column=Column("performed_session_id", UUID, nullable=False)
     )
-    name: str = Field(sa_column=Column("name", Text, nullable=False))
+    name: str = Field(sa_column=Column("name", Text))
     reps: int = Field(sa_column=Column("reps", Integer, nullable=False))
     exercise_id: Optional[str] = Field(
-        default=None, sa_column=Column("exercise_id", UUID)
+        default=None, sa_column=Column("exercise_id", UUID), nullable=False
     )
     sets: Optional[int] = Field(
         default=None,
@@ -281,3 +302,7 @@ class PerformedExercise(SQLModel, table=True):
     performed_session: Optional["PerformedSession"] = Relationship(
         back_populates="performed_exercise"
     )
+
+
+SessionScheduleRead.update_forward_refs()
+PlanRead.update_forward_refs()
