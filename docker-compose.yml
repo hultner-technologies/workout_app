@@ -1,0 +1,19 @@
+
+services:
+  db:
+    image: postgres:14
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${DB_PASSWORD?Not set}
+      - POSTGRES_USER=${DB_USER?Not set}
+      - POSTGRES_DB=${DB_DATABASE}
+    ports:
+      - '25432:5432'
+    volumes: 
+      - app-db-data:/var/lib/postgresql/data/pgdata
+      - ./database/:/docker-entrypoint-initdb.d/
+
+  
+  app-db-data:
