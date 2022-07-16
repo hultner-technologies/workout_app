@@ -1,2 +1,4 @@
 # Classify psql as postgres
 *.psql linguist-language=PLpgSQL
+*.sql linguist-language=PLpgSQL
+*.pgsql linguist-language=PLpgSQL
