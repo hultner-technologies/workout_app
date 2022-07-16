@@ -101,7 +101,12 @@ class SessionSchedule(SQLModel, table=True):
     plan_id: str = Field(sa_column=Column("plan_id", UUID, nullable=False))
     name: str = Field(sa_column=Column("name", Text, nullable=False))
     progression_limit: Decimal = Field(
-        sa_column=Column("progression_limit", Numeric(2, 1), nullable=False, server_default=text("(1)::numeric"))
+        sa_column=Column(
+            "progression_limit",
+            Numeric(2, 1),
+            nullable=False,
+            server_default=text("(1)::numeric"),
+        )
     )
     description: Optional[str] = Field(
         default=None, sa_column=Column("description", Text)
