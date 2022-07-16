@@ -11,7 +11,7 @@ click = "^8.1.3"
 pydantic = {version = "^1.9.1", extras = ["ujson,email"]}
 fastapi = "^0.79.0"
 uvicorn = "^0.18.2"
-SQLAlchemy = "^1.4.39"
+SQLAlchemy = "1.4.35"
 asyncpg = "^0.26.0"
 psycopg2-binary = "^2.9.3"
 sqlmodel = "^0.0.6"
@@ -20,9 +20,9 @@ strictyaml = "^1.6.1"
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
 bpython = "^0.22.1"
-black = "^22.6.0" 
+black = {version = "^22.6.0", extras = ["jupyter"]}
 poetryup = "^0.9.0"
-sqlacodegen = {git = "https://github.com/agronholm/sqlacodegen.git", rev = "master"}
+# sqlacodegen = {git = "https://github.com/agronholm/sqlacodegen.git", rev = "master"}
 jupyterlab = "^3.4.3"
 [build-system]
 requires = ["poetry>=0.12"]
