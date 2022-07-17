@@ -17,6 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import INTERVAL, JSONB, UUID
 from sqlmodel import Field, Relationship, SQLModel
+from pydantic import validator
 
 
 class AppUser(SQLModel, table=True):
@@ -200,7 +201,7 @@ class ExerciseRead(ExerciseBase):
     base_exercise: "BaseExercise"
 
 
-class PerformedSession(SQLModel, table=True):
+class PerformedSessionBase(SQLModel):
     __tablename__ = "performed_session"
     __table_args__ = (
         ForeignKeyConstraint(
@@ -236,6 +237,8 @@ class PerformedSession(SQLModel, table=True):
     note: Optional[str] = Field(default=None, sa_column=Column("note", Text))
     data: Optional[dict] = Field(default=None, sa_column=Column("data", JSONB))
 
+
+class PerformedSession(PerformedSessionBase, table=True):
     app_user: Optional["AppUser"] = Relationship(back_populates="performed_session")
     session_schedule: Optional["SessionSchedule"] = Relationship(
         back_populates="performed_session"
