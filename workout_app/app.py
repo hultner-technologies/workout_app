@@ -44,18 +44,18 @@ def read_plans(
 
 
 @app.get("/plan/{plan_id}", response_model=PlanRead)
-def read_plan(*, session: Session = Depends(get_session), plan_id: str):
-    plan = session.get(Plan, plan_id)
+def read_plan(*, session: Session = Depends(get_session), plan_id: UUID1):
+    plan = session.get(Plan, plan_id.hex)
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
     return plan
 
 
-@app.get("/session-schedule/{session_schedule_id}", response_model=SessionSchedule)
+@app.get("/session-schedule/{session_schedule_id}", response_model=SessionScheduleRead)
 def read_session_schedule(
-    *, session: Session = Depends(get_session), session_schedule_id: str
+    *, session: Session = Depends(get_session), session_schedule_id: UUID1
 ):
-    session_schedule = session.get(SessionSchedule, session_schedule_id)
+    session_schedule = session.get(SessionSchedule, session_schedule_id.hex)
     if not session_schedule:
         raise HTTPException(status_code=404, detail="Not found")
     return session_schedule
