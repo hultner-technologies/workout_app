@@ -134,7 +134,6 @@ class SessionSchedule(SessionScheduleBase, table=True):
 
 
 class SessionScheduleRead(SessionScheduleBase):
-    plan: Optional[Plan] = None
     exercise: List["ExerciseRead"] = []
 
 
