@@ -178,6 +178,11 @@ class ExerciseBase(SQLModel):
             server_default=text("'00:01:00'::interval"),
         )
     )
+    sort_order: int = Field(
+        sa_column=Column(
+            "sort_order", Integer, nullable=False, server_default=text("1000")
+        )
+    )
     data: Optional[dict] = Field(default=None, sa_column=Column("data", JSONB))
 
 
