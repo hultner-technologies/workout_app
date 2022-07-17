@@ -167,7 +167,7 @@ class PerformedExercise(Base):
     performed_exercise_id = Column(UUID, server_default=text("uuid_generate_v1mc()"))
     performed_session_id = Column(UUID, nullable=False)
     name = Column(Text, nullable=False)
-    reps = Column(Integer, nullable=False)
+    reps = Column(ARRAY(Integer), nullable=False)
     exercise_id = Column(UUID)
     sets = Column(Integer, Computed("array_length(reps, 1)", persisted=True))
     rest = Column(
