@@ -273,7 +273,8 @@ class PerformedExercise(SQLModel, table=True):
         sa_column=Column("performed_session_id", UUID, nullable=False)
     )
     name: str = Field(sa_column=Column("name", Text))
-    reps: int = Field(sa_column=Column("reps", Integer, nullable=False))
+    reps: list = Field(sa_column=Column("reps", ARRAY(Integer), nullable=False))
+
     exercise_id: Optional[str] = Field(
         default=None, sa_column=Column("exercise_id", UUID), nullable=False
     )
