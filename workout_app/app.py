@@ -15,7 +15,7 @@ dsn_2 = "postgresql://postgres:postgres@127.0.0.1:25432/workout_app"
 engine = create_engine(dsn_2)
 
 
-def get_session():
+def get_session() -> Session:
     with Session(engine) as session:
         yield session
 
