@@ -248,7 +248,11 @@ class PerformedSession(PerformedSessionBase, table=True):
     )
 
 
-class PerformedExercise(SQLModel, table=True):
+class PerformedSessionRead(PerformedSessionBase):
+    performed_exercise: List["PerformedExerciseRead"] = []
+
+
+class PerformedExerciseBase(SQLModel):
     __tablename__ = "performed_exercise"
     __table_args__ = (
         ForeignKeyConstraint(
@@ -319,10 +323,17 @@ class PerformedExercise(SQLModel, table=True):
         except IndexError:
             pass
         return v
+
+class PerformedExercise(PerformedExerciseBase, table=True):
+    exercise: Optional[Exercise] = Relationship(back_populates="performed_exercise")
     performed_session: Optional["PerformedSession"] = Relationship(
         back_populates="performed_exercise"
     )
 
 
-SessionScheduleRead.update_forward_refs()
+class PerformedExerciseRead(PerformedExerciseBase):
+    exercise: Optional[ExerciseRead] = []
+
 PlanRead.update_forward_refs()
+SessionScheduleRead.update_forward_refs()
+PerformedSessionRead.update_forward_refs()
