@@ -51,7 +51,7 @@ def read_plans(
     return plans
 
 
-@app.get("/plan/{plan_id}", response_model=PlanRead)
+@app.get("/plans/{plan_id}", response_model=PlanRead)
 def read_plan(*, session: Session = Depends(get_session), plan_id: UUID1):
     plan = session.get(Plan, plan_id.hex)
     if not plan:
@@ -59,7 +59,7 @@ def read_plan(*, session: Session = Depends(get_session), plan_id: UUID1):
     return plan
 
 
-@app.get("/session-schedule/{session_schedule_id}", response_model=SessionScheduleRead)
+@app.get("/session-schedules/{session_schedule_id}", response_model=SessionScheduleRead)
 def read_session_schedule(
     *, session: Session = Depends(get_session), session_schedule_id: UUID1
 ):
@@ -67,6 +67,32 @@ def read_session_schedule(
     if not session_schedule:
         raise HTTPException(status_code=404, detail="Not found")
     return session_schedule
+
+
+@app.get("/performed-sessions/", response_model=List[PerformedSession])
+def read_performed_sessions(
+    *,
+    session: Session = Depends(get_session),
+    user: AppUser = Depends(get_logged_in_user),
+    offset: int = 0,
+    limit: int = Query(default=100, lte=100),
+):
+    performed_sessions = session.exec(
+        select(PerformedSession).where(PerformedSession.app_user_id == user.app_user_id).offset(offset).limit(limit)
+    ).all()
+    return performed_sessions
+
+
+@app.get(
+    "/performed-sessions/{performed_session_id}", response_model=PerformedSessionRead
+)
+def read_performed_sessions(
+    *, session: Session = Depends(get_session), user: AppUser = Depends(get_logged_in_user), performed_session_id: UUID1,
+):
+    performed_session = session.get(PerformedSession, performed_session_id.hex)
+    if not performed_session or performed_session.app_user_id != user.app_user_id:
+        raise HTTPException(status_code=404, detail="Not found")
+    return performed_session
 
 
 if __name__ == "__main__":
