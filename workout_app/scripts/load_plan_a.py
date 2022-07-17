@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from pprint import pprint
+from itertools import count
 
 from sqlmodel import Session, create_engine, select
 from path import Path
@@ -23,6 +24,9 @@ session.commit()
 def create_exercises(plan_data, ss_data, session_schedule, session):
     base_ex = []
     exercises = []
+    sort_order = count()
+    # skip 0
+    next(sort_order)
     session.add(session_schedule)
     for e in ss_data.get("exercises"):
         be = session.exec(
@@ -40,6 +44,7 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
         ex = Exercise(
             base_exercise_id=be.base_exercise_id,
             session_schedule_id=session_schedule.session_schedule_id,
+            sort_order=next(sort_order) * 1000,
             **{
                 "reps": plan_data["default_reps"],
                 "sets": plan_data["default_sets"],
