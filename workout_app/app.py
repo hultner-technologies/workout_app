@@ -20,14 +20,22 @@ def get_session() -> Session:
         yield session
 
 
-with Session(engine) as session:
-    statement = select(AppUser).where(AppUser.name == "hultner")
+def get_logged_in_user(session: Session = Depends(get_session)) -> AppUser:
+    # TODO: Implement real function
+    statement = select(AppUser).where(AppUser.email == "ahultner@gmail.com")
     user = session.exec(statement).first()
-    print(user)
-    plan = session.exec(select(Plan).options(subqueryload(Plan.session_schedule))).one()
-    print(plan.json())
+    return user
 
-print(plan.session_schedule)
+
+# with Session(engine) as session:
+#     statement = select(AppUser).where(AppUser.name == "hultner")
+#     user = session.exec(statement).first()
+#     print(user)
+#     plan = session.exec(select(Plan).options(subqueryload(Plan.session_schedule))).one()
+#     print(plan.json())
+
+# print(plan.session_schedule)
+
 
 app = FastAPI()
 
