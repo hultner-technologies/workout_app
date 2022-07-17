@@ -306,7 +306,19 @@ class PerformedExercise(SQLModel, table=True):
     note: Optional[str] = Field(default=None, sa_column=Column("note", Text))
     data: Optional[dict] = Field(default=None, sa_column=Column("data", JSONB))
 
-    exercise: Optional["Exercise"] = Relationship(back_populates="performed_exercise")
+
+
+    @validator("reps")
+    def fix_sqla_int_array_bug(cls, v):
+        # TODO: Remove when not needed...
+        # SQLAlchemy bug?
+        # https://github.com/sqlalchemy/sqlalchemy/issues/8262
+        try:
+            if v[0] == "{" and v[-1] == "}":
+                return [int(val) for val in "".join(v[1:-1]).split(",")]
+        except IndexError:
+            pass
+        return v
     performed_session: Optional["PerformedSession"] = Relationship(
         back_populates="performed_exercise"
     )
