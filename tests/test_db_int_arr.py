@@ -14,9 +14,10 @@ Base = declarative_base()
 class PerformedExercise(Base):
     __tablename__ = "performed_exercise"
 
-    performed_exercise_id = Column(UUID, server_default=text("uuid_generate_v1mc()"), primary_key=True)
+    performed_exercise_id = Column(
+        UUID, server_default=text("uuid_generate_v1mc()"), primary_key=True
+    )
     reps = Column(ARRAY(Integer), nullable=False)
-
 
 
 e = create_engine("postgresql://hultner@localhost/test", echo="debug")
@@ -50,7 +51,9 @@ with Session(e) as sess:
     oids = sess.execute("select typarray from pg_type where typname = 'positive_int'")
 
 psycopg2.extensions.register_type(
-    psycopg2.extensions.new_array_type(tuple(*oids), 'positive_int[]', psycopg2.extensions.INTEGER)
+    psycopg2.extensions.new_array_type(
+        tuple(*oids), "positive_int[]", psycopg2.extensions.INTEGER
+    )
 )
 
 data = [10, 1, 10, 1]

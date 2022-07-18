@@ -1,4 +1,4 @@
-dsn = "postgresql+asyncpg://postgres:postgres@127.0.0.1:25432/workout_app"
+from operator import attrgetter
 from typing import List, Optional
 from pydantic import UUID1, UUID4
 
@@ -11,6 +11,7 @@ from workout_app.models import *
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
 
+# dsn = "postgresql+asyncpg://postgres:postgres@127.0.0.1:25432/workout_app"
 dsn_2 = "postgresql://postgres:postgres@127.0.0.1:25432/workout_app"
 engine = create_engine(dsn_2)
 
@@ -78,7 +79,10 @@ def read_performed_sessions(
     limit: int = Query(default=100, lte=100),
 ):
     performed_sessions = session.exec(
-        select(PerformedSession).where(PerformedSession.app_user_id == user.app_user_id).offset(offset).limit(limit)
+        select(PerformedSession)
+        .where(PerformedSession.app_user_id == user.app_user_id)
+        .offset(offset)
+        .limit(limit)
     ).all()
     return performed_sessions
 
@@ -86,8 +90,11 @@ def read_performed_sessions(
 @app.get(
     "/performed-sessions/{performed_session_id}", response_model=PerformedSessionRead
 )
-def read_performed_sessions(
-    *, session: Session = Depends(get_session), user: AppUser = Depends(get_logged_in_user), performed_session_id: UUID1,
+def read_performed_session(
+    *,
+    session: Session = Depends(get_session),
+    user: AppUser = Depends(get_logged_in_user),
+    performed_session_id: UUID1,
 ):
     performed_session = session.get(PerformedSession, performed_session_id.hex)
     if not performed_session or performed_session.app_user_id != user.app_user_id:
