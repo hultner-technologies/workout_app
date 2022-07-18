@@ -1,5 +1,7 @@
 from operator import attrgetter
+from pprint import pprint
 from typing import List, Optional
+from uuid import uuid1
 from pydantic import UUID1, UUID4
 
 from sqlmodel import Field, Session, SQLModel, create_engine, select
@@ -70,7 +72,7 @@ def read_session_schedule(
     return session_schedule
 
 
-@app.get("/performed-sessions/", response_model=List[PerformedSession])
+@app.get("/performed-sessions/", response_model=List[PerformedSessionReadMany])
 def read_performed_sessions(
     *,
     session: Session = Depends(get_session),
@@ -100,6 +102,70 @@ def read_performed_session(
     if not performed_session or performed_session.app_user_id != user.app_user_id:
         raise HTTPException(status_code=404, detail="Not found")
     return performed_session
+
+
+def set_next_weights(
+    session_schedule: SessionSchedule,
+    last_performed_exercises: List[PerformedExercise],
+) -> SessionScheduleReadNew:
+    new = SessionScheduleReadNew.from_orm(session_schedule)
+    for exercise, new_exercise in zip(session_schedule.exercise, new.exercise):
+        print("----------")
+        pprint(exercise)
+        pprint(exercise.performed_exercise)
+        print("----------")
+        pprint(new_exercise)
+        # Problem, will use other users last exercise atm
+        # Better solution, get all exercise ids
+        # Get all performed exercises ordered by completion time with user id
+        # Limit 1 per exercise id
+        # select * from performed_exercise where app_user_id = user.app_user_id order by completion_time desc
+        last_ex = 0
+        try:
+            last_ex = (
+                max(
+                    exercise.performed_exercise,
+                    key=attrgetter("completed_at"),
+                ).weight
+                or 0
+            )
+        except ValueError:
+            # Wasn't performed yet
+            last_ex = 0
+
+        new_exercise.weight = last_ex + 1000  # exercise.weight_increment
+    return new
+
+
+@app.get(
+    "/session-schedules/{session_schedule_id}/new",
+    response_model=SessionScheduleReadNew,
+)
+def read_performed_session(
+    *,
+    session: Session = Depends(get_session),
+    user: AppUser = Depends(get_logged_in_user),
+    session_schedule_id: UUID1,
+):
+    session_schedule = session.get(SessionSchedule, session_schedule_id.hex)
+    # TODO: This won't work if same base exercise exists in multiple sessions
+    last_performed_session = session.exec(
+        select(PerformedSession)
+        .where(
+            PerformedSession.app_user_id == user.app_user_id,
+            PerformedSession.session_schedule_id == session_schedule_id.hex,
+        )
+        .order_by(PerformedSession.completed_at.desc())
+    ).first()
+    if (
+        not last_performed_session
+        or last_performed_session.app_user_id != user.app_user_id
+    ):
+        # Create empty new draft
+        return session_schedule
+        raise HTTPException(status_code=404, detail="Not found")
+    # n = SessionScheduleReadNew.from_orm(session_schedule)
+    return set_next_weights(session_schedule, last_performed_session.performed_exercise)
 
 
 if __name__ == "__main__":
