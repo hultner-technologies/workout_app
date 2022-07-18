@@ -138,6 +138,10 @@ class SessionScheduleRead(SessionScheduleBase):
     exercise: List["ExerciseRead"] = []
 
 
+class SessionScheduleReadNew(SessionScheduleBase):
+    exercise: List["ExerciseNewRead"] = []
+
+
 class ExerciseBase(SQLModel):
     __tablename__ = "exercise"
     __table_args__ = (
@@ -201,6 +205,10 @@ class ExerciseRead(ExerciseBase):
     base_exercise: "BaseExercise"
 
 
+class ExerciseNewRead(ExerciseRead):
+    weight: Optional[int] = 1000
+
+
 class PerformedSessionBase(SQLModel):
     __tablename__ = "performed_session"
     __table_args__ = (
@@ -248,7 +256,12 @@ class PerformedSession(PerformedSessionBase, table=True):
     )
 
 
+class PerformedSessionReadMany(PerformedSessionBase):
+    session_schedule: Optional[SessionSchedule] = None
+
+
 class PerformedSessionRead(PerformedSessionBase):
+    session_schedule: Optional[SessionScheduleRead] = None
     performed_exercise: List["PerformedExerciseRead"] = []
 
 
@@ -310,8 +323,6 @@ class PerformedExerciseBase(SQLModel):
     note: Optional[str] = Field(default=None, sa_column=Column("note", Text))
     data: Optional[dict] = Field(default=None, sa_column=Column("data", JSONB))
 
-
-
     @validator("reps")
     def fix_sqla_int_array_bug(cls, v):
         # TODO: Remove when not needed...
@@ -324,6 +335,7 @@ class PerformedExerciseBase(SQLModel):
             pass
         return v
 
+
 class PerformedExercise(PerformedExerciseBase, table=True):
     exercise: Optional[Exercise] = Relationship(back_populates="performed_exercise")
     performed_session: Optional["PerformedSession"] = Relationship(
@@ -334,6 +346,8 @@ class PerformedExercise(PerformedExerciseBase, table=True):
 class PerformedExerciseRead(PerformedExerciseBase):
     exercise: Optional[ExerciseRead] = []
 
+
 PlanRead.update_forward_refs()
 SessionScheduleRead.update_forward_refs()
+SessionScheduleReadNew.update_forward_refs()
 PerformedSessionRead.update_forward_refs()
