@@ -4,29 +4,45 @@ from typing import List, Optional
 from uuid import uuid1
 from pydantic import UUID1, UUID4
 
+from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
 from sqlmodel import Field, Session, SQLModel, create_engine, select
-from sqlalchemy.orm import joinedload, subqueryload
+from sqlalchemy.orm import joinedload, subqueryload, selectinload
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+
 
 
 from workout_app.models import *
 
-from fastapi import Depends, FastAPI, HTTPException, Query
-from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
 
-# dsn = "postgresql+asyncpg://postgres:postgres@127.0.0.1:25432/workout_app"
+DATABASE_URL_ASYNC = (
+    "postgresql+asyncpg://postgres:postgres@127.0.0.1:25432/workout_app"
+)
 dsn_2 = "postgresql://postgres:postgres@127.0.0.1:25432/workout_app"
 engine = create_engine(dsn_2)
+engine_async = create_async_engine(DATABASE_URL_ASYNC, echo=True, future=True)
 
 
-def get_session() -> Session:
+def get_session_sync() -> Session:
     with Session(engine) as session:
         yield session
 
 
-def get_logged_in_user(session: Session = Depends(get_session)) -> AppUser:
+async def get_session() -> AsyncSession:
+    async_session = sessionmaker(
+        engine_async, class_=AsyncSession, expire_on_commit=False
+    )
+    async with async_session() as session:
+        yield session
+
+
+async def get_logged_in_user(session: AsyncSession = Depends(get_session)) -> AppUser:
     # TODO: Implement real function
-    statement = select(AppUser).where(AppUser.email == "ahultner@gmail.com")
-    user = session.exec(statement).first()
+    statement = select(AppUser).where(AppUser.email == "ahultner@gmail.com").limit(1)
+    user = (await session.execute(statement)).scalars().first()
     return user
 
 
@@ -44,61 +60,90 @@ app = FastAPI()
 
 
 @app.get("/plans/", response_model=List[Plan])
-def read_plans(
+async def read_plans(
     *,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ):
-    plans = session.exec(select(Plan).offset(offset).limit(limit)).all()
+    plans = (
+        (await session.execute(select(Plan).offset(offset).limit(limit)))
+        .scalars()
+        .all()
+    )
     return plans
 
 
 @app.get("/plans/{plan_id}", response_model=PlanRead)
-def read_plan(*, session: Session = Depends(get_session), plan_id: UUID1):
-    plan = session.get(Plan, plan_id.hex)
+async def read_plan(*, session: AsyncSession = Depends(get_session), plan_id: UUID1):
+    plan = await session.get(
+        Plan,
+        plan_id.hex,
+        options=(
+            selectinload(Plan.session_schedule).
+            selectinload(SessionSchedule.exercise).
+            selectinload(Exercise.base_exercise),
+        ),
+    )
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
     return plan
 
 
 @app.get("/session-schedules/{session_schedule_id}", response_model=SessionScheduleRead)
-def read_session_schedule(
-    *, session: Session = Depends(get_session), session_schedule_id: UUID1
+async def read_session_schedule(
+    *, session: AsyncSession = Depends(get_session), session_schedule_id: UUID1
 ):
-    session_schedule = session.get(SessionSchedule, session_schedule_id.hex)
+    session_schedule = await session.get(SessionSchedule, session_schedule_id.hex, options=(
+            selectinload(SessionSchedule.exercise).
+            selectinload(Exercise.base_exercise),
+        ))
     if not session_schedule:
         raise HTTPException(status_code=404, detail="Not found")
     return session_schedule
 
 
 @app.get("/performed-sessions/", response_model=List[PerformedSessionReadMany])
-def read_performed_sessions(
+async def read_performed_sessions(
     *,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
     user: AppUser = Depends(get_logged_in_user),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ):
-    performed_sessions = session.exec(
+    performed_sessions = (await session.execute(
         select(PerformedSession)
         .where(PerformedSession.app_user_id == user.app_user_id)
         .offset(offset)
         .limit(limit)
-    ).all()
+        .options(
+            selectinload(PerformedSession.session_schedule)
+        )
+    )).scalars().all()
     return performed_sessions
 
 
 @app.get(
     "/performed-sessions/{performed_session_id}", response_model=PerformedSessionRead
 )
-def read_performed_session(
+async def read_performed_session(
     *,
     session: Session = Depends(get_session),
     user: AppUser = Depends(get_logged_in_user),
     performed_session_id: UUID1,
 ):
-    performed_session = session.get(PerformedSession, performed_session_id.hex)
+    performed_session = await session.get(PerformedSession, performed_session_id.hex,
+        options=(
+            # selectinload(PerformedSession.session_schedule).
+            # selectinload(SessionSchedule.exercise).
+            # selectinload(Exercise.base_exercise),
+            
+            selectinload(PerformedSession.performed_exercise).
+            selectinload(PerformedExercise.exercise).
+            selectinload(Exercise.base_exercise),
+            
+        )
+    )
     if not performed_session or performed_session.app_user_id != user.app_user_id:
         raise HTTPException(status_code=404, detail="Not found")
     return performed_session
@@ -141,22 +186,29 @@ def set_next_weights(
     "/session-schedules/{session_schedule_id}/new",
     response_model=SessionScheduleReadNew,
 )
-def read_performed_session(
+async def generate_session_new(
     *,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
     user: AppUser = Depends(get_logged_in_user),
     session_schedule_id: UUID1,
 ):
-    session_schedule = session.get(SessionSchedule, session_schedule_id.hex)
+    session_schedule = await session.get(SessionSchedule, session_schedule_id.hex, options=(
+            selectinload(SessionSchedule.exercise).
+            selectinload(Exercise.base_exercise),
+            selectinload(SessionSchedule.exercise).
+            selectinload(Exercise.performed_exercise),
+    ))
     # TODO: This won't work if same base exercise exists in multiple sessions
-    last_performed_session = session.exec(
+    last_performed_session = (await session.execute(
         select(PerformedSession)
         .where(
             PerformedSession.app_user_id == user.app_user_id,
             PerformedSession.session_schedule_id == session_schedule_id.hex,
         )
         .order_by(PerformedSession.completed_at.desc())
-    ).first()
+        .limit(1)
+        .options(selectinload(PerformedSession.performed_exercise))
+    )).scalars().first()
     if (
         not last_performed_session
         or last_performed_session.app_user_id != user.app_user_id
