@@ -261,7 +261,7 @@ class PerformedSessionReadMany(PerformedSessionBase):
 
 
 class PerformedSessionRead(PerformedSessionBase):
-    session_schedule: Optional[SessionScheduleRead] = None
+    #session_schedule: Optional[SessionScheduleRead] = None
     performed_exercise: List["PerformedExerciseRead"] = []
 
 
