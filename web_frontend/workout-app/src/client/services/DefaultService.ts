@@ -84,12 +84,14 @@ export class DefaultService {
      * Read Performed Sessions
      * @param offset
      * @param limit
+     * @param sessionScheduleId
      * @returns PerformedSessionReadMany Successful Response
      * @throws ApiError
      */
     public static readPerformedSessionsPerformedSessionsGet(
         offset?: number,
         limit: number = 100,
+        sessionScheduleId?: string,
     ): CancelablePromise<Array<PerformedSessionReadMany>> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -97,6 +99,7 @@ export class DefaultService {
             query: {
                 'offset': offset,
                 'limit': limit,
+                'session_schedule_id': sessionScheduleId,
             },
             errors: {
                 422: `Validation Error`,

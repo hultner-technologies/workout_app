@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 import type { PerformedExerciseRead } from './PerformedExerciseRead';
+import type { SessionScheduleRead } from './SessionScheduleRead';
 
 export type PerformedSessionRead = {
     performed_session_id: string;
@@ -12,6 +13,7 @@ export type PerformedSessionRead = {
     completed_at?: string;
     note?: string;
     data?: any;
+    session_schedule?: SessionScheduleRead;
     performed_exercise?: Array<PerformedExerciseRead>;
 };
 
