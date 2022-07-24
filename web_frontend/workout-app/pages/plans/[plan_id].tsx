@@ -50,56 +50,62 @@ const Plan: NextPage = () => {
         {/* <p className={styles.description}>
           { data?.description}
         </p> */}
-<Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 1, sm: 2, md: 3 }}>
-    {/* 
+        <Grid
+          container
+          spacing={{ xs: 2, md: 3 }}
+          columns={{ xs: 1, sm: 2, md: 3 }}
+        >
+          {/* 
       <Item>xs=2</Item>
     </Grid> */}
           {data?.session_schedule?.map((session) => (
-          <Grid item xs={1} sm={1} md={1} key={session.session_schedule_id}>
-            <Card sx={{ maxWidth: 400 }}>
-              <CardActionArea>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {session.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {session.description}
-                  </Typography>
-                  <List
-                    sx={{
-                      width: "100%",
-                      maxWidth: 360,
-                      bgcolor: "background.paper",
-                    }}
+            <Grid item xs={1} sm={1} md={1} key={session.session_schedule_id}>
+              <Card sx={{ maxWidth: 400 }}>
+                <CardActionArea>
+                  <CardContent>
+                    <Typography gutterBottom variant="h5" component="div">
+                      {session.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {session.description}
+                    </Typography>
+                    <List
+                      sx={{
+                        width: "100%",
+                        maxWidth: 360,
+                        bgcolor: "background.paper",
+                      }}
+                    >
+                      {session.exercise?.map((exercise) => (
+                        <ListItem key={exercise.exercise_id}>
+                          <ListItemAvatar>
+                            <Avatar>
+                              <FitnessCenterIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={exercise.base_exercise.name}
+                            secondary={`${exercise.reps} ✖️ ${exercise.sets}`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </CardContent>
+                </CardActionArea>
+                <CardActions>
+                  <Link
+                    href={`/session-schedule/${session.session_schedule_id}`}
+                    passHref
                   >
-                    {session.exercise?.map((exercise) => (
-                      <ListItem key={exercise.exercise_id}>
-                        <ListItemAvatar>
-                          <Avatar>
-                            <FitnessCenterIcon />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={exercise.base_exercise.name}
-                          secondary={`${exercise.reps} ✖️ ${exercise.sets}`}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-              </CardActionArea>
-              <CardActions>
-                <Link href={`/session-schedule/${session.session_schedule_id}`}>
-                  <Button size="small" color="primary">
-                    Open
-                  </Button>
-                </Link>
-              </CardActions>
-            </Card>
-</Grid>
+                    <Button size="small" color="primary">
+                      Open
+                    </Button>
+                  </Link>
+                </CardActions>
+              </Card>
+            </Grid>
           ))}
-
-</Grid>
+        </Grid>
 
         <div className={styles.grid}>
           {data?.session_schedule?.map((session) => (
