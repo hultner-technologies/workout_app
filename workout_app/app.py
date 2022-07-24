@@ -132,16 +132,30 @@ async def read_performed_sessions(
     user: AppUser = Depends(get_logged_in_user),
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
+    session_schedule_id: Optional[UUID1] = None,
 ):
-    performed_sessions = (await session.execute(
-        select(PerformedSession)
-        .where(PerformedSession.app_user_id == user.app_user_id)
-        .offset(offset)
-        .limit(limit)
-        .options(
-            selectinload(PerformedSession.session_schedule)
+    filters = [
+        PerformedSession.app_user_id == user.app_user_id,
+    ]
+    if session_schedule_id is not None:
+        filters = [
+            *filters,
+            PerformedSession.session_schedule_id == session_schedule_id.hex,
+        ]
+    performed_sessions = (
+        (
+            await session.execute(
+                select(PerformedSession)
+                .where(*filters)
+                .order_by(PerformedSession.completed_at.desc())
+                .offset(offset)
+                .limit(limit)
+                .options(selectinload(PerformedSession.session_schedule))
+            )
         )
-    )).scalars().all()
+        .scalars()
+        .all()
+    )
     return performed_sessions
 
 
