@@ -23,6 +23,12 @@ const Home: NextPage = () => {
         </p>
 
         <div className={styles.grid}>
+
+          <a href="/plans" className={styles.card}>
+            <h2>Plans &rarr;</h2>
+            <p>Find your workout plans</p>
+          </a>
+
           <a href="https://nextjs.org/docs" className={styles.card}>
             <h2>Documentation &rarr;</h2>
             <p>Find in-depth information about Next.js features and API.</p>
