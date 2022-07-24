@@ -13,8 +13,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 
-
-
 from workout_app.models import *
 
 
@@ -102,9 +100,9 @@ async def read_plan(*, session: AsyncSession = Depends(get_session), plan_id: UU
         Plan,
         plan_id.hex,
         options=(
-            selectinload(Plan.session_schedule).
-            selectinload(SessionSchedule.exercise).
-            selectinload(Exercise.base_exercise),
+            selectinload(Plan.session_schedule)
+            .selectinload(SessionSchedule.exercise)
+            .selectinload(Exercise.base_exercise),
         ),
     )
     if not plan:
@@ -116,10 +114,13 @@ async def read_plan(*, session: AsyncSession = Depends(get_session), plan_id: UU
 async def read_session_schedule(
     *, session: AsyncSession = Depends(get_session), session_schedule_id: UUID1
 ):
-    session_schedule = await session.get(SessionSchedule, session_schedule_id.hex, options=(
-            selectinload(SessionSchedule.exercise).
-            selectinload(Exercise.base_exercise),
-        ))
+    session_schedule = await session.get(
+        SessionSchedule,
+        session_schedule_id.hex,
+        options=(
+            selectinload(SessionSchedule.exercise).selectinload(Exercise.base_exercise),
+        ),
+    )
     if not session_schedule:
         raise HTTPException(status_code=404, detail="Not found")
     return session_schedule
@@ -164,21 +165,21 @@ async def read_performed_sessions(
 )
 async def read_performed_session(
     *,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
     user: AppUser = Depends(get_logged_in_user),
     performed_session_id: UUID1,
 ):
-    performed_session = await session.get(PerformedSession, performed_session_id.hex,
+    performed_session = await session.get(
+        PerformedSession,
+        performed_session_id.hex,
         options=(
-            # selectinload(PerformedSession.session_schedule).
+            selectinload(PerformedSession.session_schedule),
             # selectinload(SessionSchedule.exercise).
             # selectinload(Exercise.base_exercise),
-            
-            selectinload(PerformedSession.performed_exercise).
-            selectinload(PerformedExercise.exercise).
-            selectinload(Exercise.base_exercise),
-            
-        )
+            selectinload(PerformedSession.performed_exercise)
+            .selectinload(PerformedExercise.exercise)
+            .selectinload(Exercise.base_exercise),
+        ),
     )
     if not performed_session or performed_session.app_user_id != user.app_user_id:
         raise HTTPException(status_code=404, detail="Not found")
@@ -228,23 +229,33 @@ async def generate_session_new(
     user: AppUser = Depends(get_logged_in_user),
     session_schedule_id: UUID1,
 ):
-    session_schedule = await session.get(SessionSchedule, session_schedule_id.hex, options=(
-            selectinload(SessionSchedule.exercise).
-            selectinload(Exercise.base_exercise),
-            selectinload(SessionSchedule.exercise).
-            selectinload(Exercise.performed_exercise),
-    ))
+    session_schedule = await session.get(
+        SessionSchedule,
+        session_schedule_id.hex,
+        options=(
+            selectinload(SessionSchedule.exercise).selectinload(Exercise.base_exercise),
+            selectinload(SessionSchedule.exercise).selectinload(
+                Exercise.performed_exercise
+            ),
+        ),
+    )
     # TODO: This won't work if same base exercise exists in multiple sessions
-    last_performed_session = (await session.execute(
-        select(PerformedSession)
-        .where(
-            PerformedSession.app_user_id == user.app_user_id,
-            PerformedSession.session_schedule_id == session_schedule_id.hex,
+    last_performed_session = (
+        (
+            await session.execute(
+                select(PerformedSession)
+                .where(
+                    PerformedSession.app_user_id == user.app_user_id,
+                    PerformedSession.session_schedule_id == session_schedule_id.hex,
+                )
+                .order_by(PerformedSession.completed_at.desc())
+                .limit(1)
+                .options(selectinload(PerformedSession.performed_exercise))
+            )
         )
-        .order_by(PerformedSession.completed_at.desc())
-        .limit(1)
-        .options(selectinload(PerformedSession.performed_exercise))
-    )).scalars().first()
+        .scalars()
+        .first()
+    )
     if (
         not last_performed_session
         or last_performed_session.app_user_id != user.app_user_id
