@@ -61,7 +61,17 @@ FASTAPI_ALLOW_CREDENTIALS: bool = True
 FASTAPI_ALLOW_METHODS: List[str] = ["*"]
 FASTAPI_ALLOW_HEADERS: List[str] = ["*"]
 
-BACKEND_CORS_ORIGINS=["http://localhost", "http://192.168.1.98:3001", "http://localhost:3001", "http://localhost:3000", "http://hultnerimac.local", "http://hultnerimac.local:3000", "http://hultnerimac.local:3001", "http://127.0.0.1:3001",  "http://hultnertechmbp.local:3001",]
+BACKEND_CORS_ORIGINS = [
+    "http://localhost",
+    "http://192.168.1.98:3001",
+    "http://localhost:3001",
+    "http://localhost:3000",
+    "http://hultnerimac.local",
+    "http://hultnerimac.local:3000",
+    "http://hultnerimac.local:3001",
+    "http://127.0.0.1:3001",
+    "http://hultnertechmbp.local:3001",
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=BACKEND_CORS_ORIGINS,
@@ -69,6 +79,7 @@ app.add_middleware(
     allow_methods=FASTAPI_ALLOW_METHODS,
     allow_headers=FASTAPI_ALLOW_HEADERS,
 )
+
 
 @app.get("/plans/", response_model=List[Plan])
 async def read_plans(
