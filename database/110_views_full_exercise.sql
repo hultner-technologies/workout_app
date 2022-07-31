@@ -1,4 +1,4 @@
-create view full_exercise as
+create or replace view full_exercise as
 (
     select exercise_id
      , be.base_exercise_id
@@ -9,6 +9,7 @@ create view full_exercise as
      , reps
      , sets
      , rest
+     , step_increment
      , sort_order
      , be.links
      , ex.data as data
