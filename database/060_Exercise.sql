@@ -15,6 +15,7 @@ CREATE TABLE exercise (
     , sets positive_int NOT NULL DEFAULT 5
     -- Default to 1 minute
     , rest interval NOT NULL DEFAULT interval '00:01:00'
+    , step_increment positive_int NOT NULL DEFAULT 2500
     , sort_order positive_int NOT NULL DEFAULT 1000
     , data jsonb
 );
