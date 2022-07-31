@@ -1,4 +1,5 @@
 import {
+  Breadcrumbs,
   Button,
   Grid,
   ListItemButton,
@@ -11,6 +12,7 @@ import { useRouter } from "next/router";
 import useSWR from "swr";
 import { DefaultService } from "../../src/client/services/DefaultService";
 
+import MuiLink from "@mui/material/Link";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -36,6 +38,28 @@ const PerformedSession: NextPage = () => {
 
   return (
     <Stack spacing={2}>
+      <Breadcrumbs aria-label="breadcrumb">
+        <Link href="/plans" passHref>
+          <MuiLink underline="hover" color="inherit">
+            Plans
+          </MuiLink>
+        </Link>
+        <Link href={`/plans/${session?.session_schedule?.plan_id}`} passHref>
+          <MuiLink underline="hover" color="inherit">
+            Current plan
+          </MuiLink>
+        </Link>
+
+        <Link
+          href={`/session-schedule/${session?.session_schedule?.session_schedule_id}`}
+          passHref
+        >
+          <MuiLink underline="hover" color="inherit">
+            Schedule: {session?.session_schedule?.name}
+          </MuiLink>
+        </Link>
+        <Typography color="text.primary">Current session</Typography>
+      </Breadcrumbs>
       <Typography variant="h2">{session?.session_schedule?.name}</Typography>
       <Typography variant="subtitle1" gutterBottom component="div">
         <Typography variant="body1">{session?.note}</Typography>
