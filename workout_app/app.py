@@ -6,6 +6,7 @@ from pydantic import UUID1, UUID4
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import func
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from sqlalchemy.orm import joinedload, subqueryload, selectinload
@@ -184,6 +185,34 @@ async def read_performed_session(
     if not performed_session or performed_session.app_user_id != user.app_user_id:
         raise HTTPException(status_code=404, detail="Not found")
     return performed_session
+
+
+@app.get(
+    "/performed-sessions/{performed_session_id}/draft-exercises",
+    # response_model=PerformedSessionRead
+)
+async def draft_new_session_exercises(
+    *,
+    session: AsyncSession = Depends(get_session),
+    user: AppUser = Depends(get_logged_in_user),
+    performed_session_id: UUID1,
+):
+    exercises = (
+        await session.execute(
+            # select(func.draft_session_exercises(performed_session_id))
+            """
+                select * from next_exercise_progression
+                where app_user_id = :app_user_id
+                    and performed_session_id = :performed_session_id
+                ;
+            """,
+            {
+                "performed_session_id": performed_session_id,
+                "app_user_id": user.app_user_id,
+            },
+        )
+    ).all()
+    return exercises
 
 
 def set_next_weights(
