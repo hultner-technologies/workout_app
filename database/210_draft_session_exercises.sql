@@ -1,9 +1,10 @@
 create or replace function draft_session_exercises(performed_session_id_ uuid)
     returns table (exercise_id uuid
                   , performed_session_id uuid
-                  , name text, reps positive_int[]
+                  , name text
+                  , reps int[]
                   , rest interval[]
-                  , weight positive_int
+                  , weight int
                   )
 AS $$
 with performed_exercise_base as (
