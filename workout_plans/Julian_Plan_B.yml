@@ -1,0 +1,143 @@
+default_reps: 10
+default_sets: 4
+default_rest: "00:05:00"
+
+name: Julian Plan B
+description: |-
+  At the 8 week mark, your muscles will likely need greater stress to continue growing. So we change a few things:
+
+  - We increase the sets per exercise from 3 to 4.
+  - We switch to exercises that allow us to scale to heavier weights.
+  - We focus on specific muscles within each workout.
+  - Since exercise Plan B is more intense, we rest for 4 days between workout day **types**.
+
+  You can do all three workout types on back-to-back days if desired. But you must take 4 days of rest before repeating a day type. For example, you can do Day 1 on Monday, Day 2 on Tuesday, and Day 3 on Wednesday, but you have to wait until Friday to repeat Day 1, Saturday to repeat Day 2, and Sunday to repeat day 3.
+
+  There are no exceptions—even if your muscles “feel fine.” If you wind up overworking your muscles, you can lose an entire workout’s worth of size gains. (You can try proving this to yourself if you’re feeling bold and measure closely.) 
+
+  Here's Plan B. As with Plan A, B exercises are chosen according to the criteria [here](https://www.julian.com/guide/muscle/workout-plans#exercise-selection) and [here](https://www.julian.com/guide/muscle/workout-plans#why-missing-exercises).
+
+  The order of exercises and workout days in Plan B is critical. Don't rearrange them or you'll risk not having the strength to complete all your sets.
+
+  The exercises are ordered to allow your muscles adequate recovery time so that exhaustion from one exercise doesn’t make it difficult to perform another that reuses a muscle group. (For example, you use your biceps when performing back exercises. So, avoid doing a back exercise right after a bicep exercise.)
+
+  One of the unique aspects of this program is how Plan B splits some exercises into two sessions per workout. Meaning, 2 sets of one exercise are performed at the beginning of a workout and the remaining 2 sets are performed at the end. (Read more [here](https://www.julian.com/guide/muscle/workout-plans#rest-times).)
+
+  Notes for exercise Plan B:
+
+  - The exercises in Plan B will require gym equipment, so if you've been working out from home, now’s the time to get into the gym. (Or, buy bigger at-home equipment if you have the room, motivation, and money. Something like [Tonal](http://tonal.com/) might get you partway there if you're short on space.)
+  - You no longer have to do grip exercises if you don't want to. Your grip strength should likely remain strong enough since you'll be using it to lift heavy barbells now.
+
+links:
+  - https://www.julian.com/guide/muscle/workout-plans#plan-b-exercises
+  - https://www.julian.com/guide/muscle/workout-plans#workout-plans
+
+# Reps needed to progress into a heavier weight next time.
+# Value between 0.1-1
+progression_limit: 0.8
+
+sessions:
+  - name: Chest, shoulders, abs
+    links:
+      - https://www.julian.com/guide/muscle/workout-plans#plan-b-exercises
+    exercises:
+      - name: Incline chest press (2 sets)
+        sets: 2
+        description:  Use just a slight incline. Listen to the advice [in this video](https://www.youtube.com/watch?v=rT7DgCr-3pg&feature=youtu.be&t=52s) to learn proper form.
+        links:
+        - https://vimeo.com/178057019
+      - name: Pulley crunch
+        description: Return to the starting position slowly; do not let the rope's tension do the lifting.
+        links:
+        - https://vimeo.com/178052126
+      - name: Overhead press
+        description: Keep your back straight. Don't lock your arms at the top of the motion.
+        links:
+        - https://vimeo.com/96081016
+      - name: Hanging leg raise †
+        description: 'Do this exercise with a dumbbell between your feet. Follow the advice [in this video](https://www.youtube.com/watch?v=BI7wrB3Crsc&amp;feature=youtu.be&amp;t=0m16s).'
+        links:
+        - https://vimeo.com/39560703
+      - name: Incline chest press (2 sets)
+        sets: 2
+        description:  Use just a slight incline. Listen to the advice [in this video](https://www.youtube.com/watch?v=rT7DgCr-3pg&feature=youtu.be&t=52s) to learn proper form.
+        links:
+        - https://vimeo.com/178057019
+      - name: Front raise
+        description: Do not raise much higher than perpendicular. Do not swing or build momentum.
+        links:
+        - https://vimeo.com/177969758
+
+  - name: Legs, pickup
+    exercises:
+      - name: Squat
+        description: Listen to the advice [in this video](https://www.youtube.com/watch?v=SW_C1A-rejs&feature=youtu.be&t=1m04s) to learn proper form.
+        links:
+        - https://vimeo.com/178056008
+      - name: Oblique twist
+        description: Rotate as far as comfortably possible. Return slowly; do not let the pulley do the work.
+        links:
+        - https://vimeo.com/178079508
+      - name: Shrug
+        description: "Raise up high up as you can comfortably go."
+        links:
+        - https://vimeo.com/177971664
+      - name: Calf raise
+        description: "Lift slowly and squeeze your calf at the top of the movement."
+        links:
+        - https://vimeo.com/177971348
+      - name: Hamstring curl 
+        sets: 3
+        description: Lift slowly. Do not overextend your knees (joints); watch for discomfort.
+        links:
+        - https://vimeo.com/164443477
+      - name: Deadlift
+        description: Listen to the advice [in this video](https://www.youtube.com/watch?v=JCXUYuzwNrM&feature=youtu.be&t=1m25s) to learn proper form.
+        links:
+        - https://vimeo.com/178056325
+      - name: Forearm curl in
+        description: If you have difficulty increasing weight, increase your grip strength using hand grippers.
+        links:
+        - https://vimeo.com/178047269
+        reps: 15
+
+  - name: Biceps, triceps, back
+    exercises:
+      - name: Seated pulley row †
+        description: 'Do not use your biceps to pull — only your back. Pull as far as comfortably possible.'
+        links:
+        - https://vimeo.com/178042607
+      - name: Lat pulldown †
+        description: 'Do not use your biceps to pull — only your back. Pull as far as comfortably possible.'
+        links:
+        - https://vimeo.com/164080300
+      - name: Julian tricep extension
+        sets: 2
+        description: Pad your back with a folded yoga mat between you and the machine.
+        links:
+        - https://vimeo.com/177969524
+      - name: Bicep curl
+        sets: 2
+        description: Keep your elbow still by your side. Slowly resist the lowering movement.
+        links:
+        - https://vimeo.com/177968823
+      - name: Julian tricep extension
+        sets: 2
+        description: Pad your back with a folded yoga mat between you and the machine.
+        links:
+        - https://vimeo.com/177969524
+      - name: Forearm curl up
+        description: Lift slowly. Do not expect much range of motion.
+        links:
+        - https://vimeo.com/177970644
+        reps: 15
+      - name: Bicep curl
+        sets: 2
+        description: Keep your elbow still by your side. Slowly resist the lowering movement.
+        links:
+        - https://vimeo.com/177968823
+      - name: Forearm curl back
+        description: If you have difficulty increasing weight, increase your grip strength using hand grippers.
+        links:
+        - https://vimeo.com/178047269
+        reps: 15
