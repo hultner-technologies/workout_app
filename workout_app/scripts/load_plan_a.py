@@ -9,16 +9,11 @@ from strictyaml import load
 
 from workout_app.models import Plan, BaseExercise, Exercise, SessionSchedule
 
-
-plan_data = load(Path("./workout_plans/Julian_Plan_A.yml").text()).data
 dsn_2 = "postgresql://postgres:postgres@127.0.0.1:25432/workout_app"
 engine = create_engine(dsn_2)
 session = Session(engine)
-
-p = Plan(**plan_data)
-pprint(p)
-session.add(p)
-session.commit()
+plan_a = "Julian_Plan_A.yml"
+plan_b = "Julian_Plan_B.yml"
 
 
 def create_exercises(plan_data, ss_data, session_schedule, session):
@@ -59,14 +54,24 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
     return (base_ex, exercises)
 
 
-sched = [
-    (
-        ss_ := SessionSchedule(
-            plan_id=p.plan_id, progression_limit=plan_data.get("progression_limit"), **s
-        ),
-        create_exercises(plan_data, s, ss_, session),
-    )
-    for s in plan_data.get("sessions")
-]
+def create_plan(plan_file: Path):
+    plan_path = Path("./workout_plans/") / plan_file
+    plan_data = load(plan_path.text()).data
+    p = Plan(**plan_data)
+    pprint(p)
+    session.add(p)
+    session.commit()
 
-session.commit()
+    schedules = [
+        (
+            schedule := SessionSchedule(
+                plan_id=p.plan_id,
+                progression_limit=plan_data.get("progression_limit"),
+                **workout_session,
+            ),
+            create_exercises(plan_data, workout_session, schedule, session),
+        )
+        for workout_session in plan_data.get("sessions")
+    ]
+
+    session.commit()
