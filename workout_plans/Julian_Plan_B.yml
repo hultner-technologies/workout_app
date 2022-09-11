@@ -41,7 +41,7 @@ sessions:
     links:
       - https://www.julian.com/guide/muscle/workout-plans#plan-b-exercises
     exercises:
-      - name: Incline chest press (2 sets)
+      - name: Incline chest press
         sets: 2
         description:  Use just a slight incline. Listen to the advice [in this video](https://www.youtube.com/watch?v=rT7DgCr-3pg&feature=youtu.be&t=52s) to learn proper form.
         links:
