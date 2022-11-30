@@ -24,6 +24,12 @@ black = {version = "^22.6.0", extras = ["jupyter"]}
 poetryup = "^0.9.0"
 # sqlacodegen = {git = "https://github.com/agronholm/sqlacodegen.git", rev = "master"}
 jupyterlab = "^3.4.3"
+pandas = "^1.5.2"
+matplotlib = "^3.6.2"
+plotly = "^5.11.0"
+ipywidgets = ">=7.6"
+jupyter-dash = "^0.4.2"
+statsmodels = "^0.13.5"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
