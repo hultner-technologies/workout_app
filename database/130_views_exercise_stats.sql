@@ -1,7 +1,10 @@
-create view exercise_stats as
+create or replace view exercise_stats as
 (
 select pe.name
      , pe.weight
+     , round(weight * (
+          36.0/(37.0-(select max(r) from unnest(pe.reps) r))
+       )) as brzycki_1_rm_max
      , pe.reps
      , (select sum(rep) from unnest(pe.reps) rep) * pe.weight /
        1000::decimal                   as volume_kg
