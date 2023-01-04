@@ -42,6 +42,8 @@ async def get_logged_in_user(session: AsyncSession = Depends(get_session)) -> Ap
     # TODO: Implement real function
     statement = select(AppUser).where(AppUser.email == "ahultner@gmail.com").limit(1)
     user = (await session.execute(statement)).scalars().first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
