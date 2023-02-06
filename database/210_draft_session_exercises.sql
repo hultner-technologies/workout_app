@@ -33,6 +33,7 @@ from performed_session ps
          left join performed_exercise_base pe
                    on fe.base_exercise_id = pe.base_exercise_id
                           and pe.app_user_id = ps.app_user_id
+                          and successful is true
 where ps.performed_session_id = performed_session_id_
 group by fe.base_exercise_id
        , fe.name
