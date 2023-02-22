@@ -43,11 +43,10 @@ def remove_accents(input_str):
 
 class Settings(BaseSettings):
     pg_dsn: str
-    
+
     class Config:
         env_file = '../.env'
         env_file_encoding = 'utf-8'
-    
 
 
 # In[ ]:
@@ -65,129 +64,128 @@ engine = create_engine(settings.pg_dsn)
 # In[ ]:
 
 
-df = pd.read_sql("select * from performed_exercise", engine)
+# df = pd.read_sql("select * from performed_exercise", engine)
 
 
 # In[ ]:
 
 
-df.reset_index()
-df.set_index('completed_at', inplace=True)
+# df.reset_index()
+# df.set_index('completed_at', inplace=True)
 
 
 # In[ ]:
 
 
-(
-    df
-    .groupby('name')['weight']
-    .plot(
-        #x="completed_at",
-        #y="weight",
+#(
+#    df
+#    .groupby('name')['weight']
+#    .plot(
+#        #x="completed_at",
+#        #y="weight",
+#        legend=True,
+#    )
+#)
+#plt.legend(bbox_to_anchor=(1.1, 1.05))
+##plt.figure(figsize=(16,16), dpi=380)
+#fig = plt.gcf()
+#fig.set_size_inches(18.5, 10.5, forward=True)
+
+
+# In[ ]:
+
+
+#df = pd.read_sql("""
+#    with vagg as (
+#        select sum(volume_kg) as agg_volume_kg,
+#               performed_session_id,
+#               array_agg(performed_exercise_id) as performed_exercise_id
+#        from exercise_stats
+#        where session_name = 'Biceps, triceps, back'
+#        group by name, performed_session_id
+#    )
+#    select *, vagg.performed_exercise_id[1] from vagg
+#    join exercise_stats es on vagg.performed_exercise_id[1]=es.performed_exercise_id
+#""", engine)
+#df.set_index('date', inplace=True)
+#(
+#    df
+#    .groupby('name')['agg_volume_kg']
+#    .plot(
+#        #x="completed_at",
+#        #y="weight",
         
-        legend=True,
-    )
-)
-plt.legend(bbox_to_anchor=(1.1, 1.05))
-#plt.figure(figsize=(16,16), dpi=380)
-fig = plt.gcf()
-fig.set_size_inches(18.5, 10.5, forward=True)
+#        legend=True,
+#    )
+#)
+
+#plt.legend(bbox_to_anchor=(1.1, 1.05))
+#fig = plt.gcf()
+#fig.set_size_inches(18.5, 10.5, forward=True)
+
+
+## In[ ]:
+
+
+#df = pd.read_sql("""
+#    with vagg as (
+#        select sum(volume_kg) as agg_volume_kg,
+#               performed_session_id,
+#               array_agg(performed_exercise_id) as performed_exercise_id
+#        from exercise_stats
+#        where session_name = 'Legs, pickup'
+#        group by name, performed_session_id
+#    )
+#    select *, vagg.performed_exercise_id[1] from vagg
+#    join exercise_stats es on vagg.performed_exercise_id[1]=es.performed_exercise_id
+#""", engine)
+#df.set_index('date', inplace=True)
+#(
+#    df
+#    .groupby('name')['agg_volume_kg']
+#    .plot(
+#        #x="completed_at",
+#        #y="weight",
+        
+#        legend=True,
+#    )
+#)
+
+#plt.legend(bbox_to_anchor=(1.1, 1.05))
+#fig = plt.gcf()
+# fig.set_size_inches(18.5, 10.5, forward=True)
 
 
 # In[ ]:
 
 
-df = pd.read_sql("""
-    with vagg as (
-        select sum(volume_kg) as agg_volume_kg,
-               performed_session_id,
-               array_agg(performed_exercise_id) as performed_exercise_id
-        from exercise_stats
-        where session_name = 'Biceps, triceps, back'
-        group by name, performed_session_id
-    )
-    select *, vagg.performed_exercise_id[1] from vagg
-    join exercise_stats es on vagg.performed_exercise_id[1]=es.performed_exercise_id
-""", engine)
-df.set_index('date', inplace=True)
-(
-    df
-    .groupby('name')['agg_volume_kg']
-    .plot(
-        #x="completed_at",
-        #y="weight",
+#df = pd.read_sql("""
+#    with vagg as (
+#        select sum(volume_kg) as agg_volume_kg,
+#               performed_session_id,
+#               array_agg(performed_exercise_id) as performed_exercise_id
+#        from exercise_stats
+#        where session_name = 'Chest, shoulders, abs'
+#        group by name, performed_session_id
+#    )
+#    select *, vagg.performed_exercise_id[1] from vagg
+#    join exercise_stats es on vagg.performed_exercise_id[1]=es.performed_exercise_id
+#""", engine)
+#df.set_index('date', inplace=True)
+#(
+#    df
+#    .groupby('name')['agg_volume_kg']
+#    .plot(
+#        #x="completed_at",
+#        #y="weight",
         
-        legend=True,
-    )
-)
+#        legend=True,
+#    )
+#)
 
-plt.legend(bbox_to_anchor=(1.1, 1.05))
-fig = plt.gcf()
-fig.set_size_inches(18.5, 10.5, forward=True)
-
-
-# In[ ]:
-
-
-df = pd.read_sql("""
-    with vagg as (
-        select sum(volume_kg) as agg_volume_kg,
-               performed_session_id,
-               array_agg(performed_exercise_id) as performed_exercise_id
-        from exercise_stats
-        where session_name = 'Legs, pickup'
-        group by name, performed_session_id
-    )
-    select *, vagg.performed_exercise_id[1] from vagg
-    join exercise_stats es on vagg.performed_exercise_id[1]=es.performed_exercise_id
-""", engine)
-df.set_index('date', inplace=True)
-(
-    df
-    .groupby('name')['agg_volume_kg']
-    .plot(
-        #x="completed_at",
-        #y="weight",
-        
-        legend=True,
-    )
-)
-
-plt.legend(bbox_to_anchor=(1.1, 1.05))
-fig = plt.gcf()
-fig.set_size_inches(18.5, 10.5, forward=True)
-
-
-# In[ ]:
-
-
-df = pd.read_sql("""
-    with vagg as (
-        select sum(volume_kg) as agg_volume_kg,
-               performed_session_id,
-               array_agg(performed_exercise_id) as performed_exercise_id
-        from exercise_stats
-        where session_name = 'Chest, shoulders, abs'
-        group by name, performed_session_id
-    )
-    select *, vagg.performed_exercise_id[1] from vagg
-    join exercise_stats es on vagg.performed_exercise_id[1]=es.performed_exercise_id
-""", engine)
-df.set_index('date', inplace=True)
-(
-    df
-    .groupby('name')['agg_volume_kg']
-    .plot(
-        #x="completed_at",
-        #y="weight",
-        
-        legend=True,
-    )
-)
-
-plt.legend(bbox_to_anchor=(1.1, 1.05))
-fig = plt.gcf()
-fig.set_size_inches(18.5, 10.5, forward=True)
+#plt.legend(bbox_to_anchor=(1.1, 1.05))
+#fig = plt.gcf()
+#fig.set_size_inches(18.5, 10.5, forward=True)
 
 
 # In[ ]:
@@ -203,18 +201,18 @@ fig = px.scatter(
     color="name",
 )
 fig.update_layout(legend={"orientation": "h"})
-fig.show()
+# fig.show()
 fig.write_html("output/weight.html")
 #df.set_index('completed_at', inplace=True)
-for name, exercise in df.groupby('name'):
-    fig = px.scatter(
-        exercise,
-        x="completed_at",
-        y="weight",
-        title=name,
-        trendline="lowess",
-    )
-    fig.show()
+# for name, exercise in df.groupby('name'):
+#     fig = px.scatter(
+#         exercise,
+#         x="completed_at",
+#         y="weight",
+#         title=name,
+#         trendline="lowess",
+#     )
+#     fig.show()
 
     #plt.legend(bbox_to_anchor=(1.1, 1.05))
     #plt.figure(figsize=(16,16), dpi=380)›
@@ -249,7 +247,7 @@ fig = px.scatter(
     title="1 rm max",
     trendline="lowess",
 )
-fig.show()
+# fig.show()
 
 fig.write_html(f"""output/1rm_max.html""")
 #df.set_index('completed_at', inplace=True)
@@ -291,7 +289,7 @@ for (name, session_name), exercise in df.groupby(['name', 'session_name']):
         title=f"{session_name}: {name}",
         trendline="lowess",
     )
-    fig.show()
+    # fig.show()
     #print(ex_agg.columns)
     file_name = remove_accents(f"{session_name} {name}".lower().replace(" ", "_"))
     fig.write_html(f"""output/{file_name}_volume.html""")
