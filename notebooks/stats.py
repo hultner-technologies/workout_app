@@ -4,28 +4,29 @@
 # In[ ]:
 
 
+import re
+import unicodedata
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotly.express as px
+from pydantic import BaseSettings
 from sqlalchemy import create_engine
 
-
 # In[ ]:
 
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.express as px
 
 
 # In[ ]:
 
 
-import unicodedata
-import re
 
 
 # In[ ]:
 
 
-from pydantic import BaseSettings
 
 
 # In[ ]:
@@ -237,7 +238,19 @@ fig.write_html("output/weight.html")
 
 
 df = pd.read_sql("select * from exercise_stats", engine)
-data = df.groupby(["name", "date"]).max("brzycki_1_rm_max").reset_index()
+# data = df.groupby(["name", "date"]).max("brzycki_1_rm_max").reset_index()
+data = (
+    df
+    .groupby(["name", "date"])
+    .agg({
+        'brzycki_1_rm_max': 'max',
+        'volume_kg': 'sum',
+        'weight': 'max',
+        #'weight': lambda x: np.array(x.tolist()),
+        'reps': lambda x: np.array(x.tolist())
+    })
+    .reset_index()
+)
 data["date"] = pd.to_datetime(data["date"])
 fig = px.scatter(
     data,
@@ -246,6 +259,7 @@ fig = px.scatter(
     color="name",
     title="1 rm max",
     trendline="lowess",
+    hover_data=["volume_kg", "weight", "reps"],
 )
 # fig.show()
 
@@ -277,7 +291,14 @@ for (name, session_name), exercise in df.groupby(['name', 'session_name']):
         # Group multiple exercise instances on the same day
         .groupby("date")
         # Sum their volume
-        .sum("volume_kg")
+        .agg({
+            'brzycki_1_rm_max': 'max',
+            'volume_kg': 'sum',
+            'weight': 'max',
+            #'weight': lambda x: np.array(x.tolist()),
+            'reps': lambda x: np.array(x.tolist())
+        })
+        #.sum("volume_kg")
         # Reset the index to make it plottable.
         .reset_index()
     )
@@ -288,6 +309,7 @@ for (name, session_name), exercise in df.groupby(['name', 'session_name']):
         y="volume_kg",
         title=f"{session_name}: {name}",
         trendline="lowess",
+        hover_data=["reps", "weight", "brzycki_1_rm_max"],
     )
     # fig.show()
     #print(ex_agg.columns)
