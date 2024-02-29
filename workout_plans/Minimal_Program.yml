@@ -13,14 +13,29 @@ description: |-
   Training day adaptaitions.
   - 2 days / week
     - Full body split
+    - Rest in between
   - 3 days / week
     - Full body
+    - Rest
     - Upper
+    - Rest
     - Lower
   - 4 days / week
     - Upper / Lower Split
+    - Upper
+    - Lower
+    - Rest
+    - Upper
+    - Lower
   - 5 days / week
     - Upper / Lower / PPL Split
+    - Upper
+    - Lower
+    - Rest
+    - Push
+    - Pull
+    - Legs
+    - Rest
 
 
 
@@ -76,50 +91,122 @@ sessions:
         reps: 15
 
 
-      - name: Machine lateral raise 
-        description: 1x12-15 + dropset
-        sets: 1
-        reps: 15
-
   - name: Full Body Day 2
     exercises:
 
-      - name: Hack squat
+      - name: Hack squat heavy
         description: 1x4-6 + dropset
         sets: 1
         reps: 6
-
-      - name: Hack squat
+      - name: Hack squat backoff
         description: 1x8-10 + dropset
         sets: 1
         reps: 10
 
-      - name: Lat pushups
-        links:
-          - https://www.youtube.com/watch?v=CLDK6jIrqIM
-      - name: Bag Squats
-        description: Use your suitcase as weight, or anything else you have around.
-      - name: Superman
-      - name: One-legged calf raise
-        description: Calf raise on one leg at a time.
-      - name: Alt arm/leg plank 
+      - name: High incline smith presss
+        description: 1x10-12, almost overhead 45-60°, superset with next
+        sets: 2
+        reps: 12
+
+      - name: T-Bar row
+        description: 1x10-12, superset with prev, can also reverse and run dumbbell row
+        sets: 2
+        reps: 12
+
+      - name: Seated leg curl
+        description: 1x10-12 + dropset
+        sets: 1
+        reps: 12
+
+      - name: EZ-bar bicep curl
+        description: 1x12-15 + myoreps, supinated grip
+        sets: 1
+        reps: 15
+
+      - name: Cable crunch
+        description: 1x12-15 + double dropset
+        sets: 2
+        reps: 15
 
 
-  - name: Full Body Day 2
+
+  - name: Upper
     exercises:
+
+      - name: Flat dumbbell press heavy
+        description: First set heavy 4-6
+        sets: 1
+        reps: 6
+      - name: Flat dumbbell press backoff 
+        description: Second set back-off: 8-10
+        sets: 1
+        reps: 10
+
+      - name: Lat pulldown
+        description: Two sets 10-12, first set overhand middle grip, second set underhand close grip. End with overhead curls
+        sets: 2
+        reps: 12
+
+      - name: Over head cable tricep extension
+        description: One sets 12-15 
+        sets: 1
+        reps: 15
+
+      - name: Machine lateral raise 
+        description: 1x12-15 + dropset, 30% reduction
+        sets: 1
+        reps: 15
+
+      - name: High incline smith presss
+        description: 1x10-12, almost overhead 45-60°, superset with next
+        sets: 2
+        reps: 12
+
+      - name: EZ-bar bicep curl
+        description: 1x12-15 + myoreps, supinated grip
+        sets: 1
+        reps: 15
+
+      - name: Cable crunch
+        description: 1x12-15 + double dropset
+        sets: 2
+        reps: 15
+
+
+
+  - name: Lower 
+    exercises:
+
+      - name: Dumbbell romainain deadlift
+        description: Two sets 8-10, can use barbell but less time efficient
+        sets: 2
+        reps: 10
+
+      - name: Dumbbell step up
+        description: : 1x8-10. One leg at a time, use straps
+        sets: 1
+        reps: 10
+
+      - name:  Leg press toe-press
+        description: 1x12-15. Seated is quicker but calf raise works. Dropset 30-40%, 1 sec pause at bottom.
+        sets: 1
+        reps: 15
 
       - name: Hack squat
         description: 1x4-6 + dropset
         sets: 1
         reps: 6
 
-  - name: Day 3, Abs and arms
-    exercises:
-      - name: Leg bicep curls
-      - name: Sit ups / Floor crunches
-      - name: Tricep extensions
-      - name: Leg raises (lower abs)
-      - name: Plank
+      - name: Hack squat
+        description: 1x4-6 + dropset
+        sets: 1
+        reps: 6
+
+      - name: Seated leg curl
+        description: 1x10-12 + dropset
+        sets: 1
+        reps: 12
+
     
   
 
