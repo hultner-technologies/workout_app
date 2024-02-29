@@ -1,0 +1,219 @@
+default_reps: 10
+default_sets: 4
+default_rest: "00:02:00"
+default_increment: 0
+
+name: Minimal program
+description: |-
+  A minimal program based on advice from Jeff Nippards YouTube channel. The goal is to keep workouts under 45 minutes while maximising quality of those workouts using science based backing.
+
+  The program can be run anywnere from 2-5x per week. 
+  12 week program length in 3 blocks.
+
+  Training day adaptaitions.
+  - 2 days / week
+    - Full body split
+  - 3 days / week
+    - Full body
+    - Upper
+    - Lower
+  - 4 days / week
+    - Upper / Lower Split
+  - 5 days / week
+    - Upper / Lower / PPL Split
+
+
+
+links:
+  - https://www.youtube.com/watch?v=eMjyvIQbn9M
+
+# Reps needed to progress into a heavier weight next time.
+# Value between 0.1-1
+# No real progression in this schedule
+progression_limit: 1 
+
+sessions:
+  - name: Full Body Day 1
+    exercises:
+
+      - name: Flat dumbbell press heavy
+        description: First set heavy 4-6
+        sets: 1
+        reps: 6
+      - name: Flat dumbbell press backoff 
+        description: Second set back-off: 8-10
+        sets: 1
+        reps: 10
+
+      - name: Dumbbell romainain deadlift
+        description: Two sets 8-10, can use barbell but less time efficient
+        sets: 2
+        reps: 10
+
+      - name: Lat pulldown
+        description: Two sets 10-12, first set overhand middle grip, second set underhand close grip. End with overhead curls
+        sets: 2
+        reps: 12
+
+      - name: Dumbbell step up
+        description: : 1x8-10. One leg at a time, use straps
+        sets: 1
+        reps: 10
+
+      - name: Over head cable tricep extension
+        description: One sets 12-15 
+        sets: 1
+        reps: 15
+
+      - name: Machine lateral raise 
+        description: 1x12-15 + dropset, 30% reduction
+        sets: 1
+        reps: 15
+
+      - name:  Leg press toe-press
+        description: 1x12-15. Seated is quicker but calf raise works. Dropset 30-40%, 1 sec pause at bottom.
+        sets: 1
+        reps: 15
+
+
+      - name: Machine lateral raise 
+        description: 1x12-15 + dropset
+        sets: 1
+        reps: 15
+
+  - name: Full Body Day 2
+    exercises:
+
+      - name: Hack squat
+        description: 1x4-6 + dropset
+        sets: 1
+        reps: 6
+
+      - name: Hack squat
+        description: 1x8-10 + dropset
+        sets: 1
+        reps: 10
+
+      - name: Lat pushups
+        links:
+          - https://www.youtube.com/watch?v=CLDK6jIrqIM
+      - name: Bag Squats
+        description: Use your suitcase as weight, or anything else you have around.
+      - name: Superman
+      - name: One-legged calf raise
+        description: Calf raise on one leg at a time.
+      - name: Alt arm/leg plank 
+
+
+  - name: Full Body Day 2
+    exercises:
+
+      - name: Hack squat
+        description: 1x4-6 + dropset
+        sets: 1
+        reps: 6
+
+  - name: Day 3, Abs and arms
+    exercises:
+      - name: Leg bicep curls
+      - name: Sit ups / Floor crunches
+      - name: Tricep extensions
+      - name: Leg raises (lower abs)
+      - name: Plank
+    
+  
+
+# sessions:
+#   - name: Day 1
+#     links:
+#       - https://www.julian.com/guide/muscle/workout-plans#plan-a-exercises
+#     exercises:
+#       - name: Dumbbell incline press
+#         description: Do not bring your elbows below chest level.
+#         links:
+#         - https://vimeo.com/177967959
+#       - name: Bicep curl
+#         description: Keep your elbow still by your side. Slowly resist the lowering movement.
+#         links:
+#         - https://vimeo.com/177968823
+#       - name: Overhead tricep extension
+#         description: On the way back up, extend your arms fully to feel the burn in your tricep.
+#         links:
+#         - https://vimeo.com/178050262
+#       - name: Front raise
+#         description: Do not raise much higher than perpendicular. Do not swing or build momentum.
+#         links:
+#         - https://vimeo.com/177969758
+#       - name: Dumbbell squat
+#         description: 'Listen to the advice <a target="_blank" href="https://www.youtube.com/watch?v=MeIiIdhvXT4&amp;feature=youtu.be&amp;t=1m6s">in this video</a> to learn proper form.'
+#         links:
+#         - https://vimeo.com/177970342
+#       - name: Hanging leg raise †
+#         description: 'Do this exercise with a dumbbell between your feet. Follow the advice <a target="_blank" href="https://www.youtube.com/watch?v=BI7wrB3Crsc&amp;feature=youtu.be&amp;t=0m16s">in this video</a>.'
+#         links:
+#         - https://vimeo.com/39560703
+#       - name: Forearm curl up (25 reps)
+#         description: Lift slowly. Do not expect much range of motion.
+#         links:
+#         - https://vimeo.com/177970644
+#         reps: 25
+
+#   - name: Day 2
+#     exercises:
+#       - name: Dumbbell romanian deadlift
+#         description: 'Listen to the advice <a target="_blank" href="https://www.youtube.com/watch?v=FQKfr1YDhEk&amp;feature=youtu.be&amp;t=22s">in this video</a> to learn proper form.'
+#         links:
+#         - https://vimeo.com/177971032
+#       - name: Calf raise
+#         description: "Lift slowly and squeeze your calf at the top of the movement."
+#         links:
+#         - https://vimeo.com/177971348
+#       - name: Shrug
+#         description: "Raise up high up as you can comfortably go."
+#         links:
+#         - https://vimeo.com/177971664
+#       - name: Seated pulley row †
+#         description: 'Do not use your biceps to pull — only your back. Pull as far as comfortably possible.'
+#         links:
+#         - https://vimeo.com/178042607
+#       - name: Lat pulldown †
+#         description: 'Do not use your biceps to pull — only your back. Pull as far as comfortably possible.'
+#         links:
+#         - https://vimeo.com/164080300
+#       - name: Dumbbell shoulder press
+#         description: Keep shoulders in their sockets. Do not arch your back.
+#         links:
+#         - https://vimeo.com/151248907
+#       - name: Forearm curl in
+#         description: If you have difficulty increasing weight, increase your grip strength using hand grippers.
+#         links:
+#         - https://vimeo.com/178047269
+#         reps: 15
+
+#   - name: Day 3
+#     exercises:
+#       - name: Dumbbell press
+#         description: Do not bring your elbows below chest level.
+#         links:
+#         - https://vimeo.com/178048727
+#       - name: Bicep curl
+#         description: Keep your elbow still by your side. Slowly resist the lowering movement.
+#         links:
+#         - https://vimeo.com/177968823
+#       - name: Overhead tricep extension
+#         description: On the way back up, extend your arms fully to feel the burn in your tricep.
+#         links:
+#         - https://vimeo.com/178050262
+#       - name: Dumbbell squat
+#         description: 'Listen to the advice <a target="_blank" href="https://www.youtube.com/watch?v=MeIiIdhvXT4&amp;feature=youtu.be&amp;t=1m6s">in this video</a> to learn proper form.'
+#         links:
+#         - https://vimeo.com/177970342
+#       - name: Floor crunch
+#         description: Return to the floor slowly; do not let gravity do the work for you.
+#         links:
+#         - https://vimeo.com/178050912
+#       - name: Forearm curl back
+#         description: If you have difficulty increasing weight, increase your grip strength using hand grippers.
+#         links:
+#         - https://vimeo.com/178047269
+#         reps: 15
