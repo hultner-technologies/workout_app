@@ -58,7 +58,7 @@ sessions:
         links:
           - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=38s
       - name: Flat dumbbell press backoff 
-        description: Second set back-off: 8-10
+        description: "Second set back-off: 8-10"
         sets: 1
         reps: 10
         links:
@@ -79,7 +79,7 @@ sessions:
           - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=150s
 
       - name: Dumbbell step up
-        description: : 1x8-10. One leg at a time, use straps
+        description: 1x8-10. One leg at a time, use straps
         sets: 1
         reps: 10
         links:
@@ -172,7 +172,7 @@ sessions:
         links:
           - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=38s
       - name: Flat dumbbell press backoff 
-        description: Second set back-off: 8-10
+        description: "Second set back-off: 8-10"
         sets: 1
         reps: 10
         links:
@@ -240,7 +240,7 @@ sessions:
           - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=102s
 
       - name: Dumbbell step up
-        description: : 1x8-10. One leg at a time, use straps
+        description: 1x8-10. One leg at a time, use straps
         sets: 1
         reps: 10
         links:
