@@ -55,78 +55,110 @@ sessions:
         description: First set heavy 4-6
         sets: 1
         reps: 6
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=38s
       - name: Flat dumbbell press backoff 
         description: Second set back-off: 8-10
         sets: 1
         reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=38s
 
       - name: Dumbbell romainain deadlift
         description: Two sets 8-10, can use barbell but less time efficient
         sets: 2
         reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=102s
 
       - name: Lat pulldown
         description: Two sets 10-12, first set overhand middle grip, second set underhand close grip. End with overhead curls
         sets: 2
         reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=150s
 
       - name: Dumbbell step up
         description: : 1x8-10. One leg at a time, use straps
         sets: 1
         reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=175s
 
       - name: Over head cable tricep extension
         description: One sets 12-15 
         sets: 1
         reps: 15
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=227s
 
       - name: Machine lateral raise 
         description: 1x12-15 + dropset, 30% reduction
         sets: 1
         reps: 15
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=297s
 
       - name:  Leg press toe-press
         description: 1x12-15. Seated is quicker but calf raise works. Dropset 30-40%, 1 sec pause at bottom.
         sets: 1
         reps: 15
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=355s
 
 
   - name: Full Body Day 2
+    links:
+      - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=405s
     exercises:
 
       - name: Hack squat heavy
         description: 1x4-6 + dropset
         sets: 1
         reps: 6
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=405s
       - name: Hack squat backoff
         description: 1x8-10 + dropset
         sets: 1
         reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=405s
 
       - name: High incline smith presss
         description: 1x10-12, almost overhead 45-60°, superset with next
         sets: 2
         reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=483s
 
       - name: T-Bar row
         description: 1x10-12, superset with prev, can also reverse and run dumbbell row
         sets: 2
         reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=483s
 
       - name: Seated leg curl
         description: 1x10-12 + dropset
         sets: 1
         reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=444s
 
       - name: EZ-bar bicep curl
         description: 1x12-15 + myoreps, supinated grip
         sets: 1
         reps: 15
+        links:
+          - https://youtu.be/eMjyvIQbn9M?t=577
 
       - name: Cable crunch
         description: 1x12-15 + double dropset
         sets: 2
         reps: 15
+        links:
+          - https://youtu.be/eMjyvIQbn9M?t=612
 
 
 
@@ -137,40 +169,63 @@ sessions:
         description: First set heavy 4-6
         sets: 1
         reps: 6
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=38s
       - name: Flat dumbbell press backoff 
         description: Second set back-off: 8-10
         sets: 1
         reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=38s
 
       - name: Lat pulldown
         description: Two sets 10-12, first set overhand middle grip, second set underhand close grip. End with overhead curls
         sets: 2
         reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=150s
 
       - name: Over head cable tricep extension
         description: One sets 12-15 
         sets: 1
         reps: 15
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=227s
 
       - name: Machine lateral raise 
         description: 1x12-15 + dropset, 30% reduction
         sets: 1
         reps: 15
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=297s
 
       - name: High incline smith presss
         description: 1x10-12, almost overhead 45-60°, superset with next
         sets: 2
         reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=483s
+
+      - name: T-Bar row
+        description: 1x10-12, superset with prev, can also reverse and run dumbbell row
+        sets: 2
+        reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=483s
 
       - name: EZ-bar bicep curl
         description: 1x12-15 + myoreps, supinated grip
         sets: 1
         reps: 15
+        links:
+          - https://youtu.be/eMjyvIQbn9M?t=577
 
       - name: Cable crunch
         description: 1x12-15 + double dropset
         sets: 2
         reps: 15
+        links:
+          - https://youtu.be/eMjyvIQbn9M?t=612
 
 
 
@@ -181,35 +236,44 @@ sessions:
         description: Two sets 8-10, can use barbell but less time efficient
         sets: 2
         reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=102s
 
       - name: Dumbbell step up
         description: : 1x8-10. One leg at a time, use straps
         sets: 1
         reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=175s
 
       - name:  Leg press toe-press
         description: 1x12-15. Seated is quicker but calf raise works. Dropset 30-40%, 1 sec pause at bottom.
         sets: 1
         reps: 15
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=355s
 
-      - name: Hack squat
+      - name: Hack squat heavy
         description: 1x4-6 + dropset
         sets: 1
         reps: 6
-
-      - name: Hack squat
-        description: 1x4-6 + dropset
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=405s
+      - name: Hack squat backoff
+        description: 1x8-10 + dropset
         sets: 1
-        reps: 6
+        reps: 10
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=405s
 
       - name: Seated leg curl
         description: 1x10-12 + dropset
         sets: 1
         reps: 12
+        links:
+          - https://www.youtube.com/watch?v=eMjyvIQbn9M&t=444s
 
-    
-  
-
+# ----
 # sessions:
 #   - name: Day 1
 #     links:
