@@ -1,7 +1,10 @@
-create or replace view exercise_stats as
+create or replace view exercise_stats
+    with (security_invoker=on)
+    as
 (
 select pe.name
      , pe.weight
+     -- The estimated 1 rm which is often used.
      , round(weight * (
           36.0/(37.0-(select max(r) from unnest(pe.reps) r))
        )) as brzycki_1_rm_max
@@ -25,6 +28,8 @@ select pe.name
 from performed_exercise pe
          join performed_session ps on pe.performed_session_id = ps.performed_session_id
          join session_schedule ss on ps.session_schedule_id = ss.session_schedule_id
-         join exercise e on pe.exercise_id = e.exercise_id
+         -- An extra non registered exercise can be included in a session, in
+         -- this case the exercise id is likely to be null.
+         left join exercise e on pe.exercise_id = e.exercise_id
 order by ss.session_schedule_id, ps.completed_at desc, e.sort_order
 );
