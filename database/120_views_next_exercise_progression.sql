@@ -1,4 +1,7 @@
 create or replace view next_exercise_progression as (
+create or replace view next_exercise_progression
+    with (security_invoker=on)
+    as (
 with performed_exercise_base as (
     select pe.*
          , base_exercise_id
