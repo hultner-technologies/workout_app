@@ -1,4 +1,6 @@
-create or replace view full_exercise as
+create or replace view full_exercise
+    with (security_invoker=on)
+    as
 (
     select exercise_id
      , be.base_exercise_id
