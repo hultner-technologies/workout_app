@@ -1,3 +1,5 @@
+-- TODO: If API is built around this we should verify that invoking user owns
+-- the referenced performed_session_id_.
 create or replace function draft_session_exercises(performed_session_id_ uuid)
     returns table (exercise_id uuid
                   , performed_session_id uuid
@@ -18,6 +20,9 @@ with performed_exercise_base as (
       join exercise e on pe.exercise_id = e.exercise_id
       join performed_session p on pe.performed_session_id = p.performed_session_id
       join session_schedule s on e.session_schedule_id = s.session_schedule_id
+    -- Only include somewhat recent lifts, to not skew recommendations after a
+    -- long hiatus. 3 months (one quarter) was chosen arbitrarily.
+    where p.completed_at >= (now() + interval '3 months ago' )
 )
 select
        distinct  on (fe.exercise_id) fe.exercise_id,
