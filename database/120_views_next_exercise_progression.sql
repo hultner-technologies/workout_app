@@ -1,4 +1,7 @@
-create or replace view next_exercise_progression as (
+-- There's a bug in this view. This should only inlcude one value per session,
+-- user and exercise.
+-- This view isn't used by anything so not critical.
+-- The draft exercises version seem to function correctly.
 create or replace view next_exercise_progression
     with (security_invoker=on)
     as (
