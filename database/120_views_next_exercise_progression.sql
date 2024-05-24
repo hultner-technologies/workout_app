@@ -17,6 +17,9 @@ with performed_exercise_base as (
                  on pe.performed_session_id = p.performed_session_id
              join session_schedule s
                  on e.session_schedule_id = s.session_schedule_id
+    -- Only include somewhat recent lifts, to not skew recommendations after a
+    -- long hiatus.
+    where p.completed_at >= (now() + interval '3 months ago' )
 )
 select
     distinct  on (fe.exercise_id, ps.performed_session_id) fe.exercise_id,
