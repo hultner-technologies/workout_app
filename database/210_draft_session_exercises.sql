@@ -8,6 +8,7 @@ create or replace function draft_session_exercises(performed_session_id_ uuid)
                   , rest interval[]
                   , weight int
                   )
+    set search_path = 'public'
 AS $$
 with performed_exercise_base as (
     select pe.*
