@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 
-from pprint import pprint
 from itertools import count
-
-from sqlmodel import Session, create_engine, select
 from pathlib import Path
-from strictyaml import load
+from pprint import pprint
+from typing import Annotated
+
 import typer
+from dotenv import load_dotenv
+from sqlmodel import Session, create_engine, select
+from strictyaml import load
 
-from workout_app.models import Plan, BaseExercise, Exercise, SessionSchedule
+from workout_app.models import BaseExercise, Exercise, Plan, SessionSchedule
 
+load_dotenv()
 # TODO: Support for custom DSN via env or similar
 dsn_2 = "postgresql://postgres:postgres@127.0.0.1:25432/workout_app"
-engine = create_engine(dsn_2)
-session = Session(engine)
+# engine = create_engine(dsn_2)
+# session = Session(engine)
 plan_a = "Julian_Plan_A.yml"
 plan_b = "Julian_Plan_B.yml"
 
@@ -36,7 +39,7 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
             session.commit()
             print("Doesn't exist")
             print(be)
-        print("after if")
+        print("-- after if be None --")
         print(be)
         ex = Exercise(
             base_exercise_id=be.base_exercise_id,
@@ -56,8 +59,13 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
     return (base_ex, exercises)
 
 
-def create_plan(plan_file: Path):
+def create_plan(
+    plan_file: Path, dsn: Annotated[str, typer.Argument(envvar="pg_dsn")] = dsn_2
+):
+
     plan_data = load(plan_file.read_text()).data
+    engine = create_engine(dsn)
+    session = Session(engine)
     p = Plan(**plan_data)
     pprint(p)
     session.add(p)
@@ -76,6 +84,7 @@ def create_plan(plan_file: Path):
     ]
 
     session.commit()
+
 
 if __name__ == "__main__":
     typer.run(create_plan)
