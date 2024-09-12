@@ -1,0 +1,31 @@
+default_reps: 5
+default_sets: 5
+default_rest: "00:03:00"
+default_increment: 2500
+
+name: Barbell program
+description: |-
+  Not really a program but rather just a collection of barbell exercises.
+  I use this as a powerlifting complement to my regular program.
+  I usually delete any exercise I don't use.
+
+
+
+links:
+  # - 
+
+# Reps needed to progress into a heavier weight next time.
+# Value between 0.1-1
+# No real progression in this schedule
+progression_limit: 1 
+
+sessions:
+  - name: Full barbell
+    exercises:
+      - name: Bench press
+      - name: Squat
+      - name: Overhead press
+      - name: Deadlift
+      - name: Barbell Row
+
+
