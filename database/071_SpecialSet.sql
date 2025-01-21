@@ -27,16 +27,21 @@
 create table exercise_set_type (
     name text PRIMARY KEY CHECK (name <> '')
     , description text
+    , sort_order numeric NOT NULL
+    , has_subset boolean NOT NULL
 );
-insert into exercise_set_type (name, description)
+
+insert into exercise_set_type (name, description, sort_order, has_subset) 
 values
-    ('warm-up', 'A warm-up set.')
-    , ('drop-set', 'A set where you decrease the weight after each set.')
-    , ('super-set', 'A set where you do two exercises back to back.')
-    , ('myo-rep', 'A set where you do a set to failure, rest for a short period, then do another set to failure, and so on.')
-    , ('pyramid-set', 'A set where you increase the weight after each set.')
-    , ('AMRAP', 'As many reps as possible.')
-    , ('other', 'A set that does not fit into the other categories.');
+    ('warm-up', 'A warm-up set.', 10, 't')
+    , ('regular', 'A regular standard set.', 20, 'f')
+    , ('drop-set', 'A set where you decrease the weight after each set.', 30, 't')
+    , ('myo-rep', 'A set where you do a set to failure, rest for a short period, then do another set to failure, and so on.', 40, 't')
+    , ('pyramid-set', 'A set where you increase the weight after each set.', 50, 't')
+    , ('super-set', 'A set where you do two exercises back to back.', 60, 'f')
+    , ('AMRAP', 'As many reps as possible.', 70, 'f')
+    , ('other', 'A set that does not fit into the other categories.', 80, 'f')
+;
 
 
 CREATE TABLE performed_exercise_set (
