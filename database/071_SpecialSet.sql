@@ -43,10 +43,31 @@ values
     , ('other', 'A set that does not fit into the other categories.', 80, 'f')
 ;
 
+ALTER TABLE public.exercise_set_type ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow read access for all" ON public.exercise_set_type
+FOR SELECT
+TO authenticated, anon
+USING (true);
+
+CREATE POLICY "Prevent insert access" ON public.exercise_set_type
+FOR INSERT
+TO authenticated, anon
+WITH CHECK (false);
+
+CREATE POLICY "Prevent update access" ON public.exercise_set_type
+FOR UPDATE
+TO authenticated, anon
+WITH CHECK (false);
+
+CREATE POLICY "Prevent delete access" ON public.exercise_set_type
+FOR DELETE
+TO authenticated, anon
+USING (false);
 
 CREATE TABLE performed_exercise_set (
     performed_exercise_set_id uuid DEFAULT uuid_generate_v1mc() PRIMARY KEY
     , performed_exercise_id uuid REFERENCES performed_exercise(performed_exercise_id) NOT NULL
+        ON DELETE CASCADE
     , exercise_set_type text REFERENCES exercise_set_type(name) NOT NULL
     , weight positive_int NOT NULL
     , reps positive_int NOT NULL
@@ -57,5 +78,64 @@ CREATE TABLE performed_exercise_set (
     , started_at timestamp default now()
     , completed_at timestamp default null
     , parent_performed_exercise_set_id uuid REFERENCES performed_exercise_set(performed_exercise_set_id)
+        ON DELETE CASCADE
 );
 
+ALTER TABLE public.performed_exercise_set ENABLE ROW LEVEL SECURITY;
+
+-- props: {"title": "Create RLS Policies for performed_exercise_set", "runQuery": "true", "isChart": "false"}
+CREATE POLICY "Allow read access for app_user_id" ON public.performed_exercise_set
+FOR SELECT
+TO authenticated
+USING (
+    EXISTS (
+        SELECT 1
+        FROM public.performed_exercise pe
+        JOIN public.performed_session ps ON pe.performed_session_id = ps.performed_session_id
+        WHERE ps.app_user_id = (select auth.uid()) AND pe.performed_exercise_id = performed_exercise_set.performed_exercise_id
+    )
+);
+
+CREATE POLICY "Allow insert access for app_user_id" ON public.performed_exercise_set
+FOR INSERT
+TO authenticated
+WITH CHECK (
+    EXISTS (
+        SELECT 1
+        FROM public.performed_exercise pe
+        JOIN public.performed_session ps ON pe.performed_session_id = ps.performed_session_id
+        WHERE ps.app_user_id = (select auth.uid()) AND pe.performed_exercise_id = performed_exercise_set.performed_exercise_id
+    )
+);
+
+CREATE POLICY "Allow update access for app_user_id" ON public.performed_exercise_set
+FOR UPDATE
+TO authenticated
+USING (
+    EXISTS (
+        SELECT 1
+        FROM public.performed_exercise pe
+        JOIN public.performed_session ps ON pe.performed_session_id = ps.performed_session_id
+        WHERE ps.app_user_id = (select auth.uid()) AND pe.performed_exercise_id = performed_exercise_set.performed_exercise_id
+    )
+)
+WITH CHECK (
+    EXISTS (
+        SELECT 1
+        FROM public.performed_exercise pe
+        JOIN public.performed_session ps ON pe.performed_session_id = ps.performed_session_id
+        WHERE ps.app_user_id = (select auth.uid()) AND pe.performed_exercise_id = performed_exercise_set.performed_exercise_id
+    )
+);
+
+CREATE POLICY "Allow delete access for app_user_id" ON public.performed_exercise_set
+FOR DELETE
+TO authenticated
+USING (
+    EXISTS (
+        SELECT 1
+        FROM public.performed_exercise pe
+        JOIN public.performed_session ps ON pe.performed_session_id = ps.performed_session_id
+        WHERE ps.app_user_id = (select auth.uid()) AND pe.performed_exercise_id = performed_exercise_set.performed_exercise_id
+    )
+);
