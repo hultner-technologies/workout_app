@@ -4,7 +4,8 @@
 -- making it impossible to distinguish between "session doesn't exist" and
 -- "session exists but has no exercises".
 --
--- Solution: Provide views and functions that use LEFT JOINs to handle empty workouts.
+-- Solution: Return session metadata with exercises aggregated in JSON array.
+-- Always returns 1 row (or 0 if doesn't exist), with empty array for empty workouts.
 --
 -- Created: 2025-11-06
 -- Author: Claude (Anthropic)
@@ -50,22 +51,22 @@ COMMENT ON VIEW session_schedule_metadata IS
     'Useful for handling empty workout templates.';
 
 
--- Function: draft_session_exercises_v2
--- Enhanced version that returns session information even when there are no exercises
--- Returns session metadata along with exercise data (if any)
+-- Function: draft_session_exercises
+-- Returns session metadata with exercises aggregated into a JSON array
 DROP FUNCTION IF EXISTS draft_session_exercises_v2(uuid);
+DROP FUNCTION IF EXISTS draft_session_exercises_v3(uuid);
 
-CREATE OR REPLACE FUNCTION draft_session_exercises_v2(performed_session_id_ uuid)
+CREATE OR REPLACE FUNCTION draft_session_exercises(performed_session_id_ uuid)
     RETURNS TABLE (
-        exercise_id uuid,
         performed_session_id uuid,
-        name text,
-        reps int[],
-        rest interval[],
-        weight int,
         session_schedule_id uuid,
         session_name text,
-        has_exercises boolean
+        app_user_id uuid,
+        started_at timestamp,
+        completed_at timestamp,
+        has_exercises boolean,
+        exercise_count integer,
+        exercises jsonb
     )
     SECURITY INVOKER
     SET search_path = 'public'
@@ -88,6 +89,8 @@ session_info AS (
         ps.performed_session_id,
         ps.session_schedule_id,
         ps.app_user_id,
+        ps.started_at,
+        ps.completed_at,
         ss.name as session_name,
         EXISTS(
             SELECT 1 FROM exercise e
@@ -96,59 +99,99 @@ session_info AS (
     FROM performed_session ps
     JOIN session_schedule ss ON ps.session_schedule_id = ss.session_schedule_id
     WHERE ps.performed_session_id = performed_session_id_
+),
+exercise_data AS (
+    SELECT
+        DISTINCT ON (fe.exercise_id)
+        si.performed_session_id,
+        fe.exercise_id,
+        fe.name,
+        fe.sort_order,
+        array_fill(fe.reps, array[fe.sets]) as reps,
+        array_fill(fe.rest, array[fe.sets]) as rest,
+        COALESCE(max(pe.weight), 0)
+            + (CASE WHEN pe.successful THEN fe.step_increment ELSE 0 END) as weight
+    FROM session_info si
+    LEFT JOIN full_exercise fe ON si.session_schedule_id = fe.session_schedule_id
+    LEFT JOIN performed_exercise_base pe
+        ON fe.base_exercise_id = pe.base_exercise_id
+        AND pe.app_user_id = si.app_user_id
+        AND successful IS TRUE
+    WHERE si.performed_session_id = performed_session_id_
+        AND fe.exercise_id IS NOT NULL
+    GROUP BY
+        fe.base_exercise_id,
+        fe.name,
+        fe.exercise_id,
+        fe.sort_order,
+        si.performed_session_id,
+        fe.reps,
+        fe.sets,
+        fe.rest,
+        fe.step_increment,
+        pe.successful
+    ORDER BY fe.exercise_id, fe.sort_order
 )
 SELECT
-    DISTINCT ON (fe.exercise_id)
-    fe.exercise_id,
     si.performed_session_id,
-    fe.name,
-    array_fill(fe.reps, array[fe.sets]) as reps,
-    array_fill(fe.rest, array[fe.sets]) as rest,
-    COALESCE(max(pe.weight), 0)
-        + (CASE WHEN pe.successful THEN fe.step_increment ELSE 0 END) as weight,
     si.session_schedule_id,
     si.session_name,
-    si.has_exercises
+    si.app_user_id,
+    si.started_at,
+    si.completed_at,
+    si.has_exercises,
+    COALESCE(COUNT(ed.exercise_id), 0)::integer as exercise_count,
+    COALESCE(
+        jsonb_agg(
+            jsonb_build_object(
+                'exercise_id', ed.exercise_id,
+                'name', ed.name,
+                'reps', ed.reps,
+                'rest', ed.rest,
+                'weight', ed.weight,
+                'sort_order', ed.sort_order
+            )
+            ORDER BY ed.sort_order, ed.name
+        ) FILTER (WHERE ed.exercise_id IS NOT NULL),
+        '[]'::jsonb
+    ) as exercises
 FROM session_info si
-LEFT JOIN full_exercise fe ON si.session_schedule_id = fe.session_schedule_id
-LEFT JOIN performed_exercise_base pe
-    ON fe.base_exercise_id = pe.base_exercise_id
-    AND pe.app_user_id = si.app_user_id
-    AND successful IS TRUE
-WHERE si.performed_session_id = performed_session_id_
+LEFT JOIN exercise_data ed ON si.performed_session_id = ed.performed_session_id
 GROUP BY
-    fe.base_exercise_id,
-    fe.name,
-    fe.exercise_id,
     si.performed_session_id,
-    fe.reps,
-    fe.sets,
-    fe.rest,
-    fe.step_increment,
-    pe.successful,
     si.session_schedule_id,
     si.session_name,
-    si.has_exercises
-ORDER BY fe.exercise_id;
+    si.app_user_id,
+    si.started_at,
+    si.completed_at,
+    si.has_exercises;
 $$
 LANGUAGE SQL;
 
-COMMENT ON FUNCTION draft_session_exercises_v2(uuid) IS
-    'Improved version of draft_session_exercises that returns session info even for empty workouts. '
-    'Returns exercise data if available, but always includes session metadata. '
-    'Check the has_exercises field to determine if the session has any exercises.';
+COMMENT ON FUNCTION draft_session_exercises(uuid) IS
+    'Returns session metadata with exercises aggregated into a JSON array. '
+    'Always returns exactly 1 row (or 0 if session does not exist). '
+    'Empty workouts return exercises: [] with has_exercises: false. '
+    'Clean interface: session metadata at top level, exercises nested. '
+    'Uses SECURITY INVOKER to respect RLS policies.';
 
 
--- Function: performed_session_exists
--- Simple check to verify if a performed session exists and get its metadata
-CREATE OR REPLACE FUNCTION performed_session_exists(performed_session_id_ uuid)
+-- Function: performed_session_details
+-- Check if a performed session exists and get its metadata
+DROP FUNCTION IF EXISTS performed_session_exists(uuid);
+DROP FUNCTION IF EXISTS performed_session_details_v2(uuid);
+
+CREATE OR REPLACE FUNCTION performed_session_details(performed_session_id_ uuid)
     RETURNS TABLE (
         exists boolean,
         performed_session_id uuid,
         session_schedule_id uuid,
         session_name text,
         app_user_id uuid,
-        exercise_count bigint,
+        started_at timestamp,
+        completed_at timestamp,
+        has_exercises boolean,
+        exercise_count integer,
         is_empty boolean
     )
     SECURITY INVOKER
@@ -160,7 +203,10 @@ AS $$
         ps.session_schedule_id,
         ss.name as session_name,
         ps.app_user_id,
-        COUNT(e.exercise_id) as exercise_count,
+        ps.started_at,
+        ps.completed_at,
+        COUNT(e.exercise_id) > 0 as has_exercises,
+        COUNT(e.exercise_id)::integer as exercise_count,
         COUNT(e.exercise_id) = 0 as is_empty
     FROM performed_session ps
     JOIN session_schedule ss ON ps.session_schedule_id = ss.session_schedule_id
@@ -170,11 +216,71 @@ AS $$
         ps.performed_session_id,
         ps.session_schedule_id,
         ss.name,
-        ps.app_user_id;
+        ps.app_user_id,
+        ps.started_at,
+        ps.completed_at;
 $$
 LANGUAGE SQL;
 
-COMMENT ON FUNCTION performed_session_exists(uuid) IS
-    'Check if a performed session exists and get its metadata, including whether it has exercises. '
-    'Useful for distinguishing between non-existent sessions and empty workout templates. '
-    'Returns 0 rows if session does not exist, 1 row if it exists (check is_empty flag).';
+COMMENT ON FUNCTION performed_session_details(uuid) IS
+    'Check if a performed session exists and get its metadata. '
+    'Returns 0 rows if session does not exist, 1 row with details if it exists. '
+    'Includes has_exercises, exercise_count, and is_empty flags. '
+    'Uses SECURITY INVOKER to respect RLS policies.';
+
+
+-- View: session_schedule_with_exercises
+-- Shows session schedules with aggregated exercise information
+DROP VIEW IF EXISTS session_schedule_with_exercises;
+
+CREATE OR REPLACE VIEW session_schedule_with_exercises
+    WITH (security_invoker=on)
+    AS
+SELECT
+    ss.session_schedule_id,
+    ss.plan_id,
+    ss.name,
+    ss.description,
+    ss.progression_limit,
+    ss.links,
+    ss.data,
+    p.name as plan_name,
+    p.description as plan_description,
+    COALESCE(COUNT(e.exercise_id), 0)::integer as exercise_count,
+    COUNT(e.exercise_id) = 0 as is_empty,
+    COALESCE(
+        jsonb_agg(
+            jsonb_build_object(
+                'exercise_id', e.exercise_id,
+                'name', be.name,
+                'reps', e.reps,
+                'sets', e.sets,
+                'rest', e.rest,
+                'step_increment', e.step_increment,
+                'sort_order', e.sort_order,
+                'description', COALESCE(e.description, be.description),
+                'links', COALESCE(e.links, be.links)
+            )
+            ORDER BY e.sort_order, be.name
+        ) FILTER (WHERE e.exercise_id IS NOT NULL),
+        '[]'::jsonb
+    ) as exercises
+FROM session_schedule ss
+JOIN plan p ON ss.plan_id = p.plan_id
+LEFT JOIN exercise e ON ss.session_schedule_id = e.session_schedule_id
+LEFT JOIN base_exercise be ON e.base_exercise_id = be.base_exercise_id
+GROUP BY
+    ss.session_schedule_id,
+    ss.plan_id,
+    ss.name,
+    ss.description,
+    ss.progression_limit,
+    ss.links,
+    ss.data,
+    p.name,
+    p.description;
+
+COMMENT ON VIEW session_schedule_with_exercises IS
+    'Session schedules with exercises aggregated into a JSON array. '
+    'Clean interface for fetching templates: single row per schedule with nested exercises. '
+    'Uses security_invoker=on to respect RLS policies.';

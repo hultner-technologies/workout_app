@@ -21,24 +21,24 @@ WHERE session_schedule_id = 's1111111-1111-1111-1111-111111111111'::uuid;
 \echo '   ✓ Expected: 1 row with is_empty = true, exercise_count = 0'
 \echo ''
 
--- Test 2: Check performed_session_exists function
-\echo '2. Test performed_session_exists function:'
+-- Test 2: Check performed_session_details function
+\echo '2. Test performed_session_details function:'
 SELECT *
-FROM performed_session_exists('p1111111-1111-1111-1111-111111111111'::uuid);
+FROM performed_session_details('p1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Expected: 1 row with exists = true, is_empty = true, exercise_count = 0'
 \echo ''
 
--- Test 3: Check draft_session_exercises_v2 function
-\echo '3. Test draft_session_exercises_v2 function (new version):'
+-- Test 3: Check draft_session_exercises function
+\echo '3. Test draft_session_exercises function (new version):'
 SELECT
     exercise_id,
     name,
     session_schedule_id,
     session_name,
     has_exercises
-FROM draft_session_exercises_v2('p1111111-1111-1111-1111-111111111111'::uuid);
+FROM draft_session_exercises('p1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Expected: Returns session info even with no exercises'
@@ -54,8 +54,8 @@ FROM draft_session_exercises('p1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   New function result:'
-SELECT COUNT(*) as row_count, 'draft_session_exercises_v2 (new)' as function_name
-FROM draft_session_exercises_v2('p1111111-1111-1111-1111-111111111111'::uuid);
+SELECT COUNT(*) as row_count, 'draft_session_exercises (new)' as function_name
+FROM draft_session_exercises('p1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Old function returns 0 rows (ambiguous)'
@@ -65,7 +65,7 @@ FROM draft_session_exercises_v2('p1111111-1111-1111-1111-111111111111'::uuid);
 -- Test 5: Test with a non-existent session
 \echo '5. Test with non-existent session (should return 0 rows):'
 SELECT *
-FROM performed_session_exists('00000000-0000-0000-0000-000000000000'::uuid);
+FROM performed_session_details('00000000-0000-0000-0000-000000000000'::uuid);
 
 \echo ''
 \echo '   ✓ Expected: 0 rows (truly non-existent)'
@@ -174,12 +174,12 @@ ORDER BY is_empty DESC;
 \echo '   - Includes is_empty flag'
 \echo '   - Always returns a row for existing sessions'
 \echo ''
-\echo '2. draft_session_exercises_v2 function:'
+\echo '2. draft_session_exercises function:'
 \echo '   - Enhanced version of draft_session_exercises'
 \echo '   - Returns session metadata even for empty workouts'
 \echo '   - Includes has_exercises flag'
 \echo ''
-\echo '3. performed_session_exists function:'
+\echo '3. performed_session_details function:'
 \echo '   - Simple check if a performed session exists'
 \echo '   - Returns exercise count and is_empty flag'
 \echo '   - Returns 0 rows only if session truly does not exist'

@@ -254,7 +254,7 @@ FROM draft_session_exercises_v2('empty-ps-1111-1111-111111111111'::uuid)
 LIMIT 1;
 
 \echo ''
-\echo '   Testing performed_session_exists for Alice:'
+\echo '   Testing performed_session_details for Alice:'
 SELECT
     exists,
     session_name,
@@ -264,7 +264,7 @@ SELECT
         WHEN is_empty THEN '✓ Exists (empty)'
         ELSE '✓ Exists (has exercises)'
     END as status
-FROM performed_session_exists('empty-ps-1111-1111-111111111111'::uuid);
+FROM performed_session_details('empty-ps-1111-1111-111111111111'::uuid);
 
 \echo ''
 
