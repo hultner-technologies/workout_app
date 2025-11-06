@@ -110,7 +110,8 @@ for file in \
     "$DB_DIR/220_create_session_exercises.sql" \
     "$DB_DIR/230_session_helper_functions.sql" \
     "$DB_DIR/250_empty_workout_support.sql" \
-    "$DB_DIR/260_rls_policies.sql"
+    "$DB_DIR/260_rls_policies.sql" \
+    "$DB_DIR/270_improved_session_interface.sql"
 do
     if [ -f "$file" ]; then
         basename_file=$(basename "$file")
@@ -143,6 +144,12 @@ echo -e "${YELLOW}Running RLS security tests...${NC}"
 docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/test_rls_security.sql"
 echo ""
 
+# Run v3 interface tests
+echo -e "${BLUE}Step 9: Test V3 Interface (JSON Aggregation)${NC}"
+echo -e "${YELLOW}Running V3 interface tests...${NC}"
+docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/test_v3_interface.sql"
+echo ""
+
 # Summary
 echo -e "${BLUE}========================================"
 echo "Test Suite Complete!"
@@ -159,10 +166,12 @@ echo "  5. Verification (proper handling of empty workouts)"
 echo "  6. Row Level Security (RLS) policies"
 echo "  7. Function security (SECURITY INVOKER)"
 echo "  8. Data isolation between users"
+echo "  9. V3 interface with JSON aggregation"
 echo ""
 echo "Documentation:"
 echo "  - database/queries/README_empty_workout.md - Empty workout usage"
-echo "  - database/queries/RESPONSE_STRUCTURE.md - API response format"
+echo "  - database/queries/RESPONSE_V3.md - V3 API response format (RECOMMENDED)"
+echo "  - database/queries/RESPONSE_STRUCTURE.md - V2 response format (legacy)"
 echo "  - database/queries/SECURITY_MODEL.md - Security & RLS guide"
 echo ""
 
