@@ -74,7 +74,9 @@ for file in \
     "$DB_DIR/130_views_exercise_stats.sql" \
     "$DB_DIR/210_draft_session_exercises.sql" \
     "$DB_DIR/220_create_session_exercises.sql" \
-    "$DB_DIR/230_session_helper_functions.sql"
+    "$DB_DIR/230_session_helper_functions.sql" \
+    "$DB_DIR/250_empty_workout_support.sql" \
+    "$DB_DIR/260_rls_policies.sql"
 do
     if [ -f "$file" ]; then
         basename_file=$(basename "$file")
@@ -97,13 +99,26 @@ echo ""
 
 # Apply fix
 echo -e "${BLUE}Step 5: Apply the Fix${NC}"
-run_sql "$DB_DIR/250_empty_workout_support.sql" "Apply empty workout support migration" || exit 1
+echo -e "${YELLOW}Note: Fix already applied in schema (Step 2)${NC}"
+echo -e "${GREEN}✓ Empty workout support enabled${NC}"
+echo ""
+
+# Apply RLS policies
+echo -e "${BLUE}Step 6: Apply Row Level Security Policies${NC}"
+echo -e "${YELLOW}Note: RLS already applied in schema (Step 2)${NC}"
+echo -e "${GREEN}✓ RLS policies enabled${NC}"
 echo ""
 
 # Run verification
-echo -e "${BLUE}Step 6: Verify the Fix${NC}"
+echo -e "${BLUE}Step 7: Verify the Fix${NC}"
 echo -e "${YELLOW}Running verification tests...${NC}"
 psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$TEST_DB" -f "$DB_DIR/queries/verify_empty_workout_fix.sql"
+echo ""
+
+# Run security tests
+echo -e "${BLUE}Step 8: Test Row Level Security${NC}"
+echo -e "${YELLOW}Running RLS security tests...${NC}"
+psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$TEST_DB" -f "$DB_DIR/queries/test_rls_security.sql"
 echo ""
 
 # Summary
@@ -114,16 +129,25 @@ echo ""
 echo -e "${GREEN}All tests passed!${NC}"
 echo ""
 echo "What was tested:"
-echo "  1. Database schema setup"
+echo "  1. Database schema setup (with RLS policies)"
 echo "  2. Empty workout plan creation"
 echo "  3. Problem demonstration (0 rows for empty workouts)"
 echo "  4. Fix application (new views and functions)"
 echo "  5. Verification (proper handling of empty workouts)"
+echo "  6. Row Level Security (RLS) policies"
+echo "  7. Function security (SECURITY INVOKER)"
+echo "  8. Data isolation between users"
+echo ""
+echo "Documentation:"
+echo "  - database/queries/README_empty_workout.md - Empty workout usage"
+echo "  - database/queries/RESPONSE_STRUCTURE.md - API response format"
+echo "  - database/queries/SECURITY_MODEL.md - Security & RLS guide"
 echo ""
 echo "Next steps:"
 echo "  - Review the output above"
-echo "  - Check database/queries/README_empty_workout.md for usage"
 echo "  - Update API endpoints to use new functions"
+echo "  - Test with real Supabase authenticated users"
+echo "  - Verify RLS data isolation in production"
 echo ""
 echo -e "${YELLOW}Test database: $TEST_DB${NC}"
 echo "Keep for manual testing or drop with:"

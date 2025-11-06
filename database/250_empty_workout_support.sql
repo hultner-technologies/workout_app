@@ -67,6 +67,7 @@ CREATE OR REPLACE FUNCTION draft_session_exercises_v2(performed_session_id_ uuid
         session_name text,
         has_exercises boolean
     )
+    SECURITY INVOKER
     SET search_path = 'public'
 AS $$
 WITH performed_exercise_base AS (
@@ -150,6 +151,7 @@ CREATE OR REPLACE FUNCTION performed_session_exists(performed_session_id_ uuid)
         exercise_count bigint,
         is_empty boolean
     )
+    SECURITY INVOKER
     SET search_path = 'public'
 AS $$
     SELECT
