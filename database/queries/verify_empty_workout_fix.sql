@@ -33,16 +33,17 @@ FROM performed_session_details('c1111111-1111-1111-1111-111111111111'::uuid);
 -- Test 3: Check draft_session_exercises function
 \echo '3. Test draft_session_exercises function (new version):'
 SELECT
-    exercise_id,
-    name,
+    performed_session_id,
     session_schedule_id,
     session_name,
-    has_exercises
+    has_exercises,
+    exercise_count,
+    jsonb_array_length(exercises) as exercises_array_length
 FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
-\echo '   ✓ Expected: Returns session info even with no exercises'
-\echo '   ✓ If empty: exercise_id and name may be NULL, but session info is present'
+\echo '   ✓ Expected: Returns 1 row with session metadata'
+\echo '   ✓ has_exercises = false, exercise_count = 0, exercises array is empty []'
 \echo ''
 
 -- Test 4: Compare old vs new behavior
