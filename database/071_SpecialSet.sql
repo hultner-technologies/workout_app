@@ -66,8 +66,7 @@ USING (false);
 
 CREATE TABLE performed_exercise_set (
     performed_exercise_set_id uuid DEFAULT uuid_generate_v1mc() PRIMARY KEY
-    , performed_exercise_id uuid REFERENCES performed_exercise(performed_exercise_id) NOT NULL
-        ON DELETE CASCADE
+    , performed_exercise_id uuid REFERENCES performed_exercise(performed_exercise_id) ON DELETE CASCADE NOT NULL
     , exercise_set_type text REFERENCES exercise_set_type(name) NOT NULL
     , weight positive_int NOT NULL
     , reps positive_int NOT NULL

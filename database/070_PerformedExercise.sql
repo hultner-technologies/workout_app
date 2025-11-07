@@ -2,7 +2,7 @@
 CREATE TABLE performed_exercise (
     performed_exercise_id uuid DEFAULT uuid_generate_v1mc() PRIMARY KEY
     , exercise_id uuid REFERENCES exercise(exercise_id) ON DELETE SET NULL
-    , performed_session_id uuid REFERENCES performed_session(performed_session_id) NOT NULL ON DELETE CASCADE
+    , performed_session_id uuid REFERENCES performed_session(performed_session_id) ON DELETE CASCADE NOT NULL
     , name text
     -- Sets is a list of reps e.g. [ 10, 10, 9, 8, 7, ], sets is the length
     , reps positive_int[] default ARRAY [ 10, 10, 10, 10, 10 ] NOT NULL
