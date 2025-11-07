@@ -128,19 +128,43 @@ echo ""
 # Run problem demonstration
 echo -e "${BLUE}Step 6: Demonstrate the Problem${NC}"
 echo -e "${YELLOW}Running test to show issue with empty workouts...${NC}"
-docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/test_empty_workout.sql"
+TEST_OUTPUT=$(docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/test_empty_workout.sql" 2>&1)
+echo "$TEST_OUTPUT"
+
+# Check for errors
+if echo "$TEST_OUTPUT" | grep -i "^ERROR:" > /dev/null; then
+    echo -e "${RED}✗ test_empty_workout.sql failed with errors${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ test_empty_workout.sql completed${NC}"
 echo ""
 
 # Run verification
 echo -e "${BLUE}Step 7: Verify the Fix${NC}"
 echo -e "${YELLOW}Running verification tests...${NC}"
-docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/verify_empty_workout_fix.sql"
+TEST_OUTPUT=$(docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/verify_empty_workout_fix.sql" 2>&1)
+echo "$TEST_OUTPUT"
+
+# Check for errors
+if echo "$TEST_OUTPUT" | grep -i "^ERROR:" > /dev/null; then
+    echo -e "${RED}✗ verify_empty_workout_fix.sql failed with errors${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ verify_empty_workout_fix.sql completed${NC}"
 echo ""
 
 # Run security tests
 echo -e "${BLUE}Step 8: Test Row Level Security${NC}"
 echo -e "${YELLOW}Running RLS security tests...${NC}"
-docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/test_rls_security.sql"
+TEST_OUTPUT=$(docker exec -i "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$DB_DIR/queries/test_rls_security.sql" 2>&1)
+echo "$TEST_OUTPUT"
+
+# Check for errors
+if echo "$TEST_OUTPUT" | grep -i "^ERROR:" > /dev/null; then
+    echo -e "${RED}✗ test_rls_security.sql failed with errors${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ test_rls_security.sql completed${NC}"
 echo ""
 
 
