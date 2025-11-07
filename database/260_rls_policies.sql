@@ -322,12 +322,12 @@ COMMENT ON VIEW session_schedule_metadata IS
 -- SECURITY NOTES FOR FUNCTIONS
 -- =============================================================================
 
--- draft_session_exercises_v2() uses:
+-- draft_session_exercises() uses:
 --   - LANGUAGE SQL with default SECURITY INVOKER behavior
 --   - Queries performed_session table which has RLS
 --   - Will automatically filter to only the user's own sessions
 --
--- performed_session_exists() uses:
+-- performed_session_details() uses:
 --   - LANGUAGE SQL with default SECURITY INVOKER behavior
 --   - Queries performed_session table which has RLS
 --   - Will automatically filter to only the user's own sessions
@@ -337,12 +337,12 @@ COMMENT ON VIEW session_schedule_metadata IS
 -- 2. Query tables with RLS enabled
 -- 3. Respect the authenticated user's permissions
 
-COMMENT ON FUNCTION draft_session_exercises_v2(uuid) IS
+COMMENT ON FUNCTION draft_session_exercises(uuid) IS
     'Secure function that respects RLS policies. '
     'Uses SECURITY INVOKER (default) to run with caller permissions. '
     'Automatically filters to only sessions owned by auth.uid().';
 
-COMMENT ON FUNCTION performed_session_exists(uuid) IS
+COMMENT ON FUNCTION performed_session_details(uuid) IS
     'Secure function that respects RLS policies. '
     'Uses SECURITY INVOKER (default) to run with caller permissions. '
     'Automatically filters to only sessions owned by auth.uid().';
