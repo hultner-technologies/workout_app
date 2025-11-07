@@ -55,6 +55,7 @@ COMMENT ON VIEW session_schedule_metadata IS
 -- Returns session metadata with exercises aggregated into a JSON array
 DROP FUNCTION IF EXISTS draft_session_exercises_v2(uuid);
 DROP FUNCTION IF EXISTS draft_session_exercises_v3(uuid);
+DROP FUNCTION IF EXISTS draft_session_exercises(uuid);
 
 CREATE OR REPLACE FUNCTION draft_session_exercises(performed_session_id_ uuid)
     RETURNS TABLE (
