@@ -183,7 +183,7 @@ DROP FUNCTION IF EXISTS performed_session_details_v2(uuid);
 
 CREATE OR REPLACE FUNCTION performed_session_details(performed_session_id_ uuid)
     RETURNS TABLE (
-        exists boolean,
+        "exists" boolean,
         performed_session_id uuid,
         session_schedule_id uuid,
         session_name text,
@@ -198,7 +198,7 @@ CREATE OR REPLACE FUNCTION performed_session_details(performed_session_id_ uuid)
     SET search_path = 'public'
 AS $$
     SELECT
-        true as exists,
+        true as "exists",
         ps.performed_session_id,
         ps.session_schedule_id,
         ss.name as session_name,
