@@ -243,9 +243,10 @@ ON CONFLICT (performed_session_id) DO NOTHING;
 
 \echo '   Testing empty workout for Alice:'
 SELECT
-    exercise_id,
+    performed_session_id,
     session_name,
     has_exercises,
+    exercise_count,
     CASE
         WHEN has_exercises THEN '✓ Has exercises'
         ELSE '✓ Empty template'
