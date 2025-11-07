@@ -108,6 +108,25 @@ venv.bak/
 
 *.idea
 
+# Claude Code
+.claude/
+
 .DS_Store
 .env.local
 .env
+
+# Database backups
+database/dump/*.sql
+
+# Session archives
+database/archive/
+
+# External exercise database (separate repo)
+database/free-exercise-db/
+
+# Temporary test databases
+test_db/
+test_db_restore/
+
+# Session files
+session.json
