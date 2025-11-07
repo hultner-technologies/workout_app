@@ -1,0 +1,57 @@
+custom_name_normalized,match_type,base_exercise_id,base_exercise_name,source_id,free_exercise_db_name
+cable bicep curl,existing_db,bee63c0c-05c8-11ed-824f-673da9665bfa,Bicep curl,,
+cable lateral raise,existing_db,a3532824-4bc2-11ee-8c75-ebab3389e058,Lateral raise,,
+cable overhead press,existing_db,1a7bd55a-31ba-11ed-aa8c-63d32f2aae22,Overhead press,,
+dumbbell lateral raise,existing_db,a3532824-4bc2-11ee-8c75-ebab3389e058,Lateral raise,,
+dumbell overhead press,existing_db,1a7bd55a-31ba-11ed-aa8c-63d32f2aae22,Overhead press,,
+dumbell bench press,existing_db,02a1a38a-70f9-11ef-bc64-d72b6479cb97,Bench press,,
+kettlebell overhead press,existing_db,1a7bd55a-31ba-11ed-aa8c-63d32f2aae22,Overhead press,,
+machine bicep curl,existing_db,bee63c0c-05c8-11ed-824f-673da9665bfa,Bicep curl,,
+machine overhead press,existing_db,1a7bd55a-31ba-11ed-aa8c-63d32f2aae22,Overhead press,,
+smith squat,existing_db,1a826cd0-31ba-11ed-aa8c-67424ddf3bd1,Squat,,
+lateral raise,existing_db,a3532824-4bc2-11ee-8c75-ebab3389e058,Lateral raise,,
+bench press,existing_db,02a1a38a-70f9-11ef-bc64-d72b6479cb97,Bench press,,
+machine lateral raise,existing_db,292952c2-dc9e-11ee-b3ef-bb9c1105deaa,Machine lateral raise,,
+machine crunch,existing_db,a34d401c-4bc2-11ee-8c75-a75e6f336c22,Machine crunch,,
+lat pulldown machine,existing_db,28c781a0-dc9e-11ee-b3ef-b3d83ae9ef50,Lat pulldown,,
+t-bar row machine,existing_db,29d5069e-dc9e-11ee-b3ef-574f7b65abee,T-Bar row,,
+pulley row,existing_db,bef59bde-05c8-11ed-824f-efb3c762cda1,Seated pulley row †,,
+smith machine calf raise,existing_db,bef283ae-05c8-11ed-824f-870b793b71df,Calf raise,,
+ez-bar preacher curl,existing_db,2a163cfe-dc9e-11ee-b3ef-575801647e7d,EZ-bar bicep curl,,
+flat bench press backoff,existing_db,2885f762-dc9e-11ee-b3ef-0fa909073fa5,Flat dumbbell press backoff,,
+high incline smith presss,existing_db,29b44c42-dc9e-11ee-b3ef-53720d6ec33a,High incline smith press,,
+sandbag step-up,existing_db,28e81f6e-dc9e-11ee-b3ef-5b9f8379af2d,Dumbbell step up,,
+dumbbell toe raises,existing_db,bef283ae-05c8-11ed-824f-870b793b71df,Calf raise,,
+pull-up,free_exercise_db,,,Pullups,Pullups
+pullup,free_exercise_db,,,Pullups,Pullups
+pull up,free_exercise_db,,,Pullups,Pullups
+machine chest fly,free_exercise_db,,,Butterfly,Butterfly
+chest fly machine,free_exercise_db,,,Butterfly,Butterfly
+leg press,free_exercise_db,,,Leg_Press,Leg Press
+cybex leg-press,free_exercise_db,,,Leg_Press,Leg Press
+machine row,free_exercise_db,,,Leverage_Iso_Row,Leverage Iso Row
+preacher curl machine,free_exercise_db,,,Machine_Preacher_Curls,Machine Preacher Curls
+bicep preacher curl machine,free_exercise_db,,,Machine_Preacher_Curls,Machine Preacher Curls
+machine preacher curl,free_exercise_db,,,Machine_Preacher_Curls,Machine Preacher Curls
+reverse machine fly,free_exercise_db,,,Reverse_Machine_Flyes,Reverse Machine Flyes
+barbell preacher curl,free_exercise_db,,,Preacher_Curl,Preacher Curl
+machine chest press,free_exercise_db,,,Leverage_Chest_Press,Leverage Chest Press
+machine shoulder press,free_exercise_db,,,Machine_Shoulder_Military_Press,Machine Shoulder (Military) Press
+shoulder press machine,free_exercise_db,,,Machine_Shoulder_Military_Press,Machine Shoulder (Military) Press
+iso-lateral bench press,free_exercise_db,,,Leverage_Chest_Press,Leverage Chest Press
+iso-lateral bench press machine,free_exercise_db,,,Leverage_Chest_Press,Leverage Chest Press
+iso lateral chest press,free_exercise_db,,,Leverage_Chest_Press,Leverage Chest Press
+iso-lateral shoulder press,free_exercise_db,,,Leverage_Shoulder_Press,Leverage Shoulder Press
+iso-lateral shoulder press machine,free_exercise_db,,,Leverage_Shoulder_Press,Leverage Shoulder Press
+chin-up,free_exercise_db,,,Chin-Up,Chin-Up
+chin up,free_exercise_db,,,Chin-Up,Chin-Up
+push press,free_exercise_db,,,Push_Press,Push Press
+assisted pullup,free_exercise_db,,,Band_Assisted_Pull-Up,Band Assisted Pull-Up
+body weight lunges,free_exercise_db,,,Bodyweight_Walking_Lunge,Bodyweight Walking Lunge
+dumbbell lying tricep extension,free_exercise_db,,,Lying_Dumbbell_Tricep_Extension,Lying Dumbbell Tricep Extension
+ez-bar lying tricep extension,free_exercise_db,,,Lying_Close-Grip_Barbell_Triceps_Extension_Behind_The_Head,Lying Close-Grip Barbell Triceps Extension Behind The Head
+seated leg extension,free_exercise_db,,,Leg_Extensions,Leg Extensions
+leg press calf-press,free_exercise_db,,,Calf_Press_On_The_Leg_Press_Machine,Calf Press On The Leg Press Machine
+one-legged elevated squat,free_exercise_db,,,Split_Squats,Split Squats
+bayesian bicep curl,create_new,TO_BE_GENERATED,Bayesian bicep curl,,
+cable reverse fly,create_new,TO_BE_GENERATED,Cable reverse fly,,

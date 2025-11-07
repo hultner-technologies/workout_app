@@ -1,0 +1,424 @@
+[
+  {
+    "source_id": "Pullups",
+    "name": "Pullups",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "body only",
+    "force": "pull",
+    "category": "strength",
+    "primary_muscles": [
+      "lats"
+    ],
+    "secondary_muscles": [
+      "biceps",
+      "middle back"
+    ],
+    "aliases": [
+      "pull up",
+      "pull-up",
+      "pullup"
+    ],
+    "custom_names": [
+      "pull up",
+      "pull-up",
+      "pullup"
+    ]
+  },
+  {
+    "source_id": "Butterfly",
+    "name": "Butterfly",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "machine",
+    "force": "pull",
+    "category": "strength",
+    "primary_muscles": [
+      "chest"
+    ],
+    "secondary_muscles": [],
+    "aliases": [
+      "chest fly machine",
+      "machine chest fly"
+    ],
+    "custom_names": [
+      "chest fly machine",
+      "machine chest fly"
+    ]
+  },
+  {
+    "source_id": "Leg_Press",
+    "name": "Leg Press",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "machine",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "quadriceps"
+    ],
+    "secondary_muscles": [
+      "calves",
+      "glutes",
+      "hamstrings"
+    ],
+    "aliases": [
+      "cybex leg-press",
+      "leg press machine"
+    ],
+    "custom_names": [
+      "cybex leg-press",
+      "leg press",
+      "leg press machine"
+    ]
+  },
+  {
+    "source_id": "Leverage_Iso_Row",
+    "name": "Leverage Iso Row",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "machine",
+    "force": "pull",
+    "category": "strength",
+    "primary_muscles": [
+      "lats"
+    ],
+    "secondary_muscles": [
+      "biceps",
+      "middle back"
+    ],
+    "aliases": [
+      "machine row"
+    ],
+    "custom_names": [
+      "machine row"
+    ]
+  },
+  {
+    "source_id": "Machine_Preacher_Curls",
+    "name": "Machine Preacher Curls",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "machine",
+    "force": "pull",
+    "category": "strength",
+    "primary_muscles": [
+      "biceps"
+    ],
+    "secondary_muscles": [],
+    "aliases": [
+      "bicep preacher curl machine",
+      "machine preacher curl",
+      "preacher curl machine"
+    ],
+    "custom_names": [
+      "bicep preacher curl machine",
+      "machine preacher curl",
+      "preacher curl machine"
+    ]
+  },
+  {
+    "source_id": "Reverse_Machine_Flyes",
+    "name": "Reverse Machine Flyes",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "machine",
+    "force": "pull",
+    "category": "strength",
+    "primary_muscles": [
+      "shoulders"
+    ],
+    "secondary_muscles": [],
+    "aliases": [
+      "reverse machine fly"
+    ],
+    "custom_names": [
+      "reverse machine fly"
+    ]
+  },
+  {
+    "source_id": "Preacher_Curl",
+    "name": "Preacher Curl",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "barbell",
+    "force": "pull",
+    "category": "strength",
+    "primary_muscles": [
+      "biceps"
+    ],
+    "secondary_muscles": [],
+    "aliases": [
+      "barbell preacher curl"
+    ],
+    "custom_names": [
+      "barbell preacher curl"
+    ]
+  },
+  {
+    "source_id": "Leverage_Chest_Press",
+    "name": "Leverage Chest Press",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "machine",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "chest"
+    ],
+    "secondary_muscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "aliases": [
+      "iso lateral chest press",
+      "iso-lateral bench press",
+      "iso-lateral bench press machine",
+      "machine chest press"
+    ],
+    "custom_names": [
+      "iso lateral chest press",
+      "iso-lateral bench press",
+      "iso-lateral bench press machine",
+      "machine chest press"
+    ]
+  },
+  {
+    "source_id": "Machine_Shoulder_Military_Press",
+    "name": "Machine Shoulder (Military) Press",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "machine",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "shoulders"
+    ],
+    "secondary_muscles": [
+      "triceps"
+    ],
+    "aliases": [
+      "machine shoulder press",
+      "shoulder press machine"
+    ],
+    "custom_names": [
+      "machine shoulder press",
+      "shoulder press machine"
+    ]
+  },
+  {
+    "source_id": "Leverage_Shoulder_Press",
+    "name": "Leverage Shoulder Press",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "machine",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "shoulders"
+    ],
+    "secondary_muscles": [
+      "triceps"
+    ],
+    "aliases": [
+      "iso-lateral shoulder press",
+      "iso-lateral shoulder press machine"
+    ],
+    "custom_names": [
+      "iso-lateral shoulder press",
+      "iso-lateral shoulder press machine"
+    ]
+  },
+  {
+    "source_id": "Chin-Up",
+    "name": "Chin-Up",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "body only",
+    "force": "pull",
+    "category": "strength",
+    "primary_muscles": [
+      "lats"
+    ],
+    "secondary_muscles": [
+      "biceps",
+      "forearms",
+      "middle back"
+    ],
+    "aliases": [
+      "chin up"
+    ],
+    "custom_names": [
+      "chin up",
+      "chin-up"
+    ]
+  },
+  {
+    "source_id": "Push_Press",
+    "name": "Push Press",
+    "level": "expert",
+    "mechanic": "compound",
+    "equipment": "barbell",
+    "force": "push",
+    "category": "olympic weightlifting",
+    "primary_muscles": [
+      "shoulders"
+    ],
+    "secondary_muscles": [
+      "quadriceps",
+      "triceps"
+    ],
+    "aliases": [],
+    "custom_names": [
+      "push press"
+    ]
+  },
+  {
+    "source_id": "Band_Assisted_Pull-Up",
+    "name": "Band Assisted Pull-Up",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "other",
+    "force": null,
+    "category": "strength",
+    "primary_muscles": [
+      "lats"
+    ],
+    "secondary_muscles": [
+      "abdominals",
+      "forearms",
+      "middle back"
+    ],
+    "aliases": [
+      "assisted pullup"
+    ],
+    "custom_names": [
+      "assisted pullup"
+    ]
+  },
+  {
+    "source_id": "Bodyweight_Walking_Lunge",
+    "name": "Bodyweight Walking Lunge",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": null,
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "quadriceps"
+    ],
+    "secondary_muscles": [
+      "calves",
+      "glutes",
+      "hamstrings"
+    ],
+    "aliases": [
+      "body weight lunges"
+    ],
+    "custom_names": [
+      "body weight lunges"
+    ]
+  },
+  {
+    "source_id": "Lying_Dumbbell_Tricep_Extension",
+    "name": "Lying Dumbbell Tricep Extension",
+    "level": "intermediate",
+    "mechanic": "isolation",
+    "equipment": "dumbbell",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "triceps"
+    ],
+    "secondary_muscles": [
+      "chest",
+      "shoulders"
+    ],
+    "aliases": [
+      "dumbbell lying tricep extension"
+    ],
+    "custom_names": [
+      "dumbbell lying tricep extension"
+    ]
+  },
+  {
+    "source_id": "Lying_Close-Grip_Barbell_Triceps_Extension_Behind_The_Head",
+    "name": "Lying Close-Grip Barbell Triceps Extension Behind The Head",
+    "level": "intermediate",
+    "mechanic": "isolation",
+    "equipment": "barbell",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "triceps"
+    ],
+    "secondary_muscles": [],
+    "aliases": [
+      "ez-bar lying tricep extension"
+    ],
+    "custom_names": [
+      "ez-bar lying tricep extension"
+    ]
+  },
+  {
+    "source_id": "Leg_Extensions",
+    "name": "Leg Extensions",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "machine",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "quadriceps"
+    ],
+    "secondary_muscles": [],
+    "aliases": [
+      "seated leg extension"
+    ],
+    "custom_names": [
+      "seated leg extension"
+    ]
+  },
+  {
+    "source_id": "Calf_Press_On_The_Leg_Press_Machine",
+    "name": "Calf Press On The Leg Press Machine",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "machine",
+    "force": "push",
+    "category": "strength",
+    "primary_muscles": [
+      "calves"
+    ],
+    "secondary_muscles": [],
+    "aliases": [
+      "leg press calf-press"
+    ],
+    "custom_names": [
+      "leg press calf-press"
+    ]
+  },
+  {
+    "source_id": "Split_Squats",
+    "name": "Split Squats",
+    "level": "intermediate",
+    "mechanic": null,
+    "equipment": null,
+    "force": "push",
+    "category": "stretching",
+    "primary_muscles": [
+      "hamstrings"
+    ],
+    "secondary_muscles": [
+      "calves",
+      "glutes",
+      "quadriceps"
+    ],
+    "aliases": [
+      "one-legged elevated squat"
+    ],
+    "custom_names": [
+      "one-legged elevated squat"
+    ]
+  }
+]
