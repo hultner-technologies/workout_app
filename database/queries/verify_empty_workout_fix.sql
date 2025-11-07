@@ -39,7 +39,7 @@ SELECT
     has_exercises,
     exercise_count,
     jsonb_array_length(exercises) as exercises_array_length
-FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
+FROM draft_session_exercises_v2('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Expected: Returns 1 row with session metadata'
@@ -49,14 +49,14 @@ FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
 -- Test 4: Compare old vs new behavior
 \echo '4. Compare old function (returns 0 rows) vs new function:'
 \echo ''
-\echo '   Old function result:'
-SELECT COUNT(*) as row_count, 'draft_session_exercises (old)' as function_name
+\echo '   Old function result (v1 - returns multiple rows with flat structure):'
+SELECT COUNT(*) as row_count, 'draft_session_exercises (v1)' as function_name
 FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
-\echo '   New function result:'
-SELECT COUNT(*) as row_count, 'draft_session_exercises (new)' as function_name
-FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
+\echo '   New function result (v2 - returns 1 row with JSON structure):'
+SELECT COUNT(*) as row_count, 'draft_session_exercises_v2 (v2)' as function_name
+FROM draft_session_exercises_v2('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Old function returns 0 rows (ambiguous)'

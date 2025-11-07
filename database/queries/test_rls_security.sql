@@ -251,7 +251,7 @@ SELECT
         WHEN has_exercises THEN '✓ Has exercises'
         ELSE '✓ Empty template'
     END as status
-FROM draft_session_exercises('eeeeeeee-1111-1111-1111-111111111111'::uuid)
+FROM draft_session_exercises_v2('eeeeeeee-1111-1111-1111-111111111111'::uuid)
 LIMIT 1;
 
 \echo ''
@@ -317,12 +317,12 @@ FROM performed_session_details('eeeeeeee-1111-1111-1111-111111111111'::uuid);
 \echo ''
 \echo '4. Test functions respect RLS:'
 \echo ''
-\echo '   -- As Alice'
-\echo '   SELECT * FROM draft_session_exercises('
+\echo '   -- As Alice (using v2 function with JSON structure)'
+\echo '   SELECT * FROM draft_session_exercises_v2('
 \echo '       '\''aaaaaaaa-1111-1111-1111-111111111111'\''::uuid);'
-\echo '   -- Expected: Alice'\''s exercises'
+\echo '   -- Expected: Alice'\''s exercises in JSON format'
 \echo ''
-\echo '   SELECT * FROM draft_session_exercises('
+\echo '   SELECT * FROM draft_session_exercises_v2('
 \echo '       '\''bbbbbbbb-2222-2222-2222-222222222222'\''::uuid);'
 \echo '   -- Expected: 0 rows (cannot see Bob'\''s session)'
 \echo ''

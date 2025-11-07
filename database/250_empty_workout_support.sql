@@ -51,13 +51,14 @@ COMMENT ON VIEW session_schedule_metadata IS
     'Useful for handling empty workout templates.';
 
 
--- Function: draft_session_exercises
+-- Function: draft_session_exercises_v2
 -- Returns session metadata with exercises aggregated into a JSON array
+-- Note: v2 adds support for empty workouts by returning session metadata + JSON array
+--       Original draft_session_exercises() remains unchanged for backward compatibility
 DROP FUNCTION IF EXISTS draft_session_exercises_v2(uuid);
 DROP FUNCTION IF EXISTS draft_session_exercises_v3(uuid);
-DROP FUNCTION IF EXISTS draft_session_exercises(uuid);
 
-CREATE OR REPLACE FUNCTION draft_session_exercises(performed_session_id_ uuid)
+CREATE OR REPLACE FUNCTION draft_session_exercises_v2(performed_session_id_ uuid)
     RETURNS TABLE (
         performed_session_id uuid,
         session_schedule_id uuid,
@@ -169,12 +170,13 @@ GROUP BY
 $$
 LANGUAGE SQL;
 
-COMMENT ON FUNCTION draft_session_exercises(uuid) IS
+COMMENT ON FUNCTION draft_session_exercises_v2(uuid) IS
     'Returns session metadata with exercises aggregated into a JSON array. '
     'Always returns exactly 1 row (or 0 if session does not exist). '
     'Empty workouts return exercises: [] with has_exercises: false. '
     'Clean interface: session metadata at top level, exercises nested. '
-    'Uses SECURITY INVOKER to respect RLS policies.';
+    'Uses SECURITY INVOKER to respect RLS policies. '
+    'Version 2: Supports empty workouts. Use draft_session_exercises() for legacy flat format.';
 
 
 -- Function: performed_session_details

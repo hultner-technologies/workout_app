@@ -337,12 +337,36 @@ COMMENT ON VIEW session_schedule_metadata IS
 -- 2. Query tables with RLS enabled
 -- 3. Respect the authenticated user's permissions
 
-COMMENT ON FUNCTION draft_session_exercises(uuid) IS
+COMMENT ON FUNCTION draft_session_exercises_v2(uuid) IS
     'Secure function that respects RLS policies. '
-    'Uses SECURITY INVOKER (default) to run with caller permissions. '
+    'Uses SECURITY INVOKER to run with caller permissions. '
     'Automatically filters to only sessions owned by auth.uid().';
 
 COMMENT ON FUNCTION performed_session_details(uuid) IS
     'Secure function that respects RLS policies. '
-    'Uses SECURITY INVOKER (default) to run with caller permissions. '
+    'Uses SECURITY INVOKER to run with caller permissions. '
     'Automatically filters to only sessions owned by auth.uid().';
+
+-- =============================================================================
+-- Performance Optimization: Indexes for RLS Queries
+-- =============================================================================
+--
+-- RLS policies add WHERE app_user_id = auth.uid() to every query.
+-- Without indexes, these queries will perform table scans.
+-- These indexes dramatically improve performance for multi-tenant queries.
+
+-- Index for filtering performed_session by app_user_id
+-- Used by: SELECT policies on performed_session
+CREATE INDEX IF NOT EXISTS idx_performed_session_app_user_id
+    ON public.performed_session(app_user_id);
+
+-- Index for JOINing performed_exercise to performed_session in RLS policies
+-- Used by: EXISTS subqueries in performed_exercise policies
+CREATE INDEX IF NOT EXISTS idx_performed_exercise_session_id
+    ON public.performed_exercise(performed_session_id);
+
+COMMENT ON INDEX idx_performed_session_app_user_id IS
+    'Performance optimization for RLS policies that filter by app_user_id';
+
+COMMENT ON INDEX idx_performed_exercise_session_id IS
+    'Performance optimization for RLS policies that JOIN to performed_session';

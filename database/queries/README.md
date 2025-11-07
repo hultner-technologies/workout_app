@@ -78,18 +78,27 @@ Or use Docker test runner:
 
 ## Functions
 
-### `draft_session_exercises(uuid)`
+### `draft_session_exercises_v2(uuid)` ⭐ NEW
 
-Returns session with exercises as JSON array.
+Returns session with exercises as JSON array. **Use this for new code!**
 
 **Usage:**
 ```sql
-SELECT * FROM draft_session_exercises('performed-session-id');
+SELECT * FROM draft_session_exercises_v2('performed-session-id');
 ```
 
 **Returns:**
 - 1 row with session metadata + exercises array
 - 0 rows if session doesn't exist
+- Supports empty workouts with `has_exercises: false`
+
+### `draft_session_exercises(uuid)` (Legacy)
+
+Original function that returns multiple rows with flat structure. Kept for backward compatibility.
+
+**Returns:**
+- Multiple rows (one per exercise)
+- 0 rows for empty workouts (ambiguous)
 
 ### `performed_session_details(uuid)`
 
@@ -115,7 +124,7 @@ SELECT * FROM session_schedule_with_exercises WHERE session_schedule_id = '...';
 
 ```python
 result = await db.fetch_one(
-    "SELECT * FROM draft_session_exercises($1)",
+    "SELECT * FROM draft_session_exercises_v2($1)",
     session_id
 )
 
@@ -129,7 +138,7 @@ return result  # Already in perfect format!
 
 ```typescript
 const { data } = await supabase
-  .rpc('draft_session_exercises', { performed_session_id_: sessionId })
+  .rpc('draft_session_exercises_v2', { performed_session_id_: sessionId })
   .single(); // Always returns 1 row!
 
 if (!data) throw new Error('Session not found');
@@ -169,7 +178,7 @@ See: [SECURITY_MODEL.md](./SECURITY_MODEL.md)
 
 - [ ] Run tests: `./run_tests_docker.sh`
 - [ ] Apply migrations to production
-- [ ] Update API to use `draft_session_exercises()`
+- [ ] Update API to use `draft_session_exercises_v2()`
 - [ ] Use `.single()` in Supabase (always 1 row)
 - [ ] Check `has_exercises` boolean
 - [ ] Access exercises via `result.exercises`
