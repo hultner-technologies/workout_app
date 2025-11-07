@@ -5,7 +5,7 @@
 -- Create the "Empty Workout" plan
 INSERT INTO plan (plan_id, name, description)
 VALUES (
-    'e1111111-1111-1111-1111-111111111111'::uuid,
+    '11111111-1111-1111-1111-111111111111'::uuid,
     'Empty Workout',
     'A blank workout template for users to customize with their own exercises'
 )
@@ -22,8 +22,8 @@ INSERT INTO session_schedule (
     progression_limit
 )
 VALUES (
-    's1111111-1111-1111-1111-111111111111'::uuid,
-    'e1111111-1111-1111-1111-111111111111'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    '11111111-1111-1111-1111-111111111111'::uuid,
     'Custom Workout',
     'Add your own exercises to this session',
     0.8
