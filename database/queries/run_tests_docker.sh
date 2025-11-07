@@ -60,9 +60,14 @@ echo -e "${BLUE}Step 3: Waiting for PostgreSQL to be ready${NC}"
 echo -n "Waiting"
 for i in {1..30}; do
     if docker exec "$CONTAINER_NAME" pg_isready -U "$POSTGRES_USER" > /dev/null 2>&1; then
-        echo ""
-        echo -e "${GREEN}✓ PostgreSQL is ready${NC}"
-        break
+        # pg_isready passed, but wait a moment for database to be fully initialized
+        sleep 2
+        # Verify database can actually execute queries
+        if docker exec "$CONTAINER_NAME" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1;" > /dev/null 2>&1; then
+            echo ""
+            echo -e "${GREEN}✓ PostgreSQL is ready${NC}"
+            break
+        fi
     fi
     echo -n "."
     sleep 1
