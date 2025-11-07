@@ -213,7 +213,7 @@ ORDER BY owner;
 -- Test: Function behavior with empty workout
 -- =============================================================================
 
-\echo '6. Testing draft_session_exercises_v2 function...'
+\echo '6. Testing draft_session_exercises function...'
 \echo ''
 
 -- Create an empty workout for Alice
@@ -250,7 +250,7 @@ SELECT
         WHEN has_exercises THEN '✓ Has exercises'
         ELSE '✓ Empty template'
     END as status
-FROM draft_session_exercises_v2('eeeeeeee-1111-1111-1111-111111111111'::uuid)
+FROM draft_session_exercises('eeeeeeee-1111-1111-1111-111111111111'::uuid)
 LIMIT 1;
 
 \echo ''
@@ -317,11 +317,11 @@ FROM performed_session_details('eeeeeeee-1111-1111-1111-111111111111'::uuid);
 \echo '4. Test functions respect RLS:'
 \echo ''
 \echo '   -- As Alice'
-\echo '   SELECT * FROM draft_session_exercises_v2('
+\echo '   SELECT * FROM draft_session_exercises('
 \echo '       '\''aaaaaaaa-1111-1111-1111-111111111111'\''::uuid);'
 \echo '   -- Expected: Alice'\''s exercises'
 \echo ''
-\echo '   SELECT * FROM draft_session_exercises_v2('
+\echo '   SELECT * FROM draft_session_exercises('
 \echo '       '\''bbbbbbbb-2222-2222-2222-222222222222'\''::uuid);'
 \echo '   -- Expected: 0 rows (cannot see Bob'\''s session)'
 \echo ''
