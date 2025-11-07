@@ -63,7 +63,7 @@ SET name = EXCLUDED.name, description = EXCLUDED.description;
 
 INSERT INTO session_schedule (session_schedule_id, plan_id, name, description)
 VALUES (
-    'ssssssss-ssss-ssss-ssss-ssssssssssss'::uuid,
+    'aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb'::uuid,
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid,
     'Test Session',
     'A public workout session'
@@ -91,7 +91,7 @@ INSERT INTO performed_session (
 )
 VALUES (
     'aaaaaaaa-1111-1111-1111-111111111111'::uuid,
-    'ssssssss-ssss-ssss-ssss-ssssssssssss'::uuid,
+    'aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb'::uuid,
     '11111111-1111-1111-1111-111111111111'::uuid,
     NOW(),
     NOW()
@@ -109,7 +109,7 @@ INSERT INTO performed_session (
 )
 VALUES (
     'bbbbbbbb-2222-2222-2222-222222222222'::uuid,
-    'ssssssss-ssss-ssss-ssss-ssssssssssss'::uuid,
+    'aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb'::uuid,
     '22222222-2222-2222-2222-222222222222'::uuid,
     NOW(),
     NOW()
@@ -219,7 +219,7 @@ ORDER BY owner;
 -- Create an empty workout for Alice
 INSERT INTO session_schedule (session_schedule_id, plan_id, name, description)
 VALUES (
-    'empty111-1111-1111-1111-111111111111'::uuid,
+    'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'::uuid,
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid,
     'Alice Empty Workout',
     'Empty template'
@@ -234,8 +234,8 @@ INSERT INTO performed_session (
     started_at
 )
 VALUES (
-    'empty-ps-1111-1111-111111111111'::uuid,
-    'empty111-1111-1111-1111-111111111111'::uuid,
+    'eeeeeeee-1111-1111-1111-111111111111'::uuid,
+    'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'::uuid,
     '11111111-1111-1111-1111-111111111111'::uuid,
     NOW()
 )
@@ -250,7 +250,7 @@ SELECT
         WHEN has_exercises THEN '✓ Has exercises'
         ELSE '✓ Empty template'
     END as status
-FROM draft_session_exercises_v2('empty-ps-1111-1111-111111111111'::uuid)
+FROM draft_session_exercises_v2('eeeeeeee-1111-1111-1111-111111111111'::uuid)
 LIMIT 1;
 
 \echo ''
@@ -264,7 +264,7 @@ SELECT
         WHEN is_empty THEN '✓ Exists (empty)'
         ELSE '✓ Exists (has exercises)'
     END as status
-FROM performed_session_details('empty-ps-1111-1111-111111111111'::uuid);
+FROM performed_session_details('eeeeeeee-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 
