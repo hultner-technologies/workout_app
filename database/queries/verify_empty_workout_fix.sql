@@ -15,7 +15,7 @@ SELECT
     exercise_count,
     is_empty
 FROM session_schedule_metadata
-WHERE session_schedule_id = 's1111111-1111-1111-1111-111111111111'::uuid;
+WHERE session_schedule_id = 'a1111111-1111-1111-1111-111111111111'::uuid;
 
 \echo ''
 \echo '   ✓ Expected: 1 row with is_empty = true, exercise_count = 0'
@@ -24,7 +24,7 @@ WHERE session_schedule_id = 's1111111-1111-1111-1111-111111111111'::uuid;
 -- Test 2: Check performed_session_details function
 \echo '2. Test performed_session_details function:'
 SELECT *
-FROM performed_session_details('p1111111-1111-1111-1111-111111111111'::uuid);
+FROM performed_session_details('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Expected: 1 row with exists = true, is_empty = true, exercise_count = 0'
@@ -38,7 +38,7 @@ SELECT
     session_schedule_id,
     session_name,
     has_exercises
-FROM draft_session_exercises('p1111111-1111-1111-1111-111111111111'::uuid);
+FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Expected: Returns session info even with no exercises'
@@ -50,12 +50,12 @@ FROM draft_session_exercises('p1111111-1111-1111-1111-111111111111'::uuid);
 \echo ''
 \echo '   Old function result:'
 SELECT COUNT(*) as row_count, 'draft_session_exercises (old)' as function_name
-FROM draft_session_exercises('p1111111-1111-1111-1111-111111111111'::uuid);
+FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   New function result:'
 SELECT COUNT(*) as row_count, 'draft_session_exercises (new)' as function_name
-FROM draft_session_exercises('p1111111-1111-1111-1111-111111111111'::uuid);
+FROM draft_session_exercises('c1111111-1111-1111-1111-111111111111'::uuid);
 
 \echo ''
 \echo '   ✓ Old function returns 0 rows (ambiguous)'
@@ -77,7 +77,7 @@ FROM performed_session_details('00000000-0000-0000-0000-000000000000'::uuid);
 -- Insert a base exercise
 INSERT INTO base_exercise (base_exercise_id, name, description)
 VALUES (
-    'b2222222-2222-2222-2222-222222222222'::uuid,
+    '22222222-2222-2222-2222-2222222222bb'::uuid,
     'Test Exercise',
     'A test exercise for comparison'
 )
@@ -86,7 +86,7 @@ ON CONFLICT (base_exercise_id) DO NOTHING;
 -- Create a plan with exercises
 INSERT INTO plan (plan_id, name, description)
 VALUES (
-    'e2222222-2222-2222-2222-222222222222'::uuid,
+    '22222222-2222-2222-2222-222222222222'::uuid,
     'Test Plan with Exercises',
     'A plan with exercises for comparison'
 )
@@ -101,8 +101,8 @@ INSERT INTO session_schedule (
     progression_limit
 )
 VALUES (
-    's2222222-2222-2222-2222-222222222222'::uuid,
-    'e2222222-2222-2222-2222-222222222222'::uuid,
+    'aa222222-2222-2222-2222-222222222222'::uuid,
+    '22222222-2222-2222-2222-222222222222'::uuid,
     'Test Session with Exercise',
     'Session with one exercise',
     0.8
@@ -119,9 +119,9 @@ INSERT INTO exercise (
     sort_order
 )
 VALUES (
-    'x2222222-2222-2222-2222-222222222222'::uuid,
-    'b2222222-2222-2222-2222-222222222222'::uuid,
-    's2222222-2222-2222-2222-222222222222'::uuid,
+    'ee222222-2222-2222-2222-222222222222'::uuid,
+    '22222222-2222-2222-2222-2222222222bb'::uuid,
+    'aa222222-2222-2222-2222-222222222222'::uuid,
     10,
     3,
     1
@@ -136,9 +136,9 @@ INSERT INTO performed_session (
     started_at
 )
 VALUES (
-    'p2222222-2222-2222-2222-222222222222'::uuid,
-    's2222222-2222-2222-2222-222222222222'::uuid,
-    'u1111111-1111-1111-1111-111111111111'::uuid,
+    'cc222222-2222-2222-2222-222222222222'::uuid,
+    'aa222222-2222-2222-2222-222222222222'::uuid,
+    'b1111111-1111-1111-1111-111111111111'::uuid,
     NOW()
 )
 ON CONFLICT (performed_session_id) DO NOTHING;
@@ -158,8 +158,8 @@ SELECT
     END as status
 FROM session_schedule_metadata
 WHERE session_schedule_id IN (
-    's1111111-1111-1111-1111-111111111111'::uuid,
-    's2222222-2222-2222-2222-222222222222'::uuid
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    'aa222222-2222-2222-2222-222222222222'::uuid
 )
 ORDER BY is_empty DESC;
 
