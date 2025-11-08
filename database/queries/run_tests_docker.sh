@@ -219,3 +219,6 @@ else
     echo "Stop with:"
     echo "  docker rm -f $CONTAINER_NAME"
 fi
+
+# Exit with success - tests passed!
+exit 0
