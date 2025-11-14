@@ -8,6 +8,29 @@
 
 BEGIN;
 
+-- Create Unknown plan if it doesn't exist
+-- This plan serves as a repository for all base exercises
+INSERT INTO plan (name, description)
+SELECT 'Unknown', 'Default plan containing all base exercises for easy access'
+WHERE NOT EXISTS (
+    SELECT 1 FROM plan WHERE name = 'Unknown'
+);
+
+-- Create Unknown session schedule if it doesn't exist
+INSERT INTO session_schedule (plan_id, name, description, progression_limit)
+SELECT
+    p.plan_id,
+    'All Exercises',
+    'Contains all available base exercises',
+    0.9
+FROM plan p
+WHERE p.name = 'Unknown'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM session_schedule ss
+      WHERE ss.plan_id = p.plan_id
+  );
+
 -- Insert exercises for all base_exercises not yet in Unknown plan
 INSERT INTO exercise (
     base_exercise_id,

@@ -144,9 +144,30 @@ CREATE INDEX IF NOT EXISTS idx_base_exercise_secondary_muscle_exercise
 CREATE INDEX IF NOT EXISTS idx_base_exercise_secondary_muscle_muscle 
     ON base_exercise_secondary_muscle (muscle_group_id);
 
+-- Full text search helper function
+-- PostgreSQL requires functions used in index expressions to be marked IMMUTABLE.
+-- This guarantees that the same input always produces the same output, which is
+-- necessary for index consistency. We create this wrapper function to make the
+-- text search vector generation IMMUTABLE and PARALLEL SAFE.
+CREATE OR REPLACE FUNCTION base_exercise_searchable(base_exercise)
+RETURNS tsvector
+LANGUAGE sql
+IMMUTABLE
+PARALLEL SAFE
+AS $$
+    SELECT to_tsvector('english',
+        $1.name || ' ' || COALESCE(array_to_string($1.aliases, ' '), '')
+    )
+$$;
+
+COMMENT ON FUNCTION base_exercise_searchable(base_exercise) IS
+    'Generates a full-text search vector for base_exercise by combining name and aliases. '
+    'Marked IMMUTABLE for use in GIN indexes. PARALLEL SAFE for query optimization.';
+
 -- Full text search index on name and aliases
-CREATE INDEX IF NOT EXISTS idx_base_exercise_search 
-    ON base_exercise USING GIN (to_tsvector('english', name || ' ' || COALESCE(array_to_string(aliases, ' '), '')));
+-- Uses the IMMUTABLE function above to allow indexing on the combined search text
+CREATE INDEX IF NOT EXISTS idx_base_exercise_search
+    ON base_exercise USING GIN (base_exercise_searchable(base_exercise.*));
 
 -- ============================================================================
 -- Aggregated Views for Simple Querying
