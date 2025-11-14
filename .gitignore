@@ -130,3 +130,6 @@ test_db_restore/
 
 # Session files
 session.json
+
+# Supabase seed data (may contain production data)
+supabase/seed.sql

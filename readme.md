@@ -69,40 +69,46 @@ CREATE DOMAIN positive_int AS int
     CHECK(VALUE >= 0)
 ```
 
-## Tech stack
+## Quick Start
+
+### Local Development (Supabase)
+
+```bash
+# Install Supabase CLI (macOS)
+brew install supabase/tap/supabase
+
+# Start local Supabase environment
+supabase start
+
+# Sync and apply migrations
+./database/sync_to_supabase.sh
+supabase db reset
+
+# Access Supabase Studio
+open http://127.0.0.1:54323
+```
+
+See [database/README.md](database/README.md) for detailed setup and migration information.
+
+## Tech Stack
 ### Backend
-- Database
-    - Database first approach
-    - PostgresSQL
-    - Driver
-        - asyncpg 
-          https://github.com/MagicStack/asyncpg
-        - aiopg (backup)
-          https://github.com/aio-libs/aiopg
-        - psycopg2 (worst case fallback)
-- Application layer 
-    - Python
-    - FastAPI
-    - PyDantic
-        - Maybe write own object mapper/model generator with aiopg
-    - REST w. OpenAPI specs
-      and/or GraphQL w. apollo?
-    - Async IO
+- **Database**: Supabase (PostgreSQL 17)
+  - Database-first approach
+  - Row Level Security (RLS) for multi-tenant isolation
+  - Custom domains and constraints
+  - Auto-generated REST API via PostgREST
+- **Python Tools**: Analysis and statistics generation
+  - Workout graphs and visualizations
+  - May evolve into full backend layer (not currently prioritized)
 
 ### Frontend
-- Native App
-    - ReactNative
-    - iOS first
-    - Focus on experience in the gym, at your workout
-    - Healthkit integration
-    - Suggestion, create a mobile web-app using React Native for web for
-      platforms we don't officially support with goal to share most code.
-        - Also faster & easier to deploy 
-- Web cloud app
-    - Online app, desktop/mobile
-    - Focus on 
-        - Analyzing previous workouts
-        - Create new workout schedules
-        - See statistics and progress
-        - Social? (Not initial version)
+- **Native App** (Priority): React Native (separate repository)
+  - iOS first
+  - Healthkit integration
+  - Focus on gym workout experience
+- **Web App** (Future): Desktop/mobile web interface
+  - Analyzing previous workouts
+  - Creating workout schedules
+  - Statistics and progress tracking
+  - Not currently prioritized
 
