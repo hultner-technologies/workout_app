@@ -28,13 +28,9 @@ CREATE POLICY "Allow read access for own performed_session"
     TO authenticated
     USING (app_user_id = (SELECT auth.uid()));
 
--- Allow anonymous read (useful for public workout logs if needed)
--- Comment this out if you want strict privacy
-CREATE POLICY "Allow read access for anon performed_session"
-    ON public.performed_session
-    FOR SELECT
-    TO anon
-    USING (true);
+-- Drop anonymous access policy if it exists (security fix: anon users shouldn't see all workouts)
+-- This policy was overly permissive and allowed any anonymous user to read all workout data
+DROP POLICY IF EXISTS "Allow read access for anon performed_session" ON public.performed_session;
 
 -- Allow users to insert their own performed sessions
 CREATE POLICY "Allow insert access for own performed_session"
@@ -79,12 +75,9 @@ CREATE POLICY "Allow read access for own performed_exercise"
         )
     );
 
--- Allow anonymous read (if workout logs are public)
-CREATE POLICY "Allow read access for anon performed_exercise"
-    ON public.performed_exercise
-    FOR SELECT
-    TO anon
-    USING (true);
+-- Drop anonymous access policy if it exists (security fix: anon users shouldn't see all exercises)
+-- This policy was overly permissive and allowed any anonymous user to read all exercise data
+DROP POLICY IF EXISTS "Allow read access for anon performed_exercise" ON public.performed_exercise;
 
 -- Allow users to insert exercises into their own sessions
 CREATE POLICY "Allow insert access for own performed_exercise"

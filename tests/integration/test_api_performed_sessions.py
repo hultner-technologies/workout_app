@@ -2,9 +2,15 @@ import pytest
 
 
 @pytest.mark.integration
-def test_supabase_can_list_performed_sessions(supabase_client):
+def test_supabase_can_list_performed_sessions(supabase_service_client):
+    """
+    Service role can list performed sessions (bypasses RLS).
+
+    Note: Changed from supabase_client to supabase_service_client after PR #1
+    RLS fix that blocks anonymous users from accessing performed_session data.
+    """
     response = (
-        supabase_client.table("performed_session")
+        supabase_service_client.table("performed_session")
         .select("performed_session_id, session_schedule_id")
         .limit(1)
         .execute()
