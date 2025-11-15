@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import create_engine
 
 # In[ ]:
@@ -45,9 +45,10 @@ def remove_accents(input_str):
 class Settings(BaseSettings):
     pg_dsn: str
 
-    class Config:
-        env_file = '../.env'
-        env_file_encoding = 'utf-8'
+    model_config = SettingsConfigDict(
+        env_file='../.env',
+        env_file_encoding='utf-8',
+    )
 
 
 # In[ ]:
@@ -318,7 +319,6 @@ for (name, session_name), exercise in df.groupby(['name', 'session_name']):
 
 
 # In[ ]:
-
 
 
 

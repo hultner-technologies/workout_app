@@ -69,40 +69,92 @@ CREATE DOMAIN positive_int AS int
     CHECK(VALUE >= 0)
 ```
 
-## Tech stack
+## Quick Start
+
+### Local Development (Supabase)
+
+```bash
+# Install Supabase CLI (macOS)
+brew install supabase/tap/supabase
+
+# Start local Supabase environment
+supabase start
+
+# Sync and apply migrations
+./database/sync_to_supabase.sh
+supabase db reset
+
+# Access Supabase Studio
+open http://127.0.0.1:54323
+```
+
+See [database/README.md](database/README.md) for detailed setup and migration information.
+
+### Testing
+
+All Python tooling is managed via [uv](https://docs.astral.sh/uv/).
+
+```bash
+# Install dependencies (once)
+uv sync
+
+# Fast database tests (parallel safe)
+uv run pytest -n auto tests/database
+
+# Integration tests (requires TEST_SUPABASE_URL + keys in env)
+uv run pytest -m integration tests/integration
+```
+
+The `tests/conftest.py` fixtures expect a local Postgres instance on
+`127.0.0.1:54322` using the `postgres/postgres` credentials that Supabase CLI
+provisions. Integration tests skip automatically until Supabase URL/API keys are
+configured in the environment.
+
+All overrides can be defined via standard environment variables or the local
+`.env` file (parsed through `tests/settings.py`). Example:
+
+```dotenv
+TEST_PG_HOST=127.0.0.1
+TEST_PG_PORT=54322
+TEST_PG_USER=postgres
+TEST_PG_PASSWORD=postgres
+TEST_PG_DATABASE=postgres
+TEST_SUPABASE_URL=http://127.0.0.1:54321
+TEST_SUPABASE_ANON_KEY=...
+TEST_SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+### Tooling
+
+```bash
+# Format Python modules
+uv run ruff format workout_app tests
+
+# Lint / import sort
+uv run ruff check .
+
+# Type-check the async fixtures and settings helpers
+uv run mypy tests/settings.py tests/conftest.py
+```
+
+## Tech Stack
 ### Backend
-- Database
-    - Database first approach
-    - PostgresSQL
-    - Driver
-        - asyncpg 
-          https://github.com/MagicStack/asyncpg
-        - aiopg (backup)
-          https://github.com/aio-libs/aiopg
-        - psycopg2 (worst case fallback)
-- Application layer 
-    - Python
-    - FastAPI
-    - PyDantic
-        - Maybe write own object mapper/model generator with aiopg
-    - REST w. OpenAPI specs
-      and/or GraphQL w. apollo?
-    - Async IO
+- **Database**: Supabase (PostgreSQL 17)
+  - Database-first approach
+  - Row Level Security (RLS) for multi-tenant isolation
+  - Custom domains and constraints
+  - Auto-generated REST API via PostgREST
+- **Python Tools**: Analysis and statistics generation
+  - Workout graphs and visualizations
+  - May evolve into full backend layer (not currently prioritized)
 
 ### Frontend
-- Native App
-    - ReactNative
-    - iOS first
-    - Focus on experience in the gym, at your workout
-    - Healthkit integration
-    - Suggestion, create a mobile web-app using React Native for web for
-      platforms we don't officially support with goal to share most code.
-        - Also faster & easier to deploy 
-- Web cloud app
-    - Online app, desktop/mobile
-    - Focus on 
-        - Analyzing previous workouts
-        - Create new workout schedules
-        - See statistics and progress
-        - Social? (Not initial version)
-
+- **Native App** (Priority): React Native (separate repository)
+  - iOS first
+  - Healthkit integration
+  - Focus on gym workout experience
+- **Web App** (Future): Desktop/mobile web interface
+  - Analyzing previous workouts
+  - Creating workout schedules
+  - Statistics and progress tracking
+  - Not currently prioritized

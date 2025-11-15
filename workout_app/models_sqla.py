@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 from sqlalchemy import (
     ARRAY,
     CheckConstraint,
@@ -32,9 +33,7 @@ class AppUser(Base):
 
 class BaseExercise(Base):
     __tablename__ = "base_exercise"
-    __table_args__ = (
-        PrimaryKeyConstraint("base_exercise_id", name="base_exercise_pkey"),
-    )
+    __table_args__ = (PrimaryKeyConstraint("base_exercise_id", name="base_exercise_pkey"),)
 
     base_exercise_id = Column(UUID, server_default=text("uuid_generate_v1mc()"))
     name = Column(Text, nullable=False)
@@ -65,9 +64,7 @@ class SessionSchedule(Base):
             "(progression_limit > (0)::numeric) AND (progression_limit < (1)::numeric)",
             name="session_schedule_progression_limit_check",
         ),
-        ForeignKeyConstraint(
-            ["plan_id"], ["plan.plan_id"], name="session_schedule_plan_id_fkey"
-        ),
+        ForeignKeyConstraint(["plan_id"], ["plan.plan_id"], name="session_schedule_plan_id_fkey"),
         PrimaryKeyConstraint("session_schedule_id", name="session_schedule_pkey"),
     )
 
@@ -81,9 +78,7 @@ class SessionSchedule(Base):
 
     plan = relationship("Plan", back_populates="session_schedule")
     exercise = relationship("Exercise", back_populates="session_schedule")
-    performed_session = relationship(
-        "PerformedSession", back_populates="session_schedule"
-    )
+    performed_session = relationship("PerformedSession", back_populates="session_schedule")
 
 
 class Exercise(Base):
@@ -140,12 +135,8 @@ class PerformedSession(Base):
     data = Column(JSONB)
 
     app_user = relationship("AppUser", back_populates="performed_session")
-    session_schedule = relationship(
-        "SessionSchedule", back_populates="performed_session"
-    )
-    performed_exercise = relationship(
-        "PerformedExercise", back_populates="performed_session"
-    )
+    session_schedule = relationship("SessionSchedule", back_populates="performed_session")
+    performed_exercise = relationship("PerformedExercise", back_populates="performed_session")
 
 
 class PerformedExercise(Base):
@@ -183,6 +174,4 @@ class PerformedExercise(Base):
     data = Column(JSONB)
 
     exercise = relationship("Exercise", back_populates="performed_exercise")
-    performed_session = relationship(
-        "PerformedSession", back_populates="performed_exercise"
-    )
+    performed_session = relationship("PerformedSession", back_populates="performed_exercise")
