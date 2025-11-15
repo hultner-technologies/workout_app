@@ -1,6 +1,7 @@
 import uuid
 
 import pytest
+from asyncpg import exceptions
 
 
 @pytest.mark.unit
@@ -188,3 +189,74 @@ async def test_anonymous_role_cannot_see_performed_exercises(db_transaction):
         "select count(*) from performed_exercise"
     )
     assert visible_exercises == 0
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_user_cannot_insert_into_other_users_session(db_transaction):
+    """Authenticated users cannot write into another user's session."""
+    user_a = uuid.uuid4()
+    user_b = uuid.uuid4()
+
+    await db_transaction.execute(
+        """
+        insert into app_user (app_user_id, name, email)
+        values
+            ($1, 'Insert Test User A', $3),
+            ($2, 'Insert Test User B', $4)
+        """,
+        user_a,
+        user_b,
+        f"{user_a}@example.com",
+        f"{user_b}@example.com",
+    )
+
+    plan_id = await db_transaction.fetchval(
+        "insert into plan (name) values ('Insert Test Plan') returning plan_id"
+    )
+    session_schedule_id = await db_transaction.fetchval(
+        """
+        insert into session_schedule (plan_id, name)
+        values ($1, 'Insert Test Session')
+        returning session_schedule_id
+        """,
+        plan_id,
+    )
+
+    base_exercise_id = await db_transaction.fetchval(
+        "insert into base_exercise (name) values ('Insert Test Exercise') returning base_exercise_id"
+    )
+    exercise_id = await db_transaction.fetchval(
+        """
+        insert into exercise (session_schedule_id, base_exercise_id, sets, reps)
+        values ($1, $2, 3, 10)
+        returning exercise_id
+        """,
+        session_schedule_id,
+        base_exercise_id,
+    )
+
+    performed_session_id = await db_transaction.fetchval(
+        """
+        insert into performed_session (session_schedule_id, app_user_id)
+        values ($1, $2)
+        returning performed_session_id
+        """,
+        session_schedule_id,
+        user_a,
+    )
+
+    await db_transaction.execute("SET LOCAL ROLE authenticated")
+    await db_transaction.execute(
+        "select set_config('request.jwt.claim.sub', $1, true)", str(user_b)
+    )
+
+    with pytest.raises(exceptions.InsufficientPrivilegeError):
+        await db_transaction.execute(
+            """
+            insert into performed_exercise (performed_session_id, exercise_id, name, reps)
+            values ($1, $2, 'Unauthorized', ARRAY[10, 10])
+            """,
+            performed_session_id,
+            exercise_id,
+        )
