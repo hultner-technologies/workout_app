@@ -10,19 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: supabase/postgres:latest
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 54322:5432
-
     env:
       TEST_PG_HOST: 127.0.0.1
       TEST_PG_PORT: 54322
