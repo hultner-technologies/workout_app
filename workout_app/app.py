@@ -2,24 +2,18 @@ from operator import attrgetter
 from pprint import pprint
 from typing import List, Optional
 from uuid import uuid1
-from pydantic import UUID1, UUID4
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import UUID1, UUID4
 from sqlalchemy import func
-from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
-from sqlmodel import Field, Session, SQLModel, create_engine, select
-from sqlalchemy.orm import joinedload, subqueryload, selectinload
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.orm import joinedload, selectinload, sessionmaker, subqueryload
+from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, select
 
 from workout_app.models import *
 
-
-DATABASE_URL_ASYNC = (
-    "postgresql+asyncpg://postgres:postgres@127.0.0.1:25432/workout_app"
-)
+DATABASE_URL_ASYNC = "postgresql+asyncpg://postgres:postgres@127.0.0.1:25432/workout_app"
 dsn_2 = "postgresql://postgres:postgres@127.0.0.1:25432/workout_app"
 engine = create_engine(dsn_2)
 engine_async = create_async_engine(DATABASE_URL_ASYNC, echo=True, future=True)
@@ -31,9 +25,7 @@ def get_session_sync() -> Session:
 
 
 async def get_session() -> AsyncSession:
-    async_session = sessionmaker(
-        engine_async, class_=AsyncSession, expire_on_commit=False
-    )
+    async_session = sessionmaker(engine_async, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
 
@@ -89,11 +81,7 @@ async def read_plans(
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
 ):
-    plans = (
-        (await session.execute(select(Plan).offset(offset).limit(limit)))
-        .scalars()
-        .all()
-    )
+    plans = (await session.execute(select(Plan).offset(offset).limit(limit))).scalars().all()
     return plans
 
 
@@ -120,9 +108,7 @@ async def read_session_schedule(
     session_schedule = await session.get(
         SessionSchedule,
         session_schedule_id.hex,
-        options=(
-            selectinload(SessionSchedule.exercise).selectinload(Exercise.base_exercise),
-        ),
+        options=(selectinload(SessionSchedule.exercise).selectinload(Exercise.base_exercise),),
     )
     if not session_schedule:
         raise HTTPException(status_code=404, detail="Not found")
@@ -163,9 +149,7 @@ async def read_performed_sessions(
     return performed_sessions
 
 
-@app.get(
-    "/performed-sessions/{performed_session_id}", response_model=PerformedSessionRead
-)
+@app.get("/performed-sessions/{performed_session_id}", response_model=PerformedSessionRead)
 async def read_performed_session(
     *,
     session: AsyncSession = Depends(get_session),
@@ -232,7 +216,9 @@ def set_next_weights(
         # Better solution, get all exercise ids
         # Get all performed exercises ordered by completion time with user id
         # Limit 1 per exercise id
-        # select * from performed_exercise where app_user_id = user.app_user_id order by completion_time desc
+        # select * from performed_exercise
+        # where app_user_id = user.app_user_id
+        # order by completion_time desc
         last_ex = 0
         try:
             last_ex = (
@@ -265,9 +251,7 @@ async def generate_session_new(
         session_schedule_id.hex,
         options=(
             selectinload(SessionSchedule.exercise).selectinload(Exercise.base_exercise),
-            selectinload(SessionSchedule.exercise).selectinload(
-                Exercise.performed_exercise
-            ),
+            selectinload(SessionSchedule.exercise).selectinload(Exercise.performed_exercise),
         ),
     )
     # TODO: This won't work if same base exercise exists in multiple sessions
@@ -287,10 +271,7 @@ async def generate_session_new(
         .scalars()
         .first()
     )
-    if (
-        not last_performed_session
-        or last_performed_session.app_user_id != user.app_user_id
-    ):
+    if not last_performed_session or last_performed_session.app_user_id != user.app_user_id:
         # Create empty new draft
         return session_schedule
         raise HTTPException(status_code=404, detail="Not found")

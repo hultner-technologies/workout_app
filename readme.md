@@ -90,6 +90,53 @@ open http://127.0.0.1:54323
 
 See [database/README.md](database/README.md) for detailed setup and migration information.
 
+### Testing
+
+All Python tooling is managed via [uv](https://docs.astral.sh/uv/).
+
+```bash
+# Install dependencies (once)
+uv sync
+
+# Fast database tests (parallel safe)
+uv run pytest -n auto tests/database
+
+# Integration tests (requires TEST_SUPABASE_URL + keys in env)
+uv run pytest -m integration tests/integration
+```
+
+The `tests/conftest.py` fixtures expect a local Postgres instance on
+`127.0.0.1:54322` using the `postgres/postgres` credentials that Supabase CLI
+provisions. Integration tests skip automatically until Supabase URL/API keys are
+configured in the environment.
+
+All overrides can be defined via standard environment variables or the local
+`.env` file (parsed through `tests/settings.py`). Example:
+
+```dotenv
+TEST_PG_HOST=127.0.0.1
+TEST_PG_PORT=54322
+TEST_PG_USER=postgres
+TEST_PG_PASSWORD=postgres
+TEST_PG_DATABASE=postgres
+TEST_SUPABASE_URL=http://127.0.0.1:54321
+TEST_SUPABASE_ANON_KEY=...
+TEST_SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+### Tooling
+
+```bash
+# Format Python modules
+uv run ruff format workout_app tests
+
+# Lint / import sort
+uv run ruff check .
+
+# Type-check the async fixtures and settings helpers
+uv run mypy tests/settings.py tests/conftest.py
+```
+
 ## Tech Stack
 ### Backend
 - **Database**: Supabase (PostgreSQL 17)
@@ -111,4 +158,3 @@ See [database/README.md](database/README.md) for detailed setup and migration in
   - Creating workout schedules
   - Statistics and progress tracking
   - Not currently prioritized
-

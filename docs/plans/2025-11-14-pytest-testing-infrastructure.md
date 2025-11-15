@@ -25,7 +25,9 @@ workout_app/
 │       ├── __init__.py
 │       ├── test_api_empty_workouts.py # Via Supabase client
 │       └── test_api_rls_security.py   # Real RLS via HTTP
-├── pyproject.toml                     # Poetry dependencies
+├── tests/settings.py                 # Pydantic settings layer (.env aware)
+├── pyproject.toml                     # uv-managed dependencies
+├── uv.lock                            # Locked dependency graph
 └── pytest.ini                         # Pytest configuration
 ```
 
@@ -33,17 +35,37 @@ workout_app/
 
 **Core:**
 - Python 3.13
-- pytest >= 8.0
-- pytest-asyncio >= 0.23
-- pytest-xdist (for parallel execution)
+- pytest >= 9.0 (parallel-friendly)
+- pytest-asyncio >= 1.3
+- pytest-xdist (parallel execution)
 
 **Database:**
 - asyncpg >= 0.30 (direct PostgreSQL)
-- supabase >= 2.24 (HTTP API client)
+- supabase >= 2.24 (HTTP API client aligned with Pydantic v2)
 
 **Development:**
 - pytest-cov (coverage reporting)
 - pytest-timeout (prevent hanging tests)
+- pydantic-settings + python-dotenv for configuration management
+
+## Configuration
+
+`tests/settings.py` centralizes configuration through `pydantic-settings.BaseSettings`. It loads
+values from environment variables (first) and `.env` (fallback) via `python-dotenv`. Defaults match
+the Supabase CLI stack, but everything can be overridden:
+
+```dotenv
+# tests/settings.py picks these up automatically
+TEST_PG_HOST=127.0.0.1
+TEST_PG_PORT=54322
+TEST_PG_USER=postgres
+TEST_PG_PASSWORD=postgres
+TEST_PG_DATABASE=postgres
+
+TEST_SUPABASE_URL=http://127.0.0.1:54321
+TEST_SUPABASE_ANON_KEY=...
+TEST_SUPABASE_SERVICE_ROLE_KEY=...
+```
 
 ## Test Strategy
 
@@ -168,7 +190,7 @@ def supabase_url():
 def supabase_anon_key():
     """Anon key from supabase status"""
     # Read from environment or config
-    return os.getenv("SUPABASE_ANON_KEY")
+    return os.getenv("TEST_SUPABASE_ANON_KEY")
 
 @pytest.fixture
 async def supabase_client(supabase_url, supabase_anon_key):
@@ -206,57 +228,63 @@ addopts =
     --cov-report=term-missing
 ```
 
-### pyproject.toml (Poetry)
+### pyproject.toml (uv)
 
 ```toml
-[tool.poetry]
-name = "workout-app"
+[project]
+name = "workout_app"
 version = "0.1.0"
-description = "Workout tracking application"
-python = "^3.13"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "asyncpg>=0.30.0,<0.31.0",
+    "fastapi>=0.111.0,<0.112.0",
+    "pydantic[email]>=2.12.4,<3.0.0",
+    "pydantic-settings>=2.4.0,<3.0.0",
+    "sqlalchemy>=2.0.29,<2.1.0",
+    "sqlmodel>=0.0.27,<0.0.28",
+]
 
-[tool.poetry.dependencies]
-python = "^3.13"
-asyncpg = "^0.30.0"
-supabase = "^2.24.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
-pytest-asyncio = "^0.23.0"
-pytest-xdist = "^3.5.0"
-pytest-cov = "^4.1.0"
-pytest-timeout = "^2.2.0"
-black = "^24.0.0"
-ruff = "^0.1.0"
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1,<10.0.0",
+    "pytest-asyncio>=1.3.0,<2.0.0",
+    "pytest-xdist>=3.8.0,<4.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
+    "pytest-timeout>=2.4.0,<3.0.0",
+    "supabase>=2.24.0,<3.0.0",
+    "websockets>=13.1,<14.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 ```
 
 ## Test Commands
 
 ```bash
+# Install/refresh the environment
+uv sync
+
 # Run all tests (parallel unit tests, sequential integration)
-pytest
+uv run pytest
 
 # Run only fast unit tests (parallel)
-pytest tests/database/ -n auto
+uv run pytest tests/database/ -n auto
 
 # Run only integration tests
-pytest tests/integration/ -m integration
+uv run pytest tests/integration/ -m integration
 
 # Run with coverage
-pytest --cov=database --cov-report=html
+uv run pytest --cov=database --cov-report=html
 
-# Run specific test
-pytest tests/database/test_empty_workouts.py::test_empty_workout_returns_one_row
+# Run a specific test
+uv run pytest tests/database/test_empty_workouts.py::test_empty_workout_returns_one_row
 
-# Watch mode (run on file changes)
-pytest-watch
-
-# Verbose output
-pytest -vv
+# Code style / quality
+uv run ruff check .
+uv run ruff format workout_app tests
+uv run mypy tests/settings.py tests/conftest.py
 ```
 
 ## GitHub Actions Workflow
@@ -295,11 +323,11 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Install uv
+        run: pipx install uv
 
-      - name: Install dependencies
-        run: poetry install
+      - name: Sync dependencies
+        run: uv sync --python 3.13
 
       - name: Start Supabase
         run: |
@@ -313,7 +341,7 @@ jobs:
         run: supabase db reset
 
       - name: Run tests
-        run: poetry run pytest --cov --cov-report=xml
+        run: uv run pytest --cov --cov-report=xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -324,16 +352,17 @@ jobs:
 ## Implementation Steps
 
 ### Step 1: Project Setup
-1. Initialize Poetry project with Python 3.13
-2. Add dependencies (pytest, asyncpg, supabase-py)
+1. Initialize uv project with Python 3.13 (`uv python pin 3.13 && uv init` if starting fresh)
+2. Declare dependencies (pytest stack, asyncpg, supabase-py) in `pyproject.toml`
 3. Create directory structure
 4. Configure pytest.ini
 
 ### Step 2: Basic Fixtures
-1. Create conftest.py
-2. Implement database connection fixtures
-3. Implement Supabase client fixtures
-4. Test fixtures work with local Supabase
+1. Create `tests/settings.py` (BaseSettings + dotenv loader)
+2. Create `conftest.py`
+3. Implement database connection fixtures
+4. Implement Supabase client fixtures (using settings helpers)
+5. Test fixtures work with local Supabase
 
 ### Step 3: Unit Tests (PR #1 Focus)
 1. `test_empty_workouts.py` - Empty workout support
