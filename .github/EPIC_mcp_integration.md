@@ -459,6 +459,40 @@ Each platform has built-in rate limiting (see hosting comparison below).
 **Security**: STDIO skips OAuth (local trust), HTTP requires full OAuth
 **Status**: ✅ Decided
 
+### 9. Volume Landmarks Implementation
+**Question**: Should we implement Israetel's volume landmarks (MEV/MAV/MRV)?
+**Decision**: Yes, implement in Phase 3
+**Rationale**: High value for evidence-based coaching, we already have exercise-to-muscle mapping
+**Complexity**: Medium
+**Status**: ✅ Decided - Phase 3
+
+### 10. User Plan Sharing
+**Question**: Implement complex sharing in Phase 3 or defer?
+**Decision**: Start simple (private/public only) in Phase 3
+**Future**: Complex sharing (specific users, following) after Phase 3
+**Status**: ✅ Decided
+
+### 11. Rate Limiting Values & Pagination
+**Question**: Are rate limiting values reasonable?
+**Decision**: Yes, with pagination support
+**Values**:
+- 100 requests/hour/user
+- 365 days max history lookback
+- 100-200 sessions max per query (paginated)
+- Pagination via offset/limit parameters
+**Rationale**: Prevents overwhelming LLM context, enables fetching older data incrementally
+**Status**: ✅ Decided - implemented in Phase 1
+
+### 12. Hosting Platform Decision
+**Question**: Confirm Railway for MVP?
+**Decision**: Fly.io (changed from Railway)
+**Rationale**:
+- Permanent free tier (3 shared VMs)
+- Native PostgreSQL drivers (5-20ms vs 50-150ms REST API)
+- Side project requires zero cost
+- User has 2 years experience with Fly.io
+**Status**: ✅ Decided - see ADR_mcp_hosting_platform.md
+
 ## Success Metrics
 
 ### Technical

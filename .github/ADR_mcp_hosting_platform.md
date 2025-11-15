@@ -11,9 +11,17 @@ We need to host a FastMCP (Python) server that:
 1. Connects to Supabase (PostgreSQL) for data access
 2. Supports both STDIO (local) and HTTP (remote) transports
 3. Implements OAuth 2.1 authentication
-4. Has minimal hosting costs (free tier preferred)
-5. Avoids vendor lock-in
-6. Provides reasonable performance (<2s p95 latency)
+4. **Must be permanently free** (side project, spare time development)
+5. **Low maintenance** (solo developer working in spare time)
+6. Avoids vendor lock-in
+7. Provides reasonable performance (<2s p95 latency)
+
+### Project Context
+
+This is a side project with a solo developer working in spare time. The database was previously hosted on Fly.io for ~2 years successfully before migrating to Supabase (IPv4 charges made phone connectivity complex). The hosting solution must be:
+- Permanently free (not time-limited credits)
+- Low maintenance
+- Reliable for personal use
 
 ### Critical Constraint: Pyodide Limitations
 
@@ -205,48 +213,52 @@ _* Estimates based on compute time, not just request count_
 - **Cost**: $0
 - **Limitation**: Only works on user's machine
 
-### Phase 2 (Beta): Railway or Fly.io
+### Phase 2 (Beta/Production): Fly.io
 
-**Primary Recommendation: Railway**
+**Primary Recommendation: Fly.io**
 
 **Why**:
-1. Native PostgreSQL drivers (5-20ms latency vs 50-150ms REST API)
-2. Simple deployment (railway up)
-3. Always-on (no cold starts)
-4. Good for beta testing with <100 users
-5. Easy to migrate away (standard Python)
+1. **Permanent free tier** (3 shared VMs - no time limit, no credit expiration)
+2. Native PostgreSQL drivers (5-20ms latency vs 50-150ms REST API)
+3. Proven reliability (user ran database here for ~2 years successfully)
+4. Low maintenance (Docker-based, simple deployment)
+5. Easy to migrate away (standard Python + Docker)
+6. Good for side projects (no surprise billing)
 
-**Fallback: Fly.io**
-
-If Railway free tier expires:
-1. Similar native driver support
-2. Permanent free tier (3 VMs)
-3. Slightly more complex setup (Docker)
-
-**Migration Path**:
+**Deployment**:
 ```bash
-# Railway
-railway up
-
-# If need to migrate to Fly.io
+# Initial setup
 fly launch
+
+# Deploy
 fly deploy
+
+# Scale to 3 free VMs
+fly scale count 3
 ```
 
-Both use standard Python with no platform-specific code.
+**Free Tier Limits**:
+- 3 shared-CPU VMs (always free)
+- ~100k requests/month estimated capacity
+- Sufficient for personal/side project use
+- No IPv4 needed for HTTP-only MCP server
 
-### Phase 3 (Production): Evaluate Based on Usage
+**Alternative (if need more resources later)**:
 
-**If <100k req/month**: Fly.io free tier (3 VMs)
+If traffic exceeds Fly.io free tier capabilities (~100k req/month):
+- Cloudflare Workers ($15-30/mo) - accepts REST API latency trade-off for scale
+- OR paid Fly.io ($6-12/mo for 3 dedicated VMs)
+- OR Railway ($10-20/mo)
 
-**If 100k-1M req/month**:
-- Railway paid ($10-20/mo)
-- OR Render ($7/mo)
-- OR migrate to Cloudflare Workers (accept REST API trade-off)
+### Long-term Scaling
 
-**If >1M req/month**:
-- Cloudflare Workers ($15-30/mo) - worth REST API trade-off for scale
-- OR AWS Lambda (complex but cost-effective at scale)
+**Personal use** (<10 users): Fly.io free tier is sufficient indefinitely
+
+**If project grows** (>100 users):
+- Start with Fly.io free tier
+- Monitor usage and performance
+- Scale up only when necessary
+- Consider Cloudflare Workers if REST API latency acceptable
 
 ## Vendor Lock-In Mitigation
 
@@ -335,46 +347,54 @@ Track these metrics to inform hosting decisions:
 | Metric | Target | Action if Exceeded |
 |--------|--------|-------------------|
 | p95 latency | <2s | Investigate DB queries, consider caching |
-| Request volume | <10k/day | Within free tiers, no action |
-| Request volume | >100k/day | Evaluate Cloudflare Workers |
+| Request volume | <10k/day | Within free tier, no action |
+| Request volume | >100k/month | Monitor performance, evaluate if upgrade needed |
 | Database query time | <100ms | Optimize queries, add indexes |
-| Cold start time | <500ms | Move to always-on hosting |
-| Monthly cost | <$10 | Accept or optimize |
+| Cold start time | <500ms | Acceptable for side project (Fly.io free tier) |
+| Monthly cost | $0 | Must stay free (side project constraint) |
 
 ## Decision
 
-**For MVP/Beta (Phase 1-2)**: Railway with native PostgreSQL drivers
+**For All Phases**: Fly.io with native PostgreSQL drivers
 
 **Rationale**:
-1. Native drivers = better performance (5-20ms vs 50-150ms)
-2. Simple deployment, good DX
-3. Easy migration path (standard Python)
-4. Good enough free tier for beta
+1. **Permanent free tier** (no credit expiration, no surprise charges)
+2. Native drivers = better performance (5-20ms vs 50-150ms REST API)
+3. Proven reliability (user's database ran on Fly.io for 2 years successfully)
+4. Low maintenance (Docker-based, standard deployment)
 5. No Pyodide limitations
+6. Perfect for side project / spare time development
+7. Easy migration path if needed (standard Python + Docker)
 
 **Re-evaluation triggers**:
-1. Railway free tier expires → Migrate to Fly.io
-2. Traffic exceeds 100k req/day → Consider Cloudflare Workers
-3. Cost exceeds $20/mo → Optimize or move to Cloudflare
-4. Need multi-region → Cloudflare Workers or Fly.io multi-region
+1. Traffic exceeds 100k req/month → Monitor performance, may still fit in free tier
+2. Need global edge performance → Consider Cloudflare Workers (accept REST API trade-off)
+3. Need dedicated VMs → Upgrade to paid Fly.io ($6-12/mo)
+
+**Status**: Approved - Aligns with project constraints (side project, spare time, permanently free)
 
 ## Consequences
 
 ### Positive
-- Fast database queries (native drivers)
-- Simple development workflow
-- No Pyodide limitations
-- Easy to migrate platforms
-- Clear upgrade path
+- ✅ Truly free forever (no time-limited credits)
+- ✅ Fast database queries (native drivers: 5-20ms)
+- ✅ Simple development workflow
+- ✅ No Pyodide limitations
+- ✅ Low maintenance overhead
+- ✅ Easy to migrate platforms if needed
+- ✅ Proven platform (user has experience)
+- ✅ No surprise billing
 
 ### Negative
-- Not truly "free forever" (Railway free tier is time-limited)
-- Need to migrate after ~1 month OR pay $10-20/mo
-- Less global performance than Cloudflare edge (but good enough)
+- ⚠️ Shared VMs (resource contention possible, but acceptable for side project)
+- ⚠️ Slightly more complex setup than Railway (requires Dockerfile)
+- ⚠️ Cold starts (50-200ms) vs always-on options
+- ⚠️ Less global performance than Cloudflare edge (but good enough)
 
 ### Neutral
-- Need to maintain abstraction for potential Cloudflare migration
-- Will need to evaluate again at scale (>100k req/day)
+- Need to maintain abstraction for potential future migration
+- Will need to evaluate if project scales significantly (>100 users)
+- Free tier limits should be sufficient for personal/side project use indefinitely
 
 ## References
 

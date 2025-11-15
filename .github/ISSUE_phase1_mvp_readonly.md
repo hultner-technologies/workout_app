@@ -38,7 +38,45 @@ User can:
 - ❌ Plan creation (Phase 3)
 - ❌ Write operations (Phase 3)
 - ❌ Deployment (Phase 2)
-- ❌ Rate limiting (Phase 2)
+- ❌ Per-user rate limiting (Phase 2)
+
+## Data Limits & Pagination
+
+To prevent overwhelming the LLM context and ensure reasonable query performance:
+
+### Hard Limits
+- **History lookback**: Max 365 days per query
+- **Sessions per analysis**: Max 200 sessions
+- **Sessions per history query**: Max 100 sessions (default 50)
+- **Exercise catalog**: Max 1000 exercises
+
+### Pagination Support
+All data-heavy endpoints support pagination:
+- `limit`: Number of records to return (default varies by endpoint)
+- `offset`: Number of records to skip (for fetching next page)
+
+**Example**:
+```python
+# First page
+history = await get_exercise_history("Squat", limit=50, offset=0)
+
+# Second page
+history = await get_exercise_history("Squat", limit=50, offset=50)
+
+# Third page
+history = await get_exercise_history("Squat", limit=50, offset=100)
+```
+
+### Why These Limits?
+- **LLM Context**: Claude has token limits - returning 1000 sessions would exceed context window
+- **Performance**: Smaller datasets = faster queries and responses
+- **User Experience**: LLMs work better with focused, relevant data vs overwhelming dumps
+- **Cost**: Fewer tokens = lower API costs for consuming LLM
+
+### Future (Phase 2)
+- Add per-user rate limiting (100 req/hour)
+- Add query result caching
+- Monitor actual usage patterns and adjust limits
 
 ## Architecture
 
@@ -128,10 +166,11 @@ class SupabaseClient:
         select: str = '*',
         filters: Optional[dict] = None,
         order: Optional[str] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
+        offset: Optional[int] = None
     ) -> list[dict[str, Any]]:
         """
-        Query a table using PostgREST syntax.
+        Query a table using PostgREST syntax with pagination support.
 
         Example:
             results = await db.query(
@@ -139,7 +178,8 @@ class SupabaseClient:
                 select='name,weight,volume_kg,completed_at',
                 filters={'name': 'eq.Squat'},
                 order='completed_at.desc',
-                limit=10
+                limit=10,
+                offset=0  # For pagination
             )
         """
         params = {'select': select}
@@ -153,6 +193,9 @@ class SupabaseClient:
 
         if limit:
             params['limit'] = str(limit)
+
+        if offset:
+            params['offset'] = str(offset)
 
         response = await self.client.get(f'{self.url}/{table}', params=params)
         response.raise_for_status()
@@ -218,14 +261,22 @@ async def get_exercise_catalog() -> str:
 
 
 @mcp.resource("workout://performance/history/{exercise_name}")
-async def get_exercise_history(exercise_name: str, user_token: str, days: int = 90) -> str:
+async def get_exercise_history(
+    exercise_name: str,
+    user_token: str,
+    days: int = 90,
+    limit: int = 50,
+    offset: int = 0
+) -> str:
     """
-    Get historical performance data for a specific exercise.
+    Get historical performance data for a specific exercise (paginated).
 
     Args:
         exercise_name: Name of the exercise (e.g., "Squat")
         user_token: User's JWT token (for RLS)
         days: How many days of history (default 90, max 365)
+        limit: Number of records to return (default 50, max 100)
+        offset: Number of records to skip for pagination (default 0)
 
     Returns:
         Performance history including:
@@ -234,13 +285,23 @@ async def get_exercise_history(exercise_name: str, user_token: str, days: int = 
         - Reps and sets
         - Weight progression
         - Date performed
+
+    Example usage:
+        - First page: offset=0, limit=50
+        - Second page: offset=50, limit=50
+        - For all history beyond 365 days, make multiple paginated requests
     """
+    # Apply limits to prevent overwhelming LLM context
     if days > 365:
-        days = 365  # Hard cap
+        days = 365
+    if limit > 100:
+        limit = 100
+    if limit < 1:
+        limit = 50
 
     db = get_db_client().with_user_auth(user_token)
 
-    # Query exercise_stats view (has RLS)
+    # Query exercise_stats view (has RLS) with pagination
     stats = await db.query(
         'exercise_stats',
         select='name,weight,volume_kg,brzycki_1_rm_max,reps,completed_at,note',
@@ -249,15 +310,22 @@ async def get_exercise_history(exercise_name: str, user_token: str, days: int = 
             'completed_at': f'gte.{(datetime.now() - timedelta(days=days)).isoformat()}'
         },
         order='completed_at.desc',
-        limit=100
+        limit=limit,
+        offset=offset
     )
 
     if not stats:
         return f"No performance history found for '{exercise_name}' in the last {days} days."
 
-    # Format for LLM
+    # Format for LLM with pagination info
     result = f"# Performance History: {exercise_name} ({days} days)\n\n"
-    result += f"Total workouts: {len(stats)}\n\n"
+    result += f"**Showing {len(stats)} workouts** (offset: {offset}, limit: {limit})\n"
+
+    # Pagination hint
+    if len(stats) == limit:
+        result += f"_Note: More data may be available. Use offset={offset + limit} to fetch next page._\n"
+
+    result += "\n"
 
     for session in stats:
         result += f"## {session['completed_at'][:10]}\n"
@@ -288,7 +356,8 @@ mcp = FastMCP("Workout Coach")
 async def analyze_progress(
     exercise_name: str,
     user_token: str,
-    time_period_days: int = 30
+    time_period_days: int = 30,
+    max_sessions: int = 100
 ) -> dict:
     """
     Analyze progression trend for an exercise.
@@ -296,7 +365,8 @@ async def analyze_progress(
     Args:
         exercise_name: Exercise to analyze (e.g., "Bench Press")
         user_token: User's JWT token
-        time_period_days: Analysis period in days (default 30)
+        time_period_days: Analysis period in days (default 30, max 365)
+        max_sessions: Maximum number of sessions to analyze (default 100, max 200)
 
     Returns:
         Dictionary containing:
@@ -305,8 +375,15 @@ async def analyze_progress(
         - one_rm_trend: 1RM progression trend
         - frequency: Workouts per week
         - last_workout: Date of last workout
+        - sessions_analyzed: Number of sessions included in analysis
         - recommendation: Suggested action
     """
+    # Apply limits to prevent overwhelming analysis
+    if time_period_days > 365:
+        time_period_days = 365
+    if max_sessions > 200:
+        max_sessions = 200
+
     db = get_db_client().with_user_auth(user_token)
 
     stats = await db.query(
@@ -316,7 +393,8 @@ async def analyze_progress(
             'name': f'ilike.%{exercise_name}%',
             'completed_at': f'gte.{(datetime.now() - timedelta(days=time_period_days)).isoformat()}'
         },
-        order='completed_at.desc'
+        order='completed_at.desc',
+        limit=max_sessions  # Limit sessions for analysis
     )
 
     if not stats:
@@ -352,7 +430,8 @@ async def analyze_progress(
     return {
         'exercise': exercise_name,
         'time_period_days': time_period_days,
-        'total_workouts': len(stats),
+        'sessions_analyzed': len(stats),
+        'max_sessions_limit': max_sessions,
         'frequency_per_week': round(frequency, 1),
         'avg_volume_kg': round(avg_volume, 1),
         'volume_trend': volume_trend,
