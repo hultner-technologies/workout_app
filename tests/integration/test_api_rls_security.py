@@ -28,11 +28,11 @@ def test_anonymous_client_cannot_read_performed_exercises(supabase_client):
 def test_anonymous_client_can_read_public_data(supabase_client):
     """Verify anonymous users can still access public reference data (plans, exercises)"""
     # Plans should be publicly readable
-    plans_response = supabase_client.table("plan").select("*").limit(5).execute()
+    _plans_response = supabase_client.table("plan").select("*").limit(5).execute()
     # We don't assert > 0 because test database might be empty, just verify no error
 
     # Base exercises should be publicly readable
-    exercises_response = (
+    _exercises_response = (
         supabase_client.table("base_exercise").select("*").limit(5).execute()
     )
     # Again, just verify no error - empty database is valid
