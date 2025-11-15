@@ -34,8 +34,8 @@ This workout app uses PostgreSQL Row Level Security (RLS) to ensure data isolati
 
 | Table | Authenticated Users | Anonymous Users | Notes |
 |-------|---------------------|-----------------|-------|
-| `performed_session` | Own data only | Read all* | *Can disable anon access |
-| `performed_exercise` | Own data only | Read all* | *Can disable anon access |
+| `performed_session` | Own data only | **None (blocked)** | Anonymous access disabled Nov 2025 |
+| `performed_exercise` | Own data only | **None (blocked)** | Anonymous access disabled Nov 2025 |
 | `performed_exercise_set` | Own data only | None | From 071_SpecialSet.sql |
 | `app_user` | Own profile only | None | Cannot delete |
 | `plan` | Read only | Read only | Admin-managed |
@@ -46,13 +46,13 @@ This workout app uses PostgreSQL Row Level Security (RLS) to ensure data isolati
 
 ### Anonymous Access
 
-Currently, anonymous users can read `performed_session` and `performed_exercise` data. This allows for:
-- Public workout log sharing
-- Viewing workout statistics without login
+> **Current state (Nov 2025):** Anonymous users **cannot** read any workout data.
 
-**To disable anonymous access**, remove the "anon" policies from:
-- `performed_session` (line 36-42 in 260_rls_policies.sql)
-- `performed_exercise` (line 70-76 in 260_rls_policies.sql)
+Pseudo-public access was intentionally removed in PR #1 (`e5e99fc`) to prevent data leakage.
+
+Anonymous users may still read public reference data (`plan`, `session_schedule`, `base_exercise`).
+
+If re-enabling anon access is ever required, explicit policies must be added back with caution.
 
 ## Views and Functions Security
 
