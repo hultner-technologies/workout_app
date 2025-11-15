@@ -41,16 +41,16 @@ jobs:
       - name: Install dependencies
         run: uv sync --python 3.13
 
+      - name: Lint and type-check
+        run: |
+          uv run ruff check .
+          uv run mypy tests
+
       - name: Start Supabase
         run: supabase start
 
       - name: Reset database
         run: supabase db reset
-
-      - name: Lint and type-check
-        run: |
-          uv run ruff check .
-          uv run mypy tests
 
       - name: Run tests
         run: uv run pytest
