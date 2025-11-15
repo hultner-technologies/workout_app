@@ -17,8 +17,8 @@ jobs:
       TEST_PG_PASSWORD: postgres
       TEST_PG_DATABASE: postgres
       TEST_SUPABASE_URL: http://127.0.0.1:54321
-      TEST_SUPABASE_ANON_KEY: supabase_anon_placeholder
-      TEST_SUPABASE_SERVICE_ROLE_KEY: supabase_service_placeholder
+      TEST_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      TEST_SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
 
     steps:
       - uses: actions/checkout@v4
@@ -28,11 +28,15 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install uv and Supabase CLI
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install uv
         run: |
           python -m pip install --upgrade pip
           pip install uv
-          curl -fsSL https://cli.supabase.com/install/linux | sh -s -- -b /usr/local/bin
 
       - name: Install dependencies
         run: uv sync --python 3.13
