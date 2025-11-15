@@ -323,30 +323,34 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install uv
-        run: pipx install uv
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
+          npm install -g supabase
 
       - name: Sync dependencies
         run: uv sync --python 3.13
 
       - name: Start Supabase
-        run: |
-          brew install supabase/tap/supabase
-          supabase start
+        env:
+          SUPABASE_DB_PASSWORD: postgres
+        run: supabase start
 
-      - name: Sync migrations
-        run: ./database/sync_to_supabase.sh
-
-      - name: Apply migrations
+      - name: Run migrations
         run: supabase db reset
 
-      - name: Run tests
-        run: uv run pytest --cov --cov-report=xml
+      - name: Lint & type-check
+        run: |
+          uv run ruff check .
+          uv run mypy tests
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
+      - name: Run tests
+        env:
+          TEST_SUPABASE_URL: http://127.0.0.1:54321
+          TEST_SUPABASE_ANON_KEY: supabase_anon_placeholder
+          TEST_SUPABASE_SERVICE_ROLE_KEY: supabase_service_placeholder
+        run: uv run pytest
 ```
 
 ## Implementation Steps
@@ -445,3 +449,10 @@ jobs:
 - [asyncpg documentation](https://magicstack.github.io/asyncpg/)
 - [supabase-py client](https://github.com/supabase/supabase-py)
 - [Supabase local development](https://supabase.com/docs/guides/cli/local-development)
+
+## Change Log
+
+- **2024-03-xx**:
+  - Migrated tooling from Poetry to uv (`pyproject.toml`, `uv.lock`), introduced `pytest.ini`, and documented `uv run ruff` / `uv run mypy` workflows.
+  - Added Supabase-focused fixtures/tests (`tests/conftest.py`, `tests/database/*`, `tests/integration/*`) and `TEST_SUPABASE_*` env variable guidance.
+  - Updated CI/CD plan to use uv + Supabase CLI in GitHub Actions (`.github/workflows/tests.yml`).

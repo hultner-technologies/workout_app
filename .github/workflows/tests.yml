@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: supabase/postgres:latest
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 54322:5432
+
+    env:
+      TEST_PG_HOST: 127.0.0.1
+      TEST_PG_PORT: 54322
+      TEST_PG_USER: postgres
+      TEST_PG_PASSWORD: postgres
+      TEST_PG_DATABASE: postgres
+      TEST_SUPABASE_URL: http://127.0.0.1:54321
+      TEST_SUPABASE_ANON_KEY: supabase_anon_placeholder
+      TEST_SUPABASE_SERVICE_ROLE_KEY: supabase_service_placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv and Supabase CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
+          npm install -g supabase
+
+      - name: Install dependencies
+        run: uv sync --python 3.13
+
+      - name: Start Supabase
+        run: supabase start
+
+      - name: Reset database
+        run: supabase db reset
+
+      - name: Lint and type-check
+        run: |
+          uv run ruff check .
+          uv run mypy tests
+
+      - name: Run tests
+        run: uv run pytest
