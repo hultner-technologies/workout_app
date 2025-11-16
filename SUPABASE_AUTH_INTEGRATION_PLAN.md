@@ -39,10 +39,11 @@ ALTER TABLE app_user
   REFERENCES auth.users(id)
   ON DELETE CASCADE;
 
--- Add username field (required, unique, min 4 chars)
+-- Add username field (required, unique, min 4 chars, alphanumeric + common chars)
 ALTER TABLE app_user
   ADD COLUMN username text NOT NULL UNIQUE
-  CONSTRAINT username_length CHECK (char_length(username) >= 4);
+  CONSTRAINT username_length CHECK (char_length(username) >= 4)
+  CONSTRAINT username_format CHECK (username ~ '^[a-zA-Z0-9._-]{4,}$');
 
 -- Add unique constraint on email
 ALTER TABLE app_user
@@ -159,6 +160,7 @@ SET search_path = public
 AS $$
 DECLARE
   user_username text;
+  user_name text;
 BEGIN
   -- Get username from metadata or generate one
   user_username := COALESCE(
@@ -166,11 +168,17 @@ BEGIN
     generate_unique_username()
   );
 
+  -- Get name from metadata, or use username as fallback
+  user_name := COALESCE(
+    NEW.raw_user_meta_data->>'name',
+    user_username
+  );
+
   -- Insert into app_user
   INSERT INTO app_user (app_user_id, name, email, username, data)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'name', ''),
+    user_name,
     NEW.email,
     user_username,
     '{}'::jsonb
@@ -181,11 +189,12 @@ EXCEPTION
   WHEN unique_violation THEN
     -- If username collision (race condition), generate new one
     user_username := generate_unique_username();
+    user_name := COALESCE(NEW.raw_user_meta_data->>'name', user_username);
 
     INSERT INTO app_user (app_user_id, name, email, username, data)
     VALUES (
       NEW.id,
-      COALESCE(NEW.raw_user_meta_data->>'name', ''),
+      user_name,
       NEW.email,
       user_username,
       '{}'::jsonb
@@ -205,8 +214,10 @@ CREATE TRIGGER on_auth_user_created
 
 **Features:**
 - Pulls email from `NEW.email`
-- Pulls name from `raw_user_meta_data->>'name'` (if provided during signup)
-- Pulls username from `raw_user_meta_data->>'username'` or generates one
+- Pulls name from `raw_user_meta_data->>'name'`, defaults to username if not provided
+- Pulls username from `raw_user_meta_data->>'username'`, generates Reddit-style if not provided
+- Generated usernames: `HappyPanda`, `QuietZebra`, `SwiftEagle42` (alphanumeric only)
+- User-provided usernames: Can include `-`, `_`, `.` (e.g., `john.doe`, `user_123`)
 - Handles race conditions with exception handling
 - Uses `SECURITY DEFINER` to bypass RLS during trigger execution
 
@@ -470,12 +481,13 @@ If issues arise:
 - [ ] **1.2** Create `026_Auth_Username_Generator.sql`
 - [ ] **1.3** Create `027_Auth_Trigger.sql`
 - [ ] **1.4** Create `265_RLS_Performance_Updates.sql`
-- [ ] **1.5** Test migrations on local/dev database
-- [ ] **1.6** Document frontend integration examples
-- [ ] **1.7** Create migration guide for existing users
-- [ ] **1.8** Write tests for new functionality
-- [ ] **1.9** Update README with auth setup instructions
-- [ ] **1.10** Deploy to production
+- [ ] **1.5** Configure email confirmation in Supabase Dashboard
+- [ ] **1.6** Test migrations on local/dev database
+- [ ] **1.7** Document frontend integration examples
+- [ ] **1.8** Create migration guide for existing users
+- [ ] **1.9** Write tests for new functionality
+- [ ] **1.10** Update README with auth setup instructions
+- [ ] **1.11** Deploy to production
 
 ### Phase 2 Tasks (Future)
 
@@ -484,7 +496,8 @@ If issues arise:
 - [ ] **2.3** Implement impersonation backend
 - [ ] **2.4** Implement impersonation frontend
 - [ ] **2.5** Add audit logging for impersonation
-- [ ] **2.6** Enable email confirmation
+- [ ] **2.6** Implement username change functionality (self-service with rate limiting)
+- [ ] **2.7** Configure custom SMTP for production email sending
 
 ---
 
@@ -498,12 +511,35 @@ If issues arise:
 - ✅ Email/password auth is priority 1
 - ✅ OAuth is Phase 2
 - ✅ Admin impersonation is Phase 2
+- ✅ **Username validation**: Allow common characters (`-`, `_`, `.`) in addition to alphanumeric
+- ✅ **Username changes**: Enabled but discouraged (link breakage). Manual process initially acceptable
+- ✅ **Email confirmation**: Enabled from start (Supabase free tier includes email, no frontend hosting needed)
+- ✅ **Default name**: Use username if name not provided during signup
 
-### Open Questions ❓
-- ❓ Should we validate username format (alphanumeric only, no special chars)?
-- ❓ Should users be able to change their username after signup?
-- ❓ Do we want email confirmation enabled from the start?
-- ❓ What should the default value for `name` be if not provided?
+### Implementation Notes
+
+**Username Validation Pattern:**
+```sql
+-- Allow alphanumeric, hyphens, underscores, and periods
+-- Minimum 4 characters
+ALTER TABLE app_user
+  ADD CONSTRAINT username_format
+  CHECK (username ~ '^[a-zA-Z0-9._-]{4,}$');
+```
+
+**Email Confirmation Setup:**
+- Supabase free tier: 2-4 emails/hour (sufficient for early development)
+- Configuration: Supabase Dashboard > Authentication > Email Templates
+- Redirect URL: Use deep linking for React Native app (e.g., `yourapp://auth/confirm`)
+- For testing: Can disable confirmation in Supabase Dashboard > Email Provider settings
+- Production: Configure custom SMTP for higher rate limits (30 emails/hour minimum)
+
+**Username Changes:**
+- Add `username_updated_at` timestamp column to track changes
+- Implement rate limiting (e.g., once per 30 days)
+- Consider username history table for link preservation
+- Phase 1: Manual changes via admin/support
+- Phase 2: Self-service with rate limiting
 
 ---
 
@@ -519,12 +555,27 @@ If issues arise:
 ## Changelog
 
 ### 2025-11-16
+
+**Initial Plan:**
 - Initial plan created
 - Phase 1 scope defined: core auth integration
 - Phase 2 scope defined: OAuth + admin impersonation
 - Username generation strategy designed
 - Migration approach documented
-- **Updated**: Username generation to Reddit-style readable format (AdjectiveNoun pattern)
-  - Changed from random character strings to memorable combinations
-  - Examples: `HappyPanda`, `QuietZebra`, `SwiftEagle42`
-  - 56 adjectives × 64 nouns = 3,584 base combinations
+
+**Update 1 - Reddit-Style Usernames:**
+- Username generation changed to Reddit-style readable format (AdjectiveNoun pattern)
+- Changed from random character strings to memorable combinations
+- Examples: `HappyPanda`, `QuietZebra`, `SwiftEagle42`
+- 56 adjectives × 64 nouns = 3,584 base combinations
+
+**Update 2 - Finalized Requirements:**
+- Resolved all open questions:
+  - ✅ Username validation: Allow alphanumeric + common chars (`-`, `_`, `.`)
+  - ✅ Username changes: Enabled but discouraged, manual process initially
+  - ✅ Email confirmation: Enabled from start (free tier sufficient for development)
+  - ✅ Default name: Use username if not provided during signup
+- Added username format constraint: `^[a-zA-Z0-9._-]{4,}$`
+- Updated trigger to use username as default name fallback
+- Moved email confirmation from Phase 2 to Phase 1
+- Added implementation notes for email setup and username changes
