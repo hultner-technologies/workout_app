@@ -64,26 +64,66 @@ ALTER TABLE app_user DROP COLUMN IF EXISTS password;
 
 **Implementation:**
 ```sql
--- Function to generate unique random username
--- Pattern: user_<8-char-random-string>
--- Handles uniqueness by checking existing usernames
+-- Function to generate unique Reddit-style username
+-- Pattern: AdjectiveNoun or AdjectiveNoun### (if collision)
+-- Examples: HappyPanda, QuietZebra, FriendlyDog42
 CREATE OR REPLACE FUNCTION generate_unique_username()
 RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
+  -- Curated word lists for readable usernames
+  adjectives text[] := ARRAY[
+    'Happy', 'Quick', 'Silent', 'Bright', 'Clever', 'Gentle', 'Swift', 'Brave',
+    'Calm', 'Wise', 'Bold', 'Kind', 'Noble', 'Proud', 'Wild', 'Free',
+    'Pure', 'True', 'Fair', 'Grand', 'Royal', 'Fancy', 'Lucky', 'Magic',
+    'Sunny', 'Starry', 'Golden', 'Silver', 'Crystal', 'Amber', 'Ruby', 'Jade',
+    'Cosmic', 'Ancient', 'Modern', 'Future', 'Alpha', 'Omega', 'Prime', 'Mega',
+    'Ultra', 'Super', 'Hyper', 'Neo', 'Cyber', 'Digital', 'Pixel', 'Retro',
+    'Cool', 'Epic', 'Awesome', 'Stellar', 'Lunar', 'Solar', 'Quantum', 'Mystic'
+  ];
+
+  nouns text[] := ARRAY[
+    'Panda', 'Tiger', 'Eagle', 'Falcon', 'Phoenix', 'Dragon', 'Wolf', 'Bear',
+    'Lion', 'Hawk', 'Owl', 'Fox', 'Deer', 'Otter', 'Raven', 'Sparrow',
+    'Dolphin', 'Shark', 'Whale', 'Seal', 'Penguin', 'Turtle', 'Jaguar', 'Leopard',
+    'River', 'Mountain', 'Ocean', 'Forest', 'Desert', 'Valley', 'Canyon', 'Meadow',
+    'Storm', 'Thunder', 'Lightning', 'Rain', 'Snow', 'Wind', 'Cloud', 'Star',
+    'Moon', 'Sun', 'Comet', 'Galaxy', 'Nebula', 'Cosmos', 'Planet', 'Meteor',
+    'Knight', 'Wizard', 'Ninja', 'Samurai', 'Ranger', 'Hunter', 'Warrior', 'Guardian',
+    'Sage', 'Oracle', 'Prophet', 'Scholar', 'Artist', 'Poet', 'Bard', 'Monk'
+  ];
+
   new_username text;
   username_exists boolean;
+  attempt_count integer := 0;
+  max_attempts integer := 5;
 BEGIN
   LOOP
-    -- Generate random 8-character alphanumeric string
-    new_username := 'user_' || lower(substring(md5(random()::text || clock_timestamp()::text) from 1 for 8));
+    -- Generate random AdjectiveNoun combination
+    new_username := adjectives[1 + floor(random() * array_length(adjectives, 1))::int] ||
+                    nouns[1 + floor(random() * array_length(nouns, 1))::int];
+
+    -- Add random 2-4 digit number if we've had collisions
+    IF attempt_count > 0 THEN
+      new_username := new_username || (10 + floor(random() * 9990))::text;
+    END IF;
 
     -- Check if username already exists
-    SELECT EXISTS(SELECT 1 FROM app_user WHERE username = new_username) INTO username_exists;
+    SELECT EXISTS(SELECT 1 FROM app_user WHERE username = new_username)
+    INTO username_exists;
 
     -- Exit loop if username is unique
     EXIT WHEN NOT username_exists;
+
+    attempt_count := attempt_count + 1;
+
+    -- Safety check: prevent infinite loop
+    IF attempt_count >= max_attempts THEN
+      -- Fallback: guarantee uniqueness with timestamp
+      new_username := new_username || extract(epoch from now())::bigint::text;
+      EXIT;
+    END IF;
   END LOOP;
 
   RETURN new_username;
@@ -92,10 +132,13 @@ $$;
 ```
 
 **Considerations:**
-- Uses MD5 hash of random value + timestamp for uniqueness
-- Loop ensures no collisions (retries if username exists)
-- Generates usernames like: `user_a3f7c8d2`, `user_9e2b4f1a`
-- Unique constraint on `app_user.username` provides database-level guarantee
+- **Readable & Memorable**: Generates usernames like `HappyPanda`, `QuietZebra`, `BraveTiger`
+- **Collision Handling**: Adds 2-4 digit numbers if needed (e.g., `SwiftEagle42`)
+- **Large Namespace**: 56 adjectives × 64 nouns = 3,584 base combinations
+- **With Numbers**: ~36 million combinations (3,584 × 9,980)
+- **Safety Mechanism**: Timestamp fallback prevents infinite loops
+- **Unique Constraint**: Database-level guarantee via `app_user.username UNIQUE`
+- **Expandable**: Easy to add more adjectives/nouns to word lists
 
 **Status:** ⏳ Pending
 
@@ -481,3 +524,7 @@ If issues arise:
 - Phase 2 scope defined: OAuth + admin impersonation
 - Username generation strategy designed
 - Migration approach documented
+- **Updated**: Username generation to Reddit-style readable format (AdjectiveNoun pattern)
+  - Changed from random character strings to memorable combinations
+  - Examples: `HappyPanda`, `QuietZebra`, `SwiftEagle42`
+  - 56 adjectives × 64 nouns = 3,584 base combinations
