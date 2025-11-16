@@ -353,13 +353,27 @@ COMMENT ON FUNCTION performed_session_details(uuid) IS
 CREATE INDEX IF NOT EXISTS idx_performed_session_app_user_id
     ON public.performed_session(app_user_id);
 
+-- Composite index for common user/date queries
+CREATE INDEX IF NOT EXISTS idx_performed_session_user_completed
+    ON public.performed_session(app_user_id, completed_at DESC NULLS LAST);
+
 -- Index for JOINing performed_exercise to performed_session in RLS policies
 -- Used by: EXISTS subqueries in performed_exercise policies
 CREATE INDEX IF NOT EXISTS idx_performed_exercise_session_id
     ON public.performed_exercise(performed_session_id);
 
+-- Composite index to accelerate RLS join filters
+CREATE INDEX IF NOT EXISTS idx_performed_session_id_user
+    ON public.performed_session(performed_session_id, app_user_id);
+
 COMMENT ON INDEX idx_performed_session_app_user_id IS
     'Performance optimization for RLS policies that filter by app_user_id';
 
+COMMENT ON INDEX idx_performed_session_user_completed IS
+    'Performance optimization for RLS queries filtering by user + completed_at';
+
 COMMENT ON INDEX idx_performed_exercise_session_id IS
     'Performance optimization for RLS policies that JOIN to performed_session';
+
+COMMENT ON INDEX idx_performed_session_id_user IS
+    'Performance optimization for JOINing performed_session by id + user';
