@@ -5,8 +5,8 @@
 ### Python/Database Tools
 - `pytest` - Run all tests
 - `pytest tests/test_specific.py` - Run single test file
-- `black workout_app/` - Format Python code
-- `poetry install` - Install dependencies
+- `uv run ruff format .` - Format Python code
+- `uv sync` - Install dependencies
 
 ## Code Style Guidelines
 

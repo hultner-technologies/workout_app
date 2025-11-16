@@ -29,9 +29,7 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
     next(sort_order)
     session.add(session_schedule)
     for e in ss_data.get("exercises"):
-        be = session.exec(
-            select(BaseExercise).where(BaseExercise.name == e["name"])
-        ).one_or_none()
+        be = session.exec(select(BaseExercise).where(BaseExercise.name == e["name"])).one_or_none()
         print(be)
         if be is None:
             be = BaseExercise(**e)
@@ -59,10 +57,7 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
     return (base_ex, exercises)
 
 
-def create_plan(
-    plan_file: Path, dsn: Annotated[str, typer.Argument(envvar="pg_dsn")] = dsn_2
-):
-
+def create_plan(plan_file: Path, dsn: Annotated[str, typer.Argument(envvar="pg_dsn")] = dsn_2):
     plan_data = load(plan_file.read_text()).data
     engine = create_engine(dsn)
     session = Session(engine)

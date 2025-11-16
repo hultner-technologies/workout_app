@@ -24,9 +24,7 @@ def create_exercises(plan_data, ss_data, session_schedule, session):
     next(sort_order)
     session.add(session_schedule)
     for e in ss_data.get("exercises"):
-        be = session.exec(
-            select(BaseExercise).where(BaseExercise.name == e["name"])
-        ).one_or_none()
+        be = session.exec(select(BaseExercise).where(BaseExercise.name == e["name"])).one_or_none()
         print(be)
         if be is None:
             be = BaseExercise(**e)
