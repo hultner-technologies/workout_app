@@ -352,6 +352,22 @@ async def test_can_impersonate_user_function_exists(db_transaction):
     ), "can_impersonate_user() function should exist for permission checks"
 
 
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_list_impersonatable_users_function_exists(db_transaction):
+    """Test that list_impersonatable_users() function exists."""
+    func_exists = await db_transaction.fetchval(
+        """
+        SELECT EXISTS (
+            SELECT 1 FROM pg_proc WHERE proname = 'list_impersonatable_users'
+        )
+        """
+    )
+    assert (
+        func_exists
+    ), "list_impersonatable_users() function should exist for admin UI"
+
+
 # =============================================================================
 # INDEX TESTS
 # =============================================================================
@@ -726,3 +742,207 @@ async def test_can_impersonate_user_allows_regular_user_impersonation(
     assert (
         can_impersonate
     ), "Admins should be able to impersonate regular users"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_list_impersonatable_users_excludes_admins(db_transaction):
+    """Test that list_impersonatable_users() excludes admin users."""
+    # Create admin and regular users
+    admin_id = uuid4()
+    user1_id = uuid4()
+    user2_id = uuid4()
+    admin2_id = uuid4()
+
+    await db_transaction.execute(
+        """
+        INSERT INTO app_user (app_user_id, name, email, username, data)
+        VALUES
+            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
+            ($2, 'User 1', 'user1@example.com', 'user1', '{}'),
+            ($3, 'User 2', 'user2@example.com', 'user2', '{}'),
+            ($4, 'Admin 2', 'admin2@example.com', 'admin2', '{}')
+        """,
+        admin_id,
+        user1_id,
+        user2_id,
+        admin2_id,
+    )
+
+    # Grant admin roles
+    await db_transaction.execute(
+        """
+        INSERT INTO admin_users (admin_user_id, role)
+        VALUES
+            ($1, 'admin'),
+            ($2, 'support')
+        """,
+        admin_id,
+        admin2_id,
+    )
+
+    # Get list of impersonatable users
+    users = await db_transaction.fetch(
+        """
+        SELECT * FROM list_impersonatable_users()
+        """
+    )
+
+    # Should return only regular users (user1 and user2)
+    user_ids = {user["app_user_id"] for user in users}
+    assert user1_id in user_ids, "Should include regular user 1"
+    assert user2_id in user_ids, "Should include regular user 2"
+    assert (
+        admin_id not in user_ids
+    ), "Should NOT include admin users (admin)"
+    assert (
+        admin2_id not in user_ids
+    ), "Should NOT include admin users (admin2)"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_list_impersonatable_users_includes_usernames(db_transaction):
+    """Test that list_impersonatable_users() includes username and email."""
+    # Create users
+    user_id = uuid4()
+    await db_transaction.execute(
+        """
+        INSERT INTO app_user (app_user_id, name, email, username, data)
+        VALUES ($1, 'Test User', 'test@example.com', 'testuser', '{}')
+        """,
+        user_id,
+    )
+
+    # Get list
+    users = await db_transaction.fetch(
+        """
+        SELECT * FROM list_impersonatable_users()
+        """
+    )
+
+    # Find our user
+    user = next(
+        (u for u in users if u["app_user_id"] == user_id), None
+    )
+    assert user is not None, "Should include our test user"
+    assert user["username"] == "testuser", "Should include username"
+    assert user["email"] == "test@example.com", "Should include email"
+    assert user["name"] == "Test User", "Should include name"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_get_active_impersonation_sessions_returns_details(
+    db_transaction,
+):
+    """Test that get_active_impersonation_sessions() returns session details."""
+    # Create admin and target users
+    admin_id = uuid4()
+    target_id = uuid4()
+
+    await db_transaction.execute(
+        """
+        INSERT INTO app_user (app_user_id, name, email, username, data)
+        VALUES
+            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
+            ($2, 'Target', 'target@example.com', 'target', '{}')
+        """,
+        admin_id,
+        target_id,
+    )
+
+    # Grant admin role
+    await db_transaction.execute(
+        """
+        INSERT INTO admin_users (admin_user_id, role)
+        VALUES ($1, 'admin')
+        """,
+        admin_id,
+    )
+
+    # Start impersonation
+    audit_id = await db_transaction.fetchval(
+        """
+        SELECT log_impersonation_start($1, $2)
+        """,
+        admin_id,
+        target_id,
+    )
+
+    # Get active sessions
+    sessions = await db_transaction.fetch(
+        """
+        SELECT * FROM get_active_impersonation_sessions()
+        """
+    )
+
+    # Should have our session
+    session = next(
+        (s for s in sessions if s["audit_id"] == audit_id), None
+    )
+    assert session is not None, "Should include our session"
+    assert session["admin_username"] == "admin", "Should include admin username"
+    assert (
+        session["target_username"] == "target"
+    ), "Should include target username"
+    assert session["duration_minutes"] is not None, "Should include duration"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_timeout_expired_sessions_ends_old_sessions(db_transaction):
+    """Test that timeout_expired_impersonation_sessions() ends old sessions."""
+    # Create admin and target users
+    admin_id = uuid4()
+    target_id = uuid4()
+
+    await db_transaction.execute(
+        """
+        INSERT INTO app_user (app_user_id, name, email, username, data)
+        VALUES
+            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
+            ($2, 'Target', 'target@example.com', 'target', '{}')
+        """,
+        admin_id,
+        target_id,
+    )
+
+    # Grant admin role
+    await db_transaction.execute(
+        """
+        INSERT INTO admin_users (admin_user_id, role)
+        VALUES ($1, 'admin')
+        """,
+        admin_id,
+    )
+
+    # Create an old impersonation session (started 3 hours ago)
+    await db_transaction.execute(
+        """
+        INSERT INTO impersonation_audit (admin_user_id, target_user_id, started_at)
+        VALUES ($1, $2, now() - interval '3 hours')
+        """,
+        admin_id,
+        target_id,
+    )
+
+    # Run timeout function
+    count = await db_transaction.fetchval(
+        """
+        SELECT timeout_expired_impersonation_sessions()
+        """
+    )
+
+    assert count == 1, "Should timeout 1 session"
+
+    # Verify session was ended
+    ended = await db_transaction.fetchval(
+        """
+        SELECT ended_reason FROM impersonation_audit
+        WHERE admin_user_id = $1 AND target_user_id = $2
+        """,
+        admin_id,
+        target_id,
+    )
+    assert ended == "timeout", "Should be ended with 'timeout' reason"

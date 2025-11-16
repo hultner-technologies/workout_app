@@ -357,6 +357,39 @@ COMMENT ON FUNCTION get_impersonation_history IS 'Get impersonation history for 
 GRANT EXECUTE ON FUNCTION get_impersonation_history(uuid, int) TO authenticated;
 
 
+-- Function: List all users that can be impersonated (non-admin users)
+CREATE OR REPLACE FUNCTION list_impersonatable_users()
+RETURNS TABLE (
+  app_user_id uuid,
+  username text,
+  email text,
+  name text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    au.app_user_id,
+    au.username,
+    au.email,
+    au.name
+  FROM app_user au
+  WHERE NOT EXISTS (
+    SELECT 1 FROM admin_users adm
+    WHERE adm.admin_user_id = au.app_user_id
+      AND adm.revoked_at IS NULL
+  )
+  ORDER BY au.username;
+$$;
+
+COMMENT ON FUNCTION list_impersonatable_users IS 'List all users that can be impersonated (excludes admin users). Returns user ID, username, email, and name. Used by admin UI to show user list.';
+
+-- Grant execute to authenticated users (admin check in frontend)
+GRANT EXECUTE ON FUNCTION list_impersonatable_users() TO authenticated;
+
+
 -- =============================================================================
 -- MAINTENANCE & MONITORING
 -- =============================================================================
