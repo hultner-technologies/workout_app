@@ -221,19 +221,24 @@ $$;
 
 ## API Implementation
 
-### Backend API Routes
+### PostgreSQL RPC Functions
 
-These would be implemented in a separate backend service or Next.js API routes.
+Following the database-first architecture, impersonation logic is implemented as PostgreSQL functions callable via Supabase client RPC. No separate backend server needed.
 
-#### POST /api/admin/impersonate/start
+#### RPC: start_impersonation()
 
 **Purpose:** Initiate impersonation session
 
-**Request:**
+**Frontend Call:**
 ```typescript
-{
-  target_user_id: string  // UUID of user to impersonate
-}
+const { data, error } = await supabase.rpc('start_impersonation', {
+  p_target_user_id: 'uuid-here'
+})
+```
+
+**Parameters:**
+```sql
+p_target_user_id uuid  -- User to impersonate
 ```
 
 **Flow:**
@@ -597,24 +602,29 @@ Users List
 
 ---
 
-## Open Questions
+## Design Decisions ✅
 
 1. **Frontend Architecture**
-   - Is this a React Native app or web app or both?
-   - Where do we implement the backend API? (Next.js API routes? Separate service?)
-   - Mobile app impersonation UX considerations?
+   - ✅ Both React Native and web, but frontend is outside scope of this repository
+   - ✅ Backend API implemented entirely in Supabase using PostgreSQL RPC functions (database-first)
+   - ✅ No separate backend server needed - use Supabase client to call RPC functions
+   - Mobile/web-specific UX handled in separate frontend repository
 
 2. **Admin Provisioning**
-   - How are initial admins created? (Manual SQL insert? Seed script?)
-   - Self-service role requests? (Requires approval workflow)
+   - ✅ Initial admins created manually via SQL INSERT (database editing)
+   - ❌ No self-service role requests (manual process ensures security)
+   - Future: Could add approval workflow if needed
 
 3. **Notification**
-   - Should target users be notified when impersonated?
-   - Email notification to admin after impersonation session?
+   - ✅ Target users NOT notified when impersonated (stealth mode for debugging)
+   - ❌ No email notifications (audit log provides full trail)
+   - Admins can view audit log for accountability
 
 4. **Permissions**
-   - Should some users be "unimpersonable"?
-   - Role-based restrictions (support can impersonate regular users, admins can impersonate anyone)?
+   - ✅ Some users are "unimpersonable" - specifically other admins
+   - ✅ Admins cannot impersonate each other (prevents lateral movement)
+   - ✅ Only regular users (non-admins) can be impersonated
+   - Future: Role-based restrictions if needed (support vs admin permissions)
 
 ---
 
