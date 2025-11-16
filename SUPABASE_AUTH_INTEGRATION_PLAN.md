@@ -137,7 +137,13 @@ INSERT INTO username_adjectives (word, category) VALUES
   ('Stellar', 'style'), ('Prime', 'style'), ('Elite', 'style'), ('Supreme', 'style'),
   -- Nature qualities
   ('Verdant', 'nature'), ('Lush', 'nature'), ('Vibrant', 'nature'), ('Radiant', 'nature'),
-  ('Glowing', 'nature'), ('Shining', 'nature'), ('Gleaming', 'nature'), ('Sparkling', 'nature');
+  ('Glowing', 'nature'), ('Shining', 'nature'), ('Gleaming', 'nature'), ('Sparkling', 'nature'),
+  -- Gym & Fitness themed (GymR8 branding)
+  ('Swole', 'fitness'), ('Buff', 'fitness'), ('Ripped', 'fitness'), ('Shredded', 'fitness'),
+  ('Jacked', 'fitness'), ('Pumped', 'fitness'), ('Built', 'fitness'), ('Toned', 'fitness'),
+  ('Lean', 'fitness'), ('Massive', 'fitness'), ('Beastly', 'fitness'), ('Hardcore', 'fitness'),
+  ('Iron', 'gym'), ('Steel', 'gym'), ('Titanium', 'gym'), ('Granite', 'gym'),
+  ('Grind', 'gym'), ('Hustle', 'gym'), ('Alpha', 'fitness'), ('Peak', 'fitness');
 
 INSERT INTO username_nouns (word, category) VALUES
   -- Large mammals
@@ -190,7 +196,19 @@ INSERT INTO username_nouns (word, category) VALUES
   -- Concepts & abstract
   ('Spirit', 'concept'), ('Shadow', 'concept'), ('Light', 'concept'), ('Echo', 'concept'),
   ('Dream', 'concept'), ('Vision', 'concept'), ('Phantom', 'concept'), ('Spectre', 'concept'),
-  ('Ember', 'concept'), ('Flame', 'concept'), ('Blaze', 'concept'), ('Spark', 'concept');
+  ('Ember', 'concept'), ('Flame', 'concept'), ('Blaze', 'concept'), ('Spark', 'concept'),
+  -- Gym & Fitness themed (GymR8 branding - THE STAR!)
+  ('Rat', 'gymrat'), ('GymRat', 'gymrat'), ('IronRat', 'gymrat'), ('SwoleRat', 'gymrat'),
+  -- Gym equipment
+  ('Barbell', 'equipment'), ('Dumbbell', 'equipment'), ('Kettlebell', 'equipment'), ('Plate', 'equipment'),
+  ('Rack', 'equipment'), ('Cable', 'equipment'), ('Machine', 'equipment'), ('Bench', 'equipment'),
+  -- Gym roles & personas
+  ('Lifter', 'athlete'), ('Powerlifter', 'athlete'), ('Bodybuilder', 'athlete'), ('Athlete', 'athlete'),
+  ('Crusher', 'athlete'), ('Grinder', 'athlete'), ('Beast', 'athlete'), ('Tank', 'athlete'),
+  ('Bull', 'athlete'), ('Titan', 'athlete'), ('Giant', 'athlete'), ('Machine', 'athlete'),
+  -- Gym concepts
+  ('Gains', 'concept'), ('Pump', 'concept'), ('Rep', 'concept'), ('Set', 'concept'),
+  ('PR', 'concept'), ('Max', 'concept'), ('Iron', 'concept'), ('Steel', 'concept');
 
 -- Add index for random selection performance
 CREATE INDEX idx_username_adjectives_random ON username_adjectives USING btree (random());
@@ -252,10 +270,12 @@ $$;
 ```
 
 **Considerations (Table-Based):**
-- **Highly Scalable**: 120 adjectives × 150 nouns = **18,000 base combinations**
-- **With Numbers**: ~18,000 × 9,980 = **~180 million combinations**
+- **Highly Scalable**: 140 adjectives × 182 nouns = **25,480 base combinations**
+- **With Numbers**: ~25,480 × 9,980 = **~254 million combinations**
+- **GymR8 Branded**: Includes gym/fitness themed words (Rat, Barbell, Swole, etc.)
+- **Example Usernames**: `SwoleRat`, `IronLifter`, `BuffBarbell`, `RippedGymRat`, `MightyBeast`
 - **Easy Expansion**: Add words with simple INSERT statements
-- **Categorization**: Words organized by category for future features
+- **Categorization**: Words organized by category (gymrat, equipment, athlete, fitness, etc.)
 - **Analytics-Ready**: Can query most popular words, usage statistics
 - **Admin-Friendly**: Future admin UI can manage word lists
 - **Performance**: Minimal overhead, optimized with proper indexing
@@ -276,7 +296,9 @@ Simpler implementation, good for getting started quickly. Less flexible but adeq
 
 **Recommendation:** Start with **Option A (Table-Based)** for long-term maintainability, or use Option B if you want to ship faster and migrate later.
 
-**Status:** ⏳ Pending (Decision needed: Table-based or Array-based?)
+**Decision:** ✅ **Option A (Table-Based)** selected - provides easy expansion as we add more words
+
+**Status:** ⏳ Pending Implementation
 
 ---
 
@@ -650,6 +672,7 @@ If issues arise:
 - ✅ **Username changes**: Enabled but discouraged (link breakage). Manual process initially acceptable
 - ✅ **Email confirmation**: Enabled from start (Supabase free tier includes email, no frontend hosting needed)
 - ✅ **Default name**: Use username if name not provided during signup
+- ✅ **Username generation approach**: Table-based (Option A) for easy expansion and maintainability
 
 ### Implementation Notes
 
@@ -729,3 +752,13 @@ ALTER TABLE app_user
 - Table-based approach follows PostgreSQL best practices for maintainability
 - Added word categories: mammals, birds, mythical creatures, geography, celestial, fantasy roles, etc.
 - Decision needed: Choose table-based or array-based implementation
+
+**Update 4 - GymR8 Branding & Final Decision:**
+- ✅ **Decision**: Selected Option A (Table-Based) for easy expansion
+- Added GymR8-branded fitness/gym themed words:
+  - **Gym Adjectives (20)**: Swole, Buff, Ripped, Shredded, Jacked, Pumped, Built, Toned, Lean, Massive, Beastly, Hardcore, Iron, Steel, Titanium, Granite, Grind, Hustle, Alpha, Peak
+  - **Gym Nouns (32)**: Rat, GymRat, IronRat, SwoleRat, Barbell, Dumbbell, Kettlebell, Plate, Rack, Cable, Machine, Bench, Lifter, Powerlifter, Bodybuilder, Athlete, Crusher, Grinder, Beast, Tank, Bull, Titan, Giant, Gains, Pump, Rep, Set, PR, Max, Iron, Steel
+- **Updated totals**: 140 adjectives × 182 nouns = **25,480 base combinations** (~254 million with numbers)
+- **Example GymR8 Usernames**: `SwoleRat`, `IronLifter`, `BuffBarbell`, `RippedGymRat`, `MightyBeast`, `HardcoreGains`
+- Organized by fitness categories: gymrat, equipment, athlete, fitness, gym
+- Plan ready for implementation!
