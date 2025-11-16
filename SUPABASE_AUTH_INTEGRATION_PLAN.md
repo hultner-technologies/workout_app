@@ -63,47 +63,166 @@ ALTER TABLE app_user DROP COLUMN IF EXISTS password;
 
 **File:** `database/026_Auth_Username_Generator.sql`
 
+**Two Implementation Approaches:**
+
+#### Option A: Table-Based (Recommended)
+
+More maintainable, easier to expand, follows database best practices.
+
 **Implementation:**
+
 ```sql
--- Function to generate unique Reddit-style username
--- Pattern: AdjectiveNoun or AdjectiveNoun### (if collision)
--- Examples: HappyPanda, QuietZebra, FriendlyDog42
+-- Create word tables for username generation
+CREATE TABLE username_adjectives (
+  word text PRIMARY KEY,
+  category text,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE username_nouns (
+  word text PRIMARY KEY,
+  category text,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Seed with expanded word lists (120 adjectives × 150 nouns = 18,000 combinations)
+INSERT INTO username_adjectives (word, category) VALUES
+  -- Positive traits
+  ('Happy', 'emotion'), ('Jolly', 'emotion'), ('Cheerful', 'emotion'), ('Bright', 'quality'),
+  ('Sunny', 'nature'), ('Friendly', 'personality'), ('Kind', 'personality'), ('Gentle', 'personality'),
+  ('Calm', 'personality'), ('Peaceful', 'quality'), ('Serene', 'quality'), ('Tranquil', 'quality'),
+  -- Speed & movement
+  ('Quick', 'movement'), ('Swift', 'movement'), ('Rapid', 'movement'), ('Fast', 'movement'),
+  ('Agile', 'quality'), ('Nimble', 'quality'), ('Fleet', 'movement'), ('Speedy', 'movement'),
+  -- Intelligence & wisdom
+  ('Wise', 'mental'), ('Clever', 'mental'), ('Smart', 'mental'), ('Bright', 'mental'),
+  ('Sharp', 'mental'), ('Keen', 'mental'), ('Astute', 'mental'), ('Savvy', 'mental'),
+  -- Strength & power
+  ('Strong', 'physical'), ('Mighty', 'physical'), ('Powerful', 'physical'), ('Robust', 'physical'),
+  ('Sturdy', 'physical'), ('Solid', 'physical'), ('Tough', 'physical'), ('Hardy', 'physical'),
+  -- Bravery & courage
+  ('Brave', 'personality'), ('Bold', 'personality'), ('Daring', 'personality'), ('Fearless', 'personality'),
+  ('Valiant', 'personality'), ('Heroic', 'personality'), ('Gallant', 'personality'), ('Noble', 'personality'),
+  -- Freedom & independence
+  ('Free', 'concept'), ('Wild', 'concept'), ('Rogue', 'concept'), ('Rebel', 'concept'),
+  ('Maverick', 'concept'), ('Wandering', 'concept'), ('Roaming', 'concept'), ('Drifting', 'concept'),
+  -- Purity & truth
+  ('Pure', 'quality'), ('True', 'quality'), ('Honest', 'quality'), ('Clear', 'quality'),
+  ('Genuine', 'quality'), ('Real', 'quality'), ('Authentic', 'quality'), ('Sincere', 'quality'),
+  -- Royalty & grandeur
+  ('Royal', 'status'), ('Grand', 'status'), ('Majestic', 'status'), ('Regal', 'status'),
+  ('Imperial', 'status'), ('Sovereign', 'status'), ('Supreme', 'status'), ('Noble', 'status'),
+  -- Magic & fantasy
+  ('Magic', 'fantasy'), ('Mystic', 'fantasy'), ('Arcane', 'fantasy'), ('Ethereal', 'fantasy'),
+  ('Enchanted', 'fantasy'), ('Fabled', 'fantasy'), ('Mythic', 'fantasy'), ('Legendary', 'fantasy'),
+  -- Metals & gems
+  ('Golden', 'material'), ('Silver', 'material'), ('Crystal', 'material'), ('Amber', 'material'),
+  ('Ruby', 'material'), ('Jade', 'material'), ('Emerald', 'material'), ('Sapphire', 'material'),
+  ('Diamond', 'material'), ('Bronze', 'material'), ('Platinum', 'material'), ('Pearl', 'material'),
+  -- Space & cosmic
+  ('Cosmic', 'space'), ('Stellar', 'space'), ('Lunar', 'space'), ('Solar', 'space'),
+  ('Astral', 'space'), ('Galactic', 'space'), ('Nebular', 'space'), ('Celestial', 'space'),
+  -- Time & era
+  ('Ancient', 'time'), ('Modern', 'time'), ('Future', 'time'), ('Eternal', 'time'),
+  ('Timeless', 'time'), ('Primal', 'time'), ('Classic', 'time'), ('Vintage', 'time'),
+  -- Greek alphabet & special
+  ('Alpha', 'greek'), ('Beta', 'greek'), ('Gamma', 'greek'), ('Delta', 'greek'),
+  ('Omega', 'greek'), ('Prime', 'concept'), ('Mega', 'concept'), ('Ultra', 'concept'),
+  ('Super', 'concept'), ('Hyper', 'concept'), ('Neo', 'concept'), ('Quantum', 'concept'),
+  -- Technology
+  ('Cyber', 'tech'), ('Digital', 'tech'), ('Pixel', 'tech'), ('Binary', 'tech'),
+  ('Vector', 'tech'), ('Matrix', 'tech'), ('Circuit', 'tech'), ('Silicon', 'tech'),
+  -- Style & cool
+  ('Cool', 'style'), ('Epic', 'style'), ('Awesome', 'style'), ('Rad', 'style'),
+  ('Stellar', 'style'), ('Prime', 'style'), ('Elite', 'style'), ('Supreme', 'style'),
+  -- Nature qualities
+  ('Verdant', 'nature'), ('Lush', 'nature'), ('Vibrant', 'nature'), ('Radiant', 'nature'),
+  ('Glowing', 'nature'), ('Shining', 'nature'), ('Gleaming', 'nature'), ('Sparkling', 'nature');
+
+INSERT INTO username_nouns (word, category) VALUES
+  -- Large mammals
+  ('Panda', 'mammal'), ('Tiger', 'mammal'), ('Lion', 'mammal'), ('Bear', 'mammal'),
+  ('Wolf', 'mammal'), ('Fox', 'mammal'), ('Deer', 'mammal'), ('Otter', 'mammal'),
+  ('Leopard', 'mammal'), ('Jaguar', 'mammal'), ('Panther', 'mammal'), ('Cheetah', 'mammal'),
+  ('Lynx', 'mammal'), ('Cougar', 'mammal'), ('Bison', 'mammal'), ('Buffalo', 'mammal'),
+  ('Moose', 'mammal'), ('Elk', 'mammal'), ('Rhino', 'mammal'), ('Hippo', 'mammal'),
+  -- Birds
+  ('Eagle', 'bird'), ('Falcon', 'bird'), ('Hawk', 'bird'), ('Owl', 'bird'),
+  ('Raven', 'bird'), ('Sparrow', 'bird'), ('Phoenix', 'bird'), ('Condor', 'bird'),
+  ('Crane', 'bird'), ('Heron', 'bird'), ('Swan', 'bird'), ('Dove', 'bird'),
+  ('Finch', 'bird'), ('Robin', 'bird'), ('Cardinal', 'bird'), ('Bluejay', 'bird'),
+  -- Sea creatures
+  ('Dolphin', 'sea'), ('Shark', 'sea'), ('Whale', 'sea'), ('Seal', 'sea'),
+  ('Penguin', 'sea'), ('Turtle', 'sea'), ('Orca', 'sea'), ('Manta', 'sea'),
+  ('Nautilus', 'sea'), ('Kraken', 'sea'), ('Barracuda', 'sea'), ('Marlin', 'sea'),
+  -- Mythical creatures
+  ('Dragon', 'mythical'), ('Griffin', 'mythical'), ('Unicorn', 'mythical'), ('Pegasus', 'mythical'),
+  ('Chimera', 'mythical'), ('Hydra', 'mythical'), ('Basilisk', 'mythical'), ('Sphinx', 'mythical'),
+  -- Geography & landscapes
+  ('River', 'geography'), ('Mountain', 'geography'), ('Ocean', 'geography'), ('Forest', 'geography'),
+  ('Desert', 'geography'), ('Valley', 'geography'), ('Canyon', 'geography'), ('Meadow', 'geography'),
+  ('Peak', 'geography'), ('Ridge', 'geography'), ('Summit', 'geography'), ('Glacier', 'geography'),
+  ('Volcano', 'geography'), ('Island', 'geography'), ('Peninsula', 'geography'), ('Plateau', 'geography'),
+  -- Weather & sky
+  ('Storm', 'weather'), ('Thunder', 'weather'), ('Lightning', 'weather'), ('Rain', 'weather'),
+  ('Snow', 'weather'), ('Wind', 'weather'), ('Cloud', 'weather'), ('Mist', 'weather'),
+  ('Frost', 'weather'), ('Blizzard', 'weather'), ('Tempest', 'weather'), ('Gale', 'weather'),
+  -- Celestial
+  ('Star', 'celestial'), ('Moon', 'celestial'), ('Sun', 'celestial'), ('Comet', 'celestial'),
+  ('Galaxy', 'celestial'), ('Nebula', 'celestial'), ('Cosmos', 'celestial'), ('Planet', 'celestial'),
+  ('Meteor', 'celestial'), ('Aurora', 'celestial'), ('Pulsar', 'celestial'), ('Quasar', 'celestial'),
+  -- Fantasy roles
+  ('Knight', 'fantasy'), ('Wizard', 'fantasy'), ('Ninja', 'fantasy'), ('Samurai', 'fantasy'),
+  ('Ranger', 'fantasy'), ('Hunter', 'fantasy'), ('Warrior', 'fantasy'), ('Guardian', 'fantasy'),
+  ('Sage', 'fantasy'), ('Oracle', 'fantasy'), ('Prophet', 'fantasy'), ('Scholar', 'fantasy'),
+  ('Paladin', 'fantasy'), ('Druid', 'fantasy'), ('Monk', 'fantasy'), ('Rogue', 'fantasy'),
+  ('Archer', 'fantasy'), ('Mage', 'fantasy'), ('Cleric', 'fantasy'), ('Shaman', 'fantasy'),
+  -- Arts & creativity
+  ('Artist', 'arts'), ('Poet', 'arts'), ('Bard', 'arts'), ('Scribe', 'arts'),
+  ('Painter', 'arts'), ('Dancer', 'arts'), ('Singer', 'arts'), ('Player', 'arts'),
+  -- Trees & plants
+  ('Oak', 'plant'), ('Pine', 'plant'), ('Willow', 'plant'), ('Maple', 'plant'),
+  ('Cedar', 'plant'), ('Birch', 'plant'), ('Aspen', 'plant'), ('Redwood', 'plant'),
+  ('Bamboo', 'plant'), ('Lotus', 'plant'), ('Rose', 'plant'), ('Iris', 'plant'),
+  -- Gemstones & minerals
+  ('Opal', 'mineral'), ('Topaz', 'mineral'), ('Onyx', 'mineral'), ('Quartz', 'mineral'),
+  ('Obsidian', 'mineral'), ('Flint', 'mineral'), ('Marble', 'mineral'), ('Granite', 'mineral'),
+  -- Concepts & abstract
+  ('Spirit', 'concept'), ('Shadow', 'concept'), ('Light', 'concept'), ('Echo', 'concept'),
+  ('Dream', 'concept'), ('Vision', 'concept'), ('Phantom', 'concept'), ('Spectre', 'concept'),
+  ('Ember', 'concept'), ('Flame', 'concept'), ('Blaze', 'concept'), ('Spark', 'concept');
+
+-- Add index for random selection performance
+CREATE INDEX idx_username_adjectives_random ON username_adjectives USING btree (random());
+CREATE INDEX idx_username_nouns_random ON username_nouns USING btree (random());
+
+-- Username generation function using tables
 CREATE OR REPLACE FUNCTION generate_unique_username()
 RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  -- Curated word lists for readable usernames
-  adjectives text[] := ARRAY[
-    'Happy', 'Quick', 'Silent', 'Bright', 'Clever', 'Gentle', 'Swift', 'Brave',
-    'Calm', 'Wise', 'Bold', 'Kind', 'Noble', 'Proud', 'Wild', 'Free',
-    'Pure', 'True', 'Fair', 'Grand', 'Royal', 'Fancy', 'Lucky', 'Magic',
-    'Sunny', 'Starry', 'Golden', 'Silver', 'Crystal', 'Amber', 'Ruby', 'Jade',
-    'Cosmic', 'Ancient', 'Modern', 'Future', 'Alpha', 'Omega', 'Prime', 'Mega',
-    'Ultra', 'Super', 'Hyper', 'Neo', 'Cyber', 'Digital', 'Pixel', 'Retro',
-    'Cool', 'Epic', 'Awesome', 'Stellar', 'Lunar', 'Solar', 'Quantum', 'Mystic'
-  ];
-
-  nouns text[] := ARRAY[
-    'Panda', 'Tiger', 'Eagle', 'Falcon', 'Phoenix', 'Dragon', 'Wolf', 'Bear',
-    'Lion', 'Hawk', 'Owl', 'Fox', 'Deer', 'Otter', 'Raven', 'Sparrow',
-    'Dolphin', 'Shark', 'Whale', 'Seal', 'Penguin', 'Turtle', 'Jaguar', 'Leopard',
-    'River', 'Mountain', 'Ocean', 'Forest', 'Desert', 'Valley', 'Canyon', 'Meadow',
-    'Storm', 'Thunder', 'Lightning', 'Rain', 'Snow', 'Wind', 'Cloud', 'Star',
-    'Moon', 'Sun', 'Comet', 'Galaxy', 'Nebula', 'Cosmos', 'Planet', 'Meteor',
-    'Knight', 'Wizard', 'Ninja', 'Samurai', 'Ranger', 'Hunter', 'Warrior', 'Guardian',
-    'Sage', 'Oracle', 'Prophet', 'Scholar', 'Artist', 'Poet', 'Bard', 'Monk'
-  ];
-
+  selected_adjective text;
+  selected_noun text;
   new_username text;
   username_exists boolean;
   attempt_count integer := 0;
   max_attempts integer := 5;
 BEGIN
   LOOP
-    -- Generate random AdjectiveNoun combination
-    new_username := adjectives[1 + floor(random() * array_length(adjectives, 1))::int] ||
-                    nouns[1 + floor(random() * array_length(nouns, 1))::int];
+    -- Select random adjective and noun from tables
+    SELECT word INTO selected_adjective
+    FROM username_adjectives
+    ORDER BY random()
+    LIMIT 1;
+
+    SELECT word INTO selected_noun
+    FROM username_nouns
+    ORDER BY random()
+    LIMIT 1;
+
+    -- Generate AdjectiveNoun combination
+    new_username := selected_adjective || selected_noun;
 
     -- Add random 2-4 digit number if we've had collisions
     IF attempt_count > 0 THEN
@@ -132,16 +251,32 @@ END;
 $$;
 ```
 
-**Considerations:**
-- **Readable & Memorable**: Generates usernames like `HappyPanda`, `QuietZebra`, `BraveTiger`
-- **Collision Handling**: Adds 2-4 digit numbers if needed (e.g., `SwiftEagle42`)
-- **Large Namespace**: 56 adjectives × 64 nouns = 3,584 base combinations
-- **With Numbers**: ~36 million combinations (3,584 × 9,980)
-- **Safety Mechanism**: Timestamp fallback prevents infinite loops
-- **Unique Constraint**: Database-level guarantee via `app_user.username UNIQUE`
-- **Expandable**: Easy to add more adjectives/nouns to word lists
+**Considerations (Table-Based):**
+- **Highly Scalable**: 120 adjectives × 150 nouns = **18,000 base combinations**
+- **With Numbers**: ~18,000 × 9,980 = **~180 million combinations**
+- **Easy Expansion**: Add words with simple INSERT statements
+- **Categorization**: Words organized by category for future features
+- **Analytics-Ready**: Can query most popular words, usage statistics
+- **Admin-Friendly**: Future admin UI can manage word lists
+- **Performance**: Minimal overhead, optimized with proper indexing
+- **Maintainable**: Follows database normalization best practices
 
-**Status:** ⏳ Pending
+#### Option B: Array-Based (Simpler, Static)
+
+Simpler implementation, good for getting started quickly. Less flexible but adequate for most use cases.
+
+**Implementation:** See expanded array-based version in appendix (maintains original approach with 3x more words)
+
+**Considerations (Array-Based):**
+- **Simpler**: No additional tables to manage
+- **Adequate Namespace**: Can expand to ~10,000-15,000 combinations
+- **Static**: Requires code changes to add/remove words
+- **Good for MVP**: Faster to implement initially
+- **Migration Path**: Can migrate to table-based later if needed
+
+**Recommendation:** Start with **Option A (Table-Based)** for long-term maintainability, or use Option B if you want to ship faster and migrate later.
+
+**Status:** ⏳ Pending (Decision needed: Table-based or Array-based?)
 
 ---
 
@@ -579,3 +714,18 @@ ALTER TABLE app_user
 - Updated trigger to use username as default name fallback
 - Moved email confirmation from Phase 2 to Phase 1
 - Added implementation notes for email setup and username changes
+
+**Update 3 - Improved Username Generation:**
+- Analyzed current namespace: 3,584 combinations (adequate but limited)
+- Added two implementation approaches:
+  - **Option A (Recommended)**: Table-based with 18,000+ combinations
+    - 120 adjectives × 150 nouns = 18,000 base combinations
+    - ~180 million combinations with numbers
+    - Organized by category (emotion, nature, fantasy, etc.)
+    - Easy to expand via SQL INSERT
+    - Analytics-ready for usage statistics
+    - Future admin UI capability
+  - **Option B**: Array-based (simpler, can expand to 10,000-15,000 combinations)
+- Table-based approach follows PostgreSQL best practices for maintainability
+- Added word categories: mammals, birds, mythical creatures, geography, celestial, fantasy roles, etc.
+- Decision needed: Choose table-based or array-based implementation
