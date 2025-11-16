@@ -39,28 +39,39 @@
 ### High Priority
 
 #### 2.2 Admin Impersonation System ⭐
-**Status:** Design phase
+**Status:** Phase 2.2.1 Complete - Database schema implemented
 
-**Requirements:**
-- Session-based user switching (not just RLS bypass)
-- Admin can "become" another user from admin UI
-- All queries run as target user (RLS enforced)
-- Admin can switch back to own session
-- Audit logging for all impersonation events
-- Security: Restrict to specific admin role
-- UI indicator showing impersonation mode
-- Session timeout for impersonated sessions
+**Phase 2.2.1: Database Schema** ✅
+- [x] admin_users table with role hierarchy
+- [x] impersonation_audit table for compliance
+- [x] Helper functions: is_admin(), get_admin_role(), can_impersonate_user()
+- [x] Audit logging: log_impersonation_start(), log_impersonation_end()
+- [x] Session management: get_active_impersonation_sessions()
+- [x] Auto-timeout: timeout_expired_impersonation_sessions()
+- [x] 42 comprehensive tests (34 unit + 8 integration)
+- [x] RLS policies for admin-only access
+- [x] Prevents admin-to-admin impersonation
 
-**Design Decisions Needed:**
-- [ ] Admin role structure (dedicated table vs app_user flag?)
-- [ ] Session management approach (set_config vs custom JWT claims?)
-- [ ] Audit log schema
-- [ ] Frontend flow and UI/UX
-- [ ] Security restrictions and permissions
+**Phase 2.2.2: RPC Implementation** (Next)
+- [ ] Implement start_impersonation() RPC function
+- [ ] Implement end_impersonation() RPC function
+- [ ] Implement get_impersonation_token() for magic link generation
+- [ ] Test impersonation flow end-to-end
+- [ ] Document RPC usage for frontend
+
+**Phase 2.2.3: Frontend Integration** (Future)
+- [ ] Create ImpersonationBanner component
+- [ ] Add impersonation controls to user list
+- [ ] Create audit log viewer
+- [ ] Add confirmation dialogs
+- [ ] Write E2E tests
 
 **References:**
-- SUPABASE_AUTH_INTEGRATION_PLAN.md section 2.2
-- Supabase session management docs
+- ADMIN_IMPERSONATION_DESIGN.md (full design document)
+- database/030_Admin_Roles.sql
+- database/031_Impersonation_Audit.sql
+- tests/database/test_admin_impersonation.py
+- Commit: `0081ba8`
 
 ---
 
