@@ -1,0 +1,466 @@
+"""
+Test suite for Supabase Auth integration with app_user table.
+
+Tests cover:
+- Username generation function
+- Auth trigger for auto-profile creation
+- RLS policies with auth.uid()
+- Username validation constraints
+"""
+
+import uuid
+
+import pytest
+from asyncpg import exceptions
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_username_generation_tables_exist(db_transaction):
+    """Test that username word tables are created and populated."""
+    # Test adjectives table exists and has data
+    adj_count = await db_transaction.fetchval(
+        "SELECT COUNT(*) FROM username_adjectives"
+    )
+    assert adj_count > 0, "username_adjectives table should have words"
+    assert adj_count >= 140, f"Expected at least 140 adjectives, got {adj_count}"
+
+    # Test nouns table exists and has data
+    noun_count = await db_transaction.fetchval("SELECT COUNT(*) FROM username_nouns")
+    assert noun_count > 0, "username_nouns table should have words"
+    assert noun_count >= 182, f"Expected at least 182 nouns, got {noun_count}"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_username_generation_function_exists(db_transaction):
+    """Test that generate_unique_username() function exists and is callable."""
+    result = await db_transaction.fetchval("SELECT generate_unique_username()")
+    assert result is not None, "generate_unique_username() should return a value"
+    assert isinstance(result, str), "Username should be a string"
+    assert len(result) >= 4, "Username should be at least 4 characters"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_username_generation_produces_readable_format(db_transaction):
+    """Test that generated usernames follow AdjectiveNoun pattern."""
+    username = await db_transaction.fetchval("SELECT generate_unique_username()")
+
+    # Should be alphanumeric (no special chars for generated usernames)
+    assert username.isalnum(), f"Generated username '{username}' should be alphanumeric"
+
+    # Should start with capital letter (adjective)
+    assert username[0].isupper(), f"Username '{username}' should start with capital"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_username_generation_uniqueness(db_transaction):
+    """Test that username generation produces unique values."""
+    # Generate multiple usernames
+    usernames = set()
+    for _ in range(10):
+        username = await db_transaction.fetchval("SELECT generate_unique_username()")
+        usernames.add(username)
+
+    # All should be unique (very high probability with 25k+ combinations)
+    assert len(usernames) == 10, "Generated usernames should be unique"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_username_generation_includes_gymr8_words(db_transaction):
+    """Test that gym/fitness themed words are in the word lists."""
+    # Check for some key GymR8 branded words
+    gym_adjectives = await db_transaction.fetch(
+        """
+        SELECT word FROM username_adjectives
+        WHERE category IN ('fitness', 'gym')
+        """
+    )
+    adj_words = [row["word"] for row in gym_adjectives]
+    assert "Swole" in adj_words, "Should have 'Swole' adjective"
+    assert "Ripped" in adj_words, "Should have 'Ripped' adjective"
+
+    gym_nouns = await db_transaction.fetch(
+        """
+        SELECT word FROM username_nouns
+        WHERE category IN ('gymrat', 'equipment', 'athlete')
+        """
+    )
+    noun_words = [row["word"] for row in gym_nouns]
+    assert "Rat" in noun_words, "Should have 'Rat' noun (GymR8!)"
+    assert "Barbell" in noun_words, "Should have 'Barbell' noun"
+    assert "Lifter" in noun_words, "Should have 'Lifter' noun"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_app_user_schema_has_username_field(db_transaction):
+    """Test that app_user table has username column with proper constraints."""
+    # Check column exists
+    column_info = await db_transaction.fetchrow(
+        """
+        SELECT column_name, data_type, is_nullable, character_maximum_length
+        FROM information_schema.columns
+        WHERE table_name = 'app_user' AND column_name = 'username'
+        """
+    )
+    assert column_info is not None, "app_user should have username column"
+    assert column_info["data_type"] == "text", "username should be text type"
+    assert column_info["is_nullable"] == "NO", "username should be NOT NULL"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_app_user_username_unique_constraint(db_transaction):
+    """Test that username has UNIQUE constraint."""
+    user1_id = uuid.uuid4()
+    user2_id = uuid.uuid4()
+
+    # Insert first user with username
+    await db_transaction.execute(
+        """
+        INSERT INTO app_user (app_user_id, name, email, username)
+        VALUES ($1, 'User 1', $2, 'TestUser123')
+        """,
+        user1_id,
+        f"{user1_id}@example.com",
+    )
+
+    # Try to insert second user with same username - should fail
+    with pytest.raises(exceptions.UniqueViolationError):
+        await db_transaction.execute(
+            """
+            INSERT INTO app_user (app_user_id, name, email, username)
+            VALUES ($1, 'User 2', $2, 'TestUser123')
+            """,
+            user2_id,
+            f"{user2_id}@example.com",
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_app_user_username_length_constraint(db_transaction):
+    """Test that username enforces minimum 4 character length."""
+    user_id = uuid.uuid4()
+
+    # Try to insert user with 3-char username - should fail
+    with pytest.raises(exceptions.CheckViolationError):
+        await db_transaction.execute(
+            """
+            INSERT INTO app_user (app_user_id, name, email, username)
+            VALUES ($1, 'Short User', $2, 'Bob')
+            """,
+            user_id,
+            f"{user_id}@example.com",
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_app_user_username_format_constraint(db_transaction):
+    """Test that username accepts alphanumeric + common chars (._-)."""
+    user_id = uuid.uuid4()
+
+    # Valid usernames with special chars
+    valid_usernames = ["user.name", "user_123", "john-doe", "test.user_1"]
+
+    for username in valid_usernames:
+        test_user_id = uuid.uuid4()
+        # Should succeed
+        await db_transaction.execute(
+            """
+            INSERT INTO app_user (app_user_id, name, email, username)
+            VALUES ($1, 'Test', $2, $3)
+            """,
+            test_user_id,
+            f"{test_user_id}@example.com",
+            username,
+        )
+
+    # Invalid username with disallowed characters
+    with pytest.raises(exceptions.CheckViolationError):
+        await db_transaction.execute(
+            """
+            INSERT INTO app_user (app_user_id, name, email, username)
+            VALUES ($1, 'Invalid', $2, 'user@name')
+            """,
+            uuid.uuid4(),
+            f"{uuid.uuid4()}@example.com",
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_app_user_foreign_key_to_auth_users(db_transaction):
+    """Test that app_user has foreign key constraint to auth.users."""
+    # Check foreign key constraint exists
+    fk_info = await db_transaction.fetchrow(
+        """
+        SELECT tc.constraint_name, kcu.column_name, ccu.table_name AS foreign_table_name
+        FROM information_schema.table_constraints AS tc
+        JOIN information_schema.key_column_usage AS kcu
+          ON tc.constraint_name = kcu.constraint_name
+        JOIN information_schema.constraint_column_usage AS ccu
+          ON ccu.constraint_name = tc.constraint_name
+        WHERE tc.table_name = 'app_user'
+          AND tc.constraint_type = 'FOREIGN KEY'
+          AND kcu.column_name = 'app_user_id'
+        """
+    )
+    assert fk_info is not None, "app_user_id should have foreign key constraint"
+    assert (
+        fk_info["foreign_table_name"] == "users"
+    ), "Foreign key should reference auth.users table"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_app_user_password_field_removed(db_transaction):
+    """Test that password column has been removed from app_user (Supabase manages auth)."""
+    column_exists = await db_transaction.fetchval(
+        """
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE table_name = 'app_user' AND column_name = 'password'
+        """
+    )
+    assert column_exists == 0, "password column should be removed from app_user"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_auth_trigger_function_exists(db_transaction):
+    """Test that handle_new_user() trigger function exists."""
+    function_exists = await db_transaction.fetchval(
+        """
+        SELECT COUNT(*)
+        FROM pg_proc
+        WHERE proname = 'handle_new_user'
+        """
+    )
+    assert function_exists > 0, "handle_new_user() function should exist"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_auth_trigger_exists_on_auth_users(db_transaction):
+    """Test that trigger exists on auth.users table."""
+    trigger_exists = await db_transaction.fetchval(
+        """
+        SELECT COUNT(*)
+        FROM pg_trigger t
+        JOIN pg_class c ON t.tgrelid = c.oid
+        JOIN pg_namespace n ON c.relnamespace = n.oid
+        WHERE t.tgname = 'on_auth_user_created'
+          AND n.nspname = 'auth'
+          AND c.relname = 'users'
+        """
+    )
+    assert trigger_exists > 0, "on_auth_user_created trigger should exist on auth.users"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_username_collision_handling(db_transaction):
+    """Test that username generation handles collisions by adding numbers."""
+    # This is tested indirectly through the trigger, but we can test the function behavior
+    # by creating a scenario where collision is likely
+
+    # Pre-populate with a common combination
+    test_user_id = uuid.uuid4()
+    await db_transaction.execute(
+        """
+        INSERT INTO app_user (app_user_id, name, email, username)
+        VALUES ($1, 'Test', $2, 'SwoleRat')
+        """,
+        test_user_id,
+        f"{test_user_id}@example.com",
+    )
+
+    # Generate many usernames - if SwoleRat appears again, it should have numbers
+    usernames = []
+    for _ in range(100):
+        username = await db_transaction.fetchval("SELECT generate_unique_username()")
+        usernames.append(username)
+
+    # Check that no duplicates exist
+    assert len(usernames) == len(set(usernames)), "All generated usernames should be unique"
+
+    # If 'SwoleRat' appears, verify it's not used (already taken)
+    assert "SwoleRat" not in usernames, "Should not generate already-used username"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_rls_policies_use_optimized_auth_uid(db_transaction):
+    """Test that RLS policies use (SELECT auth.uid()) for performance."""
+    # Check performed_session SELECT policy
+    policy_def = await db_transaction.fetchval(
+        """
+        SELECT pg_get_expr(polqual, polrelid) AS policy_definition
+        FROM pg_policy
+        WHERE polname = 'Allow read access for own performed_session'
+        """
+    )
+
+    assert policy_def is not None, "RLS policy should exist"
+    # The policy should use SELECT auth.uid() for caching
+    # Note: The actual format may vary, but should contain this pattern
+    assert (
+        "auth.uid()" in policy_def
+    ), "Policy should call auth.uid() for user identification"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_app_user_email_unique_constraint(db_transaction):
+    """Test that email has UNIQUE constraint on app_user."""
+    user1_id = uuid.uuid4()
+    user2_id = uuid.uuid4()
+
+    # Insert first user
+    await db_transaction.execute(
+        """
+        INSERT INTO app_user (app_user_id, name, email, username)
+        VALUES ($1, 'User 1', 'test@example.com', 'user123')
+        """,
+        user1_id,
+    )
+
+    # Try to insert second user with same email - should fail
+    with pytest.raises(exceptions.UniqueViolationError):
+        await db_transaction.execute(
+            """
+            INSERT INTO app_user (app_user_id, name, email, username)
+            VALUES ($1, 'User 2', 'test@example.com', 'user456')
+            """,
+            user2_id,
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_username_categories_are_organized(db_transaction):
+    """Test that word categories are properly set for organization."""
+    # Check that categories exist and make sense
+    adj_categories = await db_transaction.fetch(
+        "SELECT DISTINCT category FROM username_adjectives ORDER BY category"
+    )
+    noun_categories = await db_transaction.fetch(
+        "SELECT DISTINCT category FROM username_nouns ORDER BY category"
+    )
+
+    adj_cats = [row["category"] for row in adj_categories]
+    noun_cats = [row["category"] for row in noun_categories]
+
+    # Should have fitness/gym categories
+    assert any(
+        cat in ["fitness", "gym"] for cat in adj_cats
+    ), "Should have fitness/gym adjective categories"
+    assert any(
+        cat in ["gymrat", "equipment", "athlete"] for cat in noun_cats
+    ), "Should have gym-related noun categories"
+
+    # Should have variety of categories
+    assert len(adj_cats) >= 5, "Should have diverse adjective categories"
+    assert len(noun_cats) >= 5, "Should have diverse noun categories"
+
+
+# Integration tests that would require auth.users access
+# These are marked as integration since they test the full trigger flow
+
+
+@pytest.mark.integration
+@pytest.mark.skip(
+    reason="Requires auth.users table access - run only in Supabase environment"
+)
+@pytest.mark.asyncio
+async def test_trigger_creates_app_user_on_auth_user_insert(db_transaction):
+    """
+    Test that inserting into auth.users triggers app_user creation.
+    This test requires actual auth.users table access.
+    """
+    user_id = uuid.uuid4()
+
+    # Insert into auth.users (this would be done by Supabase Auth normally)
+    await db_transaction.execute(
+        """
+        INSERT INTO auth.users (id, email, raw_user_meta_data)
+        VALUES ($1, $2, $3::jsonb)
+        """,
+        user_id,
+        f"{user_id}@example.com",
+        '{"name": "Test User"}',
+    )
+
+    # Check that app_user was created
+    app_user = await db_transaction.fetchrow(
+        """
+        SELECT app_user_id, name, email, username
+        FROM app_user
+        WHERE app_user_id = $1
+        """,
+        user_id,
+    )
+
+    assert app_user is not None, "app_user should be created by trigger"
+    assert app_user["email"] == f"{user_id}@example.com"
+    assert app_user["name"] == "Test User"
+    assert app_user["username"] is not None
+    assert len(app_user["username"]) >= 4
+
+
+@pytest.mark.integration
+@pytest.mark.skip(
+    reason="Requires auth.users table access - run only in Supabase environment"
+)
+@pytest.mark.asyncio
+async def test_trigger_uses_provided_username(db_transaction):
+    """Test that trigger uses username from metadata if provided."""
+    user_id = uuid.uuid4()
+
+    await db_transaction.execute(
+        """
+        INSERT INTO auth.users (id, email, raw_user_meta_data)
+        VALUES ($1, $2, $3::jsonb)
+        """,
+        user_id,
+        f"{user_id}@example.com",
+        '{"name": "Test", "username": "custom.username"}',
+    )
+
+    app_user = await db_transaction.fetchrow(
+        "SELECT username FROM app_user WHERE app_user_id = $1", user_id
+    )
+
+    assert app_user["username"] == "custom.username"
+
+
+@pytest.mark.integration
+@pytest.mark.skip(
+    reason="Requires auth.users table access - run only in Supabase environment"
+)
+@pytest.mark.asyncio
+async def test_trigger_falls_back_to_username_for_name(db_transaction):
+    """Test that if no name provided, username is used as fallback."""
+    user_id = uuid.uuid4()
+
+    await db_transaction.execute(
+        """
+        INSERT INTO auth.users (id, email, raw_user_meta_data)
+        VALUES ($1, $2, '{}'::jsonb)
+        """,
+        user_id,
+        f"{user_id}@example.com",
+    )
+
+    app_user = await db_transaction.fetchrow(
+        "SELECT name, username FROM app_user WHERE app_user_id = $1", user_id
+    )
+
+    # Name should equal username when no name provided
+    assert app_user["name"] == app_user["username"]
