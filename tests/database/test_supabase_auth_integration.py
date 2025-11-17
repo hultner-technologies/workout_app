@@ -117,7 +117,7 @@ async def test_app_user_schema_has_username_field(db_transaction):
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_app_user_username_unique_constraint(db_transaction):
-    """Test that username has UNIQUE constraint."""
+    """Test that username collision is handled by auto-generating new username."""
     user1_id = uuid.uuid4()
     user2_id = uuid.uuid4()
 
@@ -126,11 +126,26 @@ async def test_app_user_username_unique_constraint(db_transaction):
         db_transaction, user1_id, f"{user1_id}@example.com", username="TestUser123", name="User 1"
     )
 
-    # Try to insert second user with same username - should fail
-    with pytest.raises(exceptions.UniqueViolationError):
-        await create_test_user(
-            db_transaction, user2_id, f"{user2_id}@example.com", username="TestUser123", name="User 2"
-        )
+    # Insert second user with same username - trigger auto-generates new username
+    await create_test_user(
+        db_transaction, user2_id, f"{user2_id}@example.com", username="TestUser123", name="User 2"
+    )
+
+    # Verify both users exist but with different usernames
+    users = await db_transaction.fetch(
+        """
+        SELECT app_user_id, username
+        FROM app_user
+        WHERE app_user_id = ANY($1::uuid[])
+        ORDER BY app_user_id
+        """,
+        [user1_id, user2_id]
+    )
+
+    assert len(users) == 2, "Both users should be created"
+    assert users[0]["username"] == "TestUser123", "First user keeps requested username"
+    assert users[1]["username"] != "TestUser123", "Second user gets auto-generated username"
+    assert users[0]["username"] != users[1]["username"], "Usernames should be unique"
 
 
 @pytest.mark.unit
