@@ -2,7 +2,7 @@
 name = "workout_app"
 version = "0.1.0"
 description = ""
-readme = "readme.md"
+readme = "README.md"
 requires-python = ">=3.10,<4.0"
 authors = [
     { name = "Alexander Hultnér", email = "ahultner@gmail.com" },
