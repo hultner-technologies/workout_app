@@ -10,7 +10,7 @@
 
 -- Table to audit all impersonation events
 CREATE TABLE impersonation_audit (
-  audit_id uuid PRIMARY KEY DEFAULT uuid_generate_v1mc(),
+  audit_id uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v1mc(),
   admin_user_id uuid NOT NULL REFERENCES app_user(app_user_id) ON DELETE CASCADE,
   target_user_id uuid NOT NULL REFERENCES app_user(app_user_id) ON DELETE CASCADE,
   started_at timestamptz NOT NULL DEFAULT now(),
