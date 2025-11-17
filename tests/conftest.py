@@ -92,6 +92,7 @@ async def create_test_user(
         metadata["name"] = name
 
     # Insert into auth.users - this will trigger handle_new_user()
+    # Note: asyncpg automatically converts Python dicts to JSONB, no cast needed
     await conn.execute(
         """
         INSERT INTO auth.users (
@@ -110,7 +111,7 @@ async def create_test_user(
             $2,
             crypt('password', gen_salt('bf')),
             now(),
-            $3::jsonb,
+            $3,
             'authenticated',
             'authenticated'
         )

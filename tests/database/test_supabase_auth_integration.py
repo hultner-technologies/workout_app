@@ -187,24 +187,33 @@ async def test_app_user_username_format_constraint(db_transaction):
 @pytest.mark.asyncio
 async def test_app_user_foreign_key_to_auth_users(db_transaction):
     """Test that app_user has foreign key constraint to auth.users."""
-    # Check foreign key constraint exists
+    # Check foreign key constraint exists using pg_constraint (works with cross-schema FKs)
     fk_info = await db_transaction.fetchrow(
         """
-        SELECT tc.constraint_name, kcu.column_name, ccu.table_name AS foreign_table_name
-        FROM information_schema.table_constraints AS tc
-        JOIN information_schema.key_column_usage AS kcu
-          ON tc.constraint_name = kcu.constraint_name
-        JOIN information_schema.constraint_column_usage AS ccu
-          ON ccu.constraint_name = tc.constraint_name
-        WHERE tc.table_name = 'app_user'
-          AND tc.constraint_type = 'FOREIGN KEY'
-          AND kcu.column_name = 'app_user_id'
+        SELECT
+            con.conname AS constraint_name,
+            att.attname AS column_name,
+            nsp_ref.nspname AS foreign_schema,
+            cls_ref.relname AS foreign_table_name
+        FROM pg_constraint con
+        JOIN pg_class cls ON con.conrelid = cls.oid
+        JOIN pg_namespace nsp ON cls.relnamespace = nsp.oid
+        JOIN pg_attribute att ON att.attrelid = cls.oid AND att.attnum = ANY(con.conkey)
+        JOIN pg_class cls_ref ON con.confrelid = cls_ref.oid
+        JOIN pg_namespace nsp_ref ON cls_ref.relnamespace = nsp_ref.oid
+        WHERE con.contype = 'f'
+          AND cls.relname = 'app_user'
+          AND nsp.nspname = 'public'
+          AND att.attname = 'app_user_id'
         """
     )
     assert fk_info is not None, "app_user_id should have foreign key constraint"
     assert (
         fk_info["foreign_table_name"] == "users"
     ), "Foreign key should reference auth.users table"
+    assert (
+        fk_info["foreign_schema"] == "auth"
+    ), "Foreign key should reference auth schema"
 
 
 @pytest.mark.unit
