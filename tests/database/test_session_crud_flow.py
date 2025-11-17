@@ -2,6 +2,8 @@ import uuid
 
 import pytest
 
+from tests.conftest import create_test_user
+
 
 @pytest.mark.unit
 @pytest.mark.asyncio
@@ -47,10 +49,12 @@ async def test_full_session_crud_flow(db_transaction):
         session_schedule_id,
     )
 
-    app_user_id = await db_transaction.fetchval(
-        "insert into app_user (name, email) values ($1, $2) returning app_user_id",
-        "Test User",
+    app_user_id = uuid.uuid4()
+    await create_test_user(
+        db_transaction,
+        app_user_id,
         f"user-{uuid.uuid4()}@example.com",
+        name="Test User"
     )
 
     performed_session_id = await db_transaction.fetchval(
