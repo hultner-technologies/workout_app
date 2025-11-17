@@ -7,6 +7,37 @@ Quick deployment guide with exact commands for deploying Phase 1 and Phase 2.2.1
 - Supabase project created at [supabase.com](https://supabase.com)
 - Supabase CLI installed: `npm install -g supabase` OR use Supabase Dashboard SQL Editor
 
+## Local Development with Supabase CLI
+
+**Quick Start:**
+
+```bash
+# Start local Supabase (includes PostgreSQL, Auth, Storage, etc.)
+supabase start
+
+# Apply all migrations (from supabase/migrations/)
+supabase db reset
+
+# Run tests
+pytest
+
+# Stop Supabase
+supabase stop
+```
+
+**Migrations are automatically applied** from `supabase/migrations/` directory when you run `supabase db reset`. The migrations are numbered sequentially:
+
+- `20240101000028` - AppUser Auth Migration (Phase 1)
+- `20240101000029` - Username Generator (Phase 1)
+- `20240101000030` - Auth Trigger (Phase 1)
+- `20240101000031` - RLS Performance Updates (Phase 1)
+- `20240101000032` - Admin Roles (Phase 2.2.1)
+- `20240101000033` - Impersonation Audit (Phase 2.2.1)
+
+**Note:** CI automatically applies these migrations via GitHub Actions.
+
+---
+
 ## Phase 1: Core Authentication
 
 ### Step 1: Deploy Migrations (Exact Order)
