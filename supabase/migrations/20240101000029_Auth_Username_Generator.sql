@@ -194,7 +194,7 @@ INSERT INTO username_nouns (word, category) VALUES
   -- Gym roles & personas (12 words)
   ('Lifter', 'athlete'), ('Powerlifter', 'athlete'), ('Bodybuilder', 'athlete'), ('Athlete', 'athlete'),
   ('Crusher', 'athlete'), ('Grinder', 'athlete'), ('Beast', 'athlete'), ('Tank', 'athlete'),
-  ('Bull', 'athlete'), ('Titan', 'athlete'), ('Giant', 'athlete'), ('Machine', 'athlete'),
+  ('Bull', 'athlete'), ('Titan', 'athlete'), ('Giant', 'athlete'), ('Champion', 'athlete'),
 
   -- Gym concepts (8 words)
   ('Gains', 'concept'), ('Pump', 'concept'), ('Rep', 'concept'), ('Set', 'concept'),
