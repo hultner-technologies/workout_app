@@ -80,7 +80,7 @@ BEGIN
     v_user_id,
     '00000000-0000-0000-0000-000000000000'::uuid,
     v_email,
-    crypt('TEMP_PASSWORD_' || gen_random_uuid()::text, gen_salt('bf')),
+    extensions.crypt('TEMP_PASSWORD_' || gen_random_uuid()::text, extensions.gen_salt('bf')),
     NOW(),
     NOW(),
     NOW(),

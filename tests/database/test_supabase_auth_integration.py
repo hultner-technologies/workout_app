@@ -431,7 +431,7 @@ async def test_trigger_creates_app_user_on_auth_user_insert(db_transaction):
         )
         VALUES (
             $1, '00000000-0000-0000-0000-000000000000'::uuid, $2,
-            crypt('test_password', gen_salt('bf')),
+            extensions.crypt('test_password', extensions.gen_salt('bf')),
             NOW(), NOW(), NOW(),
             'authenticated', 'authenticated', $3::jsonb
         )
@@ -473,7 +473,7 @@ async def test_trigger_uses_provided_username(db_transaction):
         )
         VALUES (
             $1, '00000000-0000-0000-0000-000000000000'::uuid, $2,
-            crypt('test_password', gen_salt('bf')),
+            extensions.crypt('test_password', extensions.gen_salt('bf')),
             NOW(), NOW(), NOW(),
             'authenticated', 'authenticated', $3::jsonb
         )
@@ -505,7 +505,7 @@ async def test_trigger_falls_back_to_username_for_name(db_transaction):
         )
         VALUES (
             $1, '00000000-0000-0000-0000-000000000000'::uuid, $2,
-            crypt('test_password', gen_salt('bf')),
+            extensions.crypt('test_password', extensions.gen_salt('bf')),
             NOW(), NOW(), NOW(),
             'authenticated', 'authenticated', '{}'::jsonb
         )

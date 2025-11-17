@@ -34,7 +34,7 @@ SELECT
   app_user_id,
   '00000000-0000-0000-0000-000000000000'::uuid,
   email,
-  crypt('PRODUCTION_MIGRATED_' || gen_random_uuid()::text, gen_salt('bf')),
+  extensions.crypt('PRODUCTION_MIGRATED_' || gen_random_uuid()::text, extensions.gen_salt('bf')),
   NOW(),
   NOW(),
   NOW(),
