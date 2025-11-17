@@ -98,15 +98,13 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
 -- Create trigger that fires AFTER INSERT on auth.users
 -- This ensures the auth.users record is fully created before we reference it
+-- Note: Automatically creates an app_user profile when a new user signs up.
+-- Fires after insertion into auth.users table.
+-- Calls handle_new_user() function to create the corresponding app_user record.
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION handle_new_user();
-
-COMMENT ON TRIGGER on_auth_user_created ON auth.users IS
-  'Automatically creates an app_user profile when a new user signs up. '
-  'Fires after insertion into auth.users table. '
-  'Calls handle_new_user() function to create the corresponding app_user record.';
 
 -- =============================================================================
 -- UPDATE RLS POLICY TO ALLOW TRIGGER-BASED INSERTS
