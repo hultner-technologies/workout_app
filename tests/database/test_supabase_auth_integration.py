@@ -412,9 +412,6 @@ async def test_username_categories_are_organized(db_transaction):
 
 
 @pytest.mark.integration
-@pytest.mark.skip(
-    reason="Requires auth.users table access - run only in Supabase environment"
-)
 @pytest.mark.asyncio
 async def test_trigger_creates_app_user_on_auth_user_insert(db_transaction):
     """
@@ -424,10 +421,20 @@ async def test_trigger_creates_app_user_on_auth_user_insert(db_transaction):
     user_id = uuid.uuid4()
 
     # Insert into auth.users (this would be done by Supabase Auth normally)
+    # Provide all required fields for auth.users
     await db_transaction.execute(
         """
-        INSERT INTO auth.users (id, email, raw_user_meta_data)
-        VALUES ($1, $2, $3::jsonb)
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password,
+            email_confirmed_at, created_at, updated_at,
+            aud, role, raw_user_meta_data
+        )
+        VALUES (
+            $1, '00000000-0000-0000-0000-000000000000'::uuid, $2,
+            crypt('test_password', gen_salt('bf')),
+            NOW(), NOW(), NOW(),
+            'authenticated', 'authenticated', $3::jsonb
+        )
         """,
         user_id,
         f"{user_id}@example.com",
@@ -452,9 +459,6 @@ async def test_trigger_creates_app_user_on_auth_user_insert(db_transaction):
 
 
 @pytest.mark.integration
-@pytest.mark.skip(
-    reason="Requires auth.users table access - run only in Supabase environment"
-)
 @pytest.mark.asyncio
 async def test_trigger_uses_provided_username(db_transaction):
     """Test that trigger uses username from metadata if provided."""
@@ -462,8 +466,17 @@ async def test_trigger_uses_provided_username(db_transaction):
 
     await db_transaction.execute(
         """
-        INSERT INTO auth.users (id, email, raw_user_meta_data)
-        VALUES ($1, $2, $3::jsonb)
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password,
+            email_confirmed_at, created_at, updated_at,
+            aud, role, raw_user_meta_data
+        )
+        VALUES (
+            $1, '00000000-0000-0000-0000-000000000000'::uuid, $2,
+            crypt('test_password', gen_salt('bf')),
+            NOW(), NOW(), NOW(),
+            'authenticated', 'authenticated', $3::jsonb
+        )
         """,
         user_id,
         f"{user_id}@example.com",
@@ -478,9 +491,6 @@ async def test_trigger_uses_provided_username(db_transaction):
 
 
 @pytest.mark.integration
-@pytest.mark.skip(
-    reason="Requires auth.users table access - run only in Supabase environment"
-)
 @pytest.mark.asyncio
 async def test_trigger_falls_back_to_username_for_name(db_transaction):
     """Test that if no name provided, username is used as fallback."""
@@ -488,8 +498,17 @@ async def test_trigger_falls_back_to_username_for_name(db_transaction):
 
     await db_transaction.execute(
         """
-        INSERT INTO auth.users (id, email, raw_user_meta_data)
-        VALUES ($1, $2, '{}'::jsonb)
+        INSERT INTO auth.users (
+            id, instance_id, email, encrypted_password,
+            email_confirmed_at, created_at, updated_at,
+            aud, role, raw_user_meta_data
+        )
+        VALUES (
+            $1, '00000000-0000-0000-0000-000000000000'::uuid, $2,
+            crypt('test_password', gen_salt('bf')),
+            NOW(), NOW(), NOW(),
+            'authenticated', 'authenticated', '{}'::jsonb
+        )
         """,
         user_id,
         f"{user_id}@example.com",
