@@ -32,7 +32,11 @@ AS $$
 DECLARE
   user_username text;
   user_name text;
+  username_was_provided boolean;
 BEGIN
+  -- Check if username was provided by user
+  username_was_provided := (NEW.raw_user_meta_data->>'username') IS NOT NULL;
+
   -- Get username from metadata or generate Reddit-style username
   -- If user provides username in signup metadata, use it
   -- Otherwise, generate one like: SwoleRat, IronLifter, BuffBarbell
@@ -63,8 +67,14 @@ BEGIN
 
 EXCEPTION
   WHEN unique_violation THEN
-    -- Handle edge case: username collision due to race condition
-    -- This is extremely rare with 25k+ combinations, but we handle it gracefully
+    -- Only retry if username was auto-generated
+    -- If user explicitly provided a duplicate username, let the error propagate
+    IF username_was_provided THEN
+      RAISE;  -- Re-raise the unique_violation error for user-provided usernames
+    END IF;
+
+    -- Handle edge case: auto-generated username collision due to race condition
+    -- This is extremely rare with 30k+ combinations, but we handle it gracefully
     -- Generate a new username and try again
     user_username := generate_unique_username();
     user_name := COALESCE(NEW.raw_user_meta_data->>'name', user_username);
@@ -86,8 +96,9 @@ COMMENT ON FUNCTION handle_new_user() IS
   'Trigger function that automatically creates an app_user record when a new user signs up via Supabase Auth. '
   'Pulls email and optional name/username from auth.users metadata. '
   'Auto-generates Reddit-style username (e.g., SwoleRat) if not provided. '
-  'Uses SECURITY DEFINER to bypass RLS policies during user creation. '
-  'Handles username collisions gracefully with exception handling.';
+  'User-provided duplicate usernames raise unique_violation error. '
+  'Auto-generated username collisions are retried with a new random username. '
+  'Uses SECURITY DEFINER to bypass RLS policies during user creation.';
 
 -- =============================================================================
 -- CREATE TRIGGER: on_auth_user_created
