@@ -3,6 +3,8 @@ import uuid
 import pytest
 from asyncpg import exceptions
 
+from tests.conftest import create_test_user
+
 
 @pytest.mark.unit
 @pytest.mark.asyncio
@@ -10,22 +12,12 @@ async def test_performed_session_rls_filters_by_auth_uid(db_transaction):
     user_id = uuid.uuid4()
     other_user_id = uuid.uuid4()
 
-    await db_transaction.execute(
-        """
-        insert into app_user (app_user_id, name, email)
-        values ($1, 'RLS User', $2)
-        """,
-        user_id,
-        f"{user_id}@example.com",
+    await create_test_user(
+        db_transaction, user_id, f"{user_id}@example.com", name="RLS User"
     )
 
-    await db_transaction.execute(
-        """
-        insert into app_user (app_user_id, name, email)
-        values ($1, 'RLS Other', $2)
-        """,
-        other_user_id,
-        f"{other_user_id}@example.com",
+    await create_test_user(
+        db_transaction, other_user_id, f"{other_user_id}@example.com", name="RLS Other"
     )
 
     session_schedule_id = await db_transaction.fetchval(
@@ -82,13 +74,8 @@ async def test_anonymous_role_cannot_see_performed_sessions(db_transaction):
     """PR #1 security fix: Anonymous users should not be able to read any workout data"""
     user_id = uuid.uuid4()
 
-    await db_transaction.execute(
-        """
-        insert into app_user (app_user_id, name, email)
-        values ($1, 'Anon Test User', $2)
-        """,
-        user_id,
-        f"{user_id}@example.com",
+    await create_test_user(
+        db_transaction, user_id, f"{user_id}@example.com", name="Anon Test User"
     )
 
     plan_id = await db_transaction.fetchval(
@@ -128,13 +115,8 @@ async def test_anonymous_role_cannot_see_performed_exercises(db_transaction):
     """PR #1 security fix: Anonymous users should not be able to read exercise data"""
     user_id = uuid.uuid4()
 
-    await db_transaction.execute(
-        """
-        insert into app_user (app_user_id, name, email)
-        values ($1, 'Anon Exercise Test', $2)
-        """,
-        user_id,
-        f"{user_id}@example.com",
+    await create_test_user(
+        db_transaction, user_id, f"{user_id}@example.com", name="Anon Exercise Test"
     )
 
     plan_id = await db_transaction.fetchval(
@@ -198,17 +180,11 @@ async def test_user_cannot_insert_into_other_users_session(db_transaction):
     user_a = uuid.uuid4()
     user_b = uuid.uuid4()
 
-    await db_transaction.execute(
-        """
-        insert into app_user (app_user_id, name, email)
-        values
-            ($1, 'Insert Test User A', $3),
-            ($2, 'Insert Test User B', $4)
-        """,
-        user_a,
-        user_b,
-        f"{user_a}@example.com",
-        f"{user_b}@example.com",
+    await create_test_user(
+        db_transaction, user_a, f"{user_a}@example.com", name="Insert Test User A"
+    )
+    await create_test_user(
+        db_transaction, user_b, f"{user_b}@example.com", name="Insert Test User B"
     )
 
     plan_id = await db_transaction.fetchval(

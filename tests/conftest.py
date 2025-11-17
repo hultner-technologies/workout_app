@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 from typing import Iterator
+from uuid import UUID
 
 import asyncpg
 import pytest
@@ -61,3 +62,60 @@ def supabase_service_client() -> Iterator[Client]:
     """
     settings = get_supabase_settings()
     yield _build_supabase_client(settings.service_role_key, "supabase_service_client")
+
+
+async def create_test_user(
+    conn: asyncpg.Connection,
+    user_id: UUID,
+    email: str,
+    username: str | None = None,
+    name: str | None = None,
+) -> None:
+    """
+    Helper function to create a test user in auth.users.
+
+    This function creates a user in auth.users, which triggers the
+    handle_new_user() function that automatically creates an app_user record.
+
+    Args:
+        conn: Database connection
+        user_id: UUID for the user
+        email: Email address
+        username: Optional username (auto-generated if not provided)
+        name: Optional name (defaults to username if not provided)
+    """
+    # Build metadata JSON for username and name
+    metadata = {}
+    if username:
+        metadata["username"] = username
+    if name:
+        metadata["name"] = name
+
+    # Insert into auth.users - this will trigger handle_new_user()
+    await conn.execute(
+        """
+        INSERT INTO auth.users (
+            id,
+            instance_id,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            raw_user_meta_data,
+            aud,
+            role
+        )
+        VALUES (
+            $1,
+            '00000000-0000-0000-0000-000000000000',
+            $2,
+            crypt('password', gen_salt('bf')),
+            now(),
+            $3::jsonb,
+            'authenticated',
+            'authenticated'
+        )
+        """,
+        user_id,
+        email,
+        metadata if metadata else {},
+    )

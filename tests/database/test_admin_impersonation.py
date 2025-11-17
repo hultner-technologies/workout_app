@@ -8,6 +8,8 @@ for the admin impersonation feature (Phase 2.2).
 import pytest
 from uuid import uuid4
 
+from tests.conftest import create_test_user
+
 
 # =============================================================================
 # SCHEMA TESTS
@@ -430,12 +432,8 @@ async def test_is_admin_returns_false_for_non_admin(db_transaction):
     """Test that is_admin() returns false for non-admin users."""
     # Create a regular user
     user_id = uuid4()
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES ($1, 'Test User', 'test@example.com', 'testuser', '{}')
-        """,
-        user_id,
+    await create_test_user(
+        db_transaction, user_id, "test@example.com", username="testuser", name="Test User"
     )
 
     # Check is_admin returns false
@@ -451,12 +449,8 @@ async def test_is_admin_returns_true_for_admin(db_transaction):
     """Test that is_admin() returns true for admin users."""
     # Create a user
     user_id = uuid4()
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES ($1, 'Admin User', 'admin@example.com', 'adminuser', '{}')
-        """,
-        user_id,
+    await create_test_user(
+        db_transaction, user_id, "admin@example.com", username="adminuser", name="Admin User"
     )
 
     # Grant admin role
@@ -481,12 +475,8 @@ async def test_is_admin_returns_false_for_revoked_admin(db_transaction):
     """Test that is_admin() returns false for revoked admins."""
     # Create a user
     user_id = uuid4()
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES ($1, 'Revoked Admin', 'revoked@example.com', 'revokedadmin', '{}')
-        """,
-        user_id,
+    await create_test_user(
+        db_transaction, user_id, "revoked@example.com", username="revokedadmin", name="Revoked Admin"
     )
 
     # Grant and then revoke admin role
@@ -511,12 +501,8 @@ async def test_get_admin_role_returns_correct_role(db_transaction):
     """Test that get_admin_role() returns correct role."""
     # Create a support user
     user_id = uuid4()
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES ($1, 'Support User', 'support@example.com', 'supportuser', '{}')
-        """,
-        user_id,
+    await create_test_user(
+        db_transaction, user_id, "support@example.com", username="supportuser", name="Support User"
     )
 
     # Grant support role
@@ -545,15 +531,11 @@ async def test_log_impersonation_start_creates_audit_record(
     admin_id = uuid4()
     target_id = uuid4()
 
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES
-            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
-            ($2, 'Target', 'target@example.com', 'target', '{}')
-        """,
-        admin_id,
-        target_id,
+    await create_test_user(
+        db_transaction, admin_id, "admin@example.com", username="admin", name="Admin"
+    )
+    await create_test_user(
+        db_transaction, target_id, "target@example.com", username="target", name="Target"
     )
 
     # Grant admin role
@@ -602,15 +584,11 @@ async def test_log_impersonation_end_updates_audit_record(db_transaction):
     admin_id = uuid4()
     target_id = uuid4()
 
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES
-            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
-            ($2, 'Target', 'target@example.com', 'target', '{}')
-        """,
-        admin_id,
-        target_id,
+    await create_test_user(
+        db_transaction, admin_id, "admin@example.com", username="admin", name="Admin"
+    )
+    await create_test_user(
+        db_transaction, target_id, "target@example.com", username="target", name="Target"
     )
 
     # Grant admin role
@@ -663,15 +641,11 @@ async def test_can_impersonate_user_prevents_admin_impersonation(
     admin1_id = uuid4()
     admin2_id = uuid4()
 
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES
-            ($1, 'Admin 1', 'admin1@example.com', 'admin1', '{}'),
-            ($2, 'Admin 2', 'admin2@example.com', 'admin2', '{}')
-        """,
-        admin1_id,
-        admin2_id,
+    await create_test_user(
+        db_transaction, admin1_id, "admin1@example.com", username="admin1", name="Admin 1"
+    )
+    await create_test_user(
+        db_transaction, admin2_id, "admin2@example.com", username="admin2", name="Admin 2"
     )
 
     # Grant admin roles
@@ -710,15 +684,11 @@ async def test_can_impersonate_user_allows_regular_user_impersonation(
     admin_id = uuid4()
     user_id = uuid4()
 
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES
-            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
-            ($2, 'User', 'user@example.com', 'user', '{}')
-        """,
-        admin_id,
-        user_id,
+    await create_test_user(
+        db_transaction, admin_id, "admin@example.com", username="admin", name="Admin"
+    )
+    await create_test_user(
+        db_transaction, user_id, "user@example.com", username="user", name="User"
     )
 
     # Grant admin role to admin only
@@ -754,19 +724,17 @@ async def test_list_impersonatable_users_excludes_admins(db_transaction):
     user2_id = uuid4()
     admin2_id = uuid4()
 
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES
-            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
-            ($2, 'User 1', 'user1@example.com', 'user1', '{}'),
-            ($3, 'User 2', 'user2@example.com', 'user2', '{}'),
-            ($4, 'Admin 2', 'admin2@example.com', 'admin2', '{}')
-        """,
-        admin_id,
-        user1_id,
-        user2_id,
-        admin2_id,
+    await create_test_user(
+        db_transaction, admin_id, "admin@example.com", username="admin", name="Admin"
+    )
+    await create_test_user(
+        db_transaction, user1_id, "user1@example.com", username="user1", name="User 1"
+    )
+    await create_test_user(
+        db_transaction, user2_id, "user2@example.com", username="user2", name="User 2"
+    )
+    await create_test_user(
+        db_transaction, admin2_id, "admin2@example.com", username="admin2", name="Admin 2"
     )
 
     # Grant admin roles
@@ -806,12 +774,8 @@ async def test_list_impersonatable_users_includes_usernames(db_transaction):
     """Test that list_impersonatable_users() includes username and email."""
     # Create users
     user_id = uuid4()
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES ($1, 'Test User', 'test@example.com', 'testuser', '{}')
-        """,
-        user_id,
+    await create_test_user(
+        db_transaction, user_id, "test@example.com", username="testuser", name="Test User"
     )
 
     # Get list
@@ -841,15 +805,11 @@ async def test_get_active_impersonation_sessions_returns_details(
     admin_id = uuid4()
     target_id = uuid4()
 
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES
-            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
-            ($2, 'Target', 'target@example.com', 'target', '{}')
-        """,
-        admin_id,
-        target_id,
+    await create_test_user(
+        db_transaction, admin_id, "admin@example.com", username="admin", name="Admin"
+    )
+    await create_test_user(
+        db_transaction, target_id, "target@example.com", username="target", name="Target"
     )
 
     # Grant admin role
@@ -897,15 +857,11 @@ async def test_timeout_expired_sessions_ends_old_sessions(db_transaction):
     admin_id = uuid4()
     target_id = uuid4()
 
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username, data)
-        VALUES
-            ($1, 'Admin', 'admin@example.com', 'admin', '{}'),
-            ($2, 'Target', 'target@example.com', 'target', '{}')
-        """,
-        admin_id,
-        target_id,
+    await create_test_user(
+        db_transaction, admin_id, "admin@example.com", username="admin", name="Admin"
+    )
+    await create_test_user(
+        db_transaction, target_id, "target@example.com", username="target", name="Target"
     )
 
     # Grant admin role

@@ -13,6 +13,8 @@ import uuid
 import pytest
 from asyncpg import exceptions
 
+from tests.conftest import create_test_user
+
 
 @pytest.mark.unit
 @pytest.mark.asyncio
@@ -120,24 +122,14 @@ async def test_app_user_username_unique_constraint(db_transaction):
     user2_id = uuid.uuid4()
 
     # Insert first user with username
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username)
-        VALUES ($1, 'User 1', $2, 'TestUser123')
-        """,
-        user1_id,
-        f"{user1_id}@example.com",
+    await create_test_user(
+        db_transaction, user1_id, f"{user1_id}@example.com", username="TestUser123", name="User 1"
     )
 
     # Try to insert second user with same username - should fail
     with pytest.raises(exceptions.UniqueViolationError):
-        await db_transaction.execute(
-            """
-            INSERT INTO app_user (app_user_id, name, email, username)
-            VALUES ($1, 'User 2', $2, 'TestUser123')
-            """,
-            user2_id,
-            f"{user2_id}@example.com",
+        await create_test_user(
+            db_transaction, user2_id, f"{user2_id}@example.com", username="TestUser123", name="User 2"
         )
 
 
@@ -171,14 +163,12 @@ async def test_app_user_username_format_constraint(db_transaction):
     for username in valid_usernames:
         test_user_id = uuid.uuid4()
         # Should succeed
-        await db_transaction.execute(
-            """
-            INSERT INTO app_user (app_user_id, name, email, username)
-            VALUES ($1, 'Test', $2, $3)
-            """,
+        await create_test_user(
+            db_transaction,
             test_user_id,
             f"{test_user_id}@example.com",
-            username,
+            username=username,
+            name="Test"
         )
 
     # Invalid username with disallowed characters
@@ -272,13 +262,8 @@ async def test_username_collision_handling(db_transaction):
 
     # Pre-populate with a common combination
     test_user_id = uuid.uuid4()
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username)
-        VALUES ($1, 'Test', $2, 'SwoleRat')
-        """,
-        test_user_id,
-        f"{test_user_id}@example.com",
+    await create_test_user(
+        db_transaction, test_user_id, f"{test_user_id}@example.com", username="SwoleRat", name="Test"
     )
 
     # Generate many usernames - if SwoleRat appears again, it should have numbers
@@ -323,22 +308,14 @@ async def test_app_user_email_unique_constraint(db_transaction):
     user2_id = uuid.uuid4()
 
     # Insert first user
-    await db_transaction.execute(
-        """
-        INSERT INTO app_user (app_user_id, name, email, username)
-        VALUES ($1, 'User 1', 'test@example.com', 'user123')
-        """,
-        user1_id,
+    await create_test_user(
+        db_transaction, user1_id, "test@example.com", username="user123", name="User 1"
     )
 
     # Try to insert second user with same email - should fail
     with pytest.raises(exceptions.UniqueViolationError):
-        await db_transaction.execute(
-            """
-            INSERT INTO app_user (app_user_id, name, email, username)
-            VALUES ($1, 'User 2', 'test@example.com', 'user456')
-            """,
-            user2_id,
+        await create_test_user(
+            db_transaction, user2_id, "test@example.com", username="user456", name="User 2"
         )
 
 
