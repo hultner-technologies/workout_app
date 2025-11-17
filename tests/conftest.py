@@ -6,8 +6,8 @@ from uuid import UUID
 import asyncpg
 import pytest
 import pytest_asyncio
-from supabase import Client, create_client
 
+from supabase import Client, create_client
 from tests.settings import get_db_settings, get_supabase_settings
 
 
