@@ -10,18 +10,18 @@ def test_anonymous_client_cannot_read_performed_sessions(supabase_client):
     the real Supabase HTTP API layer.
     """
     response = supabase_client.table("performed_session").select("*").execute()
-    assert len(response.data) == 0, (
-        "Anonymous users should not be able to read any performed_session records"
-    )
+    assert (
+        len(response.data) == 0
+    ), "Anonymous users should not be able to read any performed_session records"
 
 
 @pytest.mark.integration
 def test_anonymous_client_cannot_read_performed_exercises(supabase_client):
     """PR #1 security fix: Anonymous users cannot read exercise performance data"""
     response = supabase_client.table("performed_exercise").select("*").execute()
-    assert len(response.data) == 0, (
-        "Anonymous users should not be able to read any performed_exercise records"
-    )
+    assert (
+        len(response.data) == 0
+    ), "Anonymous users should not be able to read any performed_exercise records"
 
 
 @pytest.mark.integration
@@ -32,7 +32,5 @@ def test_anonymous_client_can_read_public_data(supabase_client):
     # We don't assert > 0 because test database might be empty, just verify no error
 
     # Base exercises should be publicly readable
-    _exercises_response = (
-        supabase_client.table("base_exercise").select("*").limit(5).execute()
-    )
+    _exercises_response = supabase_client.table("base_exercise").select("*").limit(5).execute()
     # Again, just verify no error - empty database is valid
