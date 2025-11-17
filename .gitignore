@@ -134,3 +134,6 @@ session.json
 
 # Supabase seed data (may contain production data)
 supabase/seed.sql
+backups/
+backups/
+.env.local

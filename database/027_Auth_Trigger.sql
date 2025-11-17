@@ -54,6 +54,8 @@ BEGIN
 
   -- Insert new app_user record
   -- app_user_id matches auth.users.id (foreign key)
+  -- Use INSERT ... ON CONFLICT to handle case where app_user already exists
+  -- (e.g., created by migration before auth.users)
   INSERT INTO app_user (app_user_id, name, email, username, data)
   VALUES (
     NEW.id,
@@ -61,7 +63,11 @@ BEGIN
     NEW.email,
     user_username,
     '{}'::jsonb
-  );
+  )
+  ON CONFLICT (app_user_id) DO UPDATE SET
+    email = EXCLUDED.email,
+    name = COALESCE(EXCLUDED.name, app_user.name),
+    username = COALESCE(app_user.username, EXCLUDED.username);
 
   RETURN NEW;
 
