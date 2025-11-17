@@ -1,13 +1,13 @@
+import json
 from collections.abc import AsyncIterator
 from typing import Iterator
 from uuid import UUID
-import json
 
 import asyncpg
 import pytest
 import pytest_asyncio
-
 from supabase import Client, create_client
+
 from tests.settings import get_db_settings, get_supabase_settings
 
 
