@@ -51,7 +51,7 @@ INSERT INTO username_adjectives (word, category) VALUES
   ('Agile', 'quality'), ('Nimble', 'quality'), ('Fleet', 'movement'), ('Speedy', 'movement'),
 
   -- Intelligence & wisdom (8 words)
-  ('Wise', 'mental'), ('Clever', 'mental'), ('Smart', 'mental'), ('Bright', 'mental'),
+  ('Wise', 'mental'), ('Clever', 'mental'), ('Smart', 'mental'), ('Brilliant', 'mental'),
   ('Sharp', 'mental'), ('Keen', 'mental'), ('Astute', 'mental'), ('Savvy', 'mental'),
 
   -- Strength & power (8 words)
@@ -72,7 +72,7 @@ INSERT INTO username_adjectives (word, category) VALUES
 
   -- Royalty & grandeur (8 words)
   ('Royal', 'status'), ('Grand', 'status'), ('Majestic', 'status'), ('Regal', 'status'),
-  ('Imperial', 'status'), ('Sovereign', 'status'), ('Supreme', 'status'), ('Noble', 'status'),
+  ('Imperial', 'status'), ('Sovereign', 'status'), ('Glorious', 'status'), ('Exalted', 'status'),
 
   -- Magic & fantasy (8 words)
   ('Magic', 'fantasy'), ('Mystic', 'fantasy'), ('Arcane', 'fantasy'), ('Ethereal', 'fantasy'),
@@ -92,7 +92,7 @@ INSERT INTO username_adjectives (word, category) VALUES
   ('Timeless', 'time'), ('Primal', 'time'), ('Classic', 'time'), ('Vintage', 'time'),
 
   -- Greek alphabet & special (12 words)
-  ('Alpha', 'greek'), ('Beta', 'greek'), ('Gamma', 'greek'), ('Delta', 'greek'),
+  ('Sigma', 'greek'), ('Beta', 'greek'), ('Gamma', 'greek'), ('Delta', 'greek'),
   ('Omega', 'greek'), ('Prime', 'concept'), ('Mega', 'concept'), ('Ultra', 'concept'),
   ('Super', 'concept'), ('Hyper', 'concept'), ('Neo', 'concept'), ('Quantum', 'concept'),
 
@@ -102,7 +102,7 @@ INSERT INTO username_adjectives (word, category) VALUES
 
   -- Style & cool (8 words)
   ('Cool', 'style'), ('Epic', 'style'), ('Awesome', 'style'), ('Rad', 'style'),
-  ('Stellar', 'style'), ('Prime', 'style'), ('Elite', 'style'), ('Supreme', 'style'),
+  ('Fresh', 'style'), ('Slick', 'style'), ('Elite', 'style'), ('Smooth', 'style'),
 
   -- Nature qualities (8 words)
   ('Verdant', 'nature'), ('Lush', 'nature'), ('Vibrant', 'nature'), ('Radiant', 'nature'),
