@@ -4,11 +4,11 @@
 -- Implements Reddit-style readable usernames with GymR8 branding.
 --
 -- Components:
---   1. username_adjectives table with 140 words
---   2. username_nouns table with 182 words
+--   1. username_adjectives table with 160 words
+--   2. username_nouns table with 188 words
 --   3. generate_unique_username() function
 --
--- Namespace: 140 × 182 = 25,480 base combinations (~254 million with numbers)
+-- Namespace: 160 × 188 = 30,080 base combinations (~300 million with numbers)
 -- Examples: SwoleRat, IronLifter, BuffBarbell, RippedGymRat
 --
 -- Created: 2025-11-16
