@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 from typing import Iterator
 from uuid import UUID
+import json
 
 import asyncpg
 import pytest
@@ -92,7 +93,7 @@ async def create_test_user(
         metadata["name"] = name
 
     # Insert into auth.users - this will trigger handle_new_user()
-    # Note: asyncpg automatically converts Python dicts to JSONB, no cast needed
+    # Note: raw_user_meta_data expects a JSON string, not a Python dict
     await conn.execute(
         """
         INSERT INTO auth.users (
@@ -118,5 +119,5 @@ async def create_test_user(
         """,
         user_id,
         email,
-        metadata if metadata else {},
+        json.dumps(metadata) if metadata else "{}",
     )
