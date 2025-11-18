@@ -55,13 +55,16 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/reset-password") ||
     pathname.startsWith("/verify-email");
 
+  // /update-password is a special auth route that should be accessible by authenticated users
+  const isUpdatePasswordRoute = pathname.startsWith("/update-password");
+
   if (isProtectedRoute && !user) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (isAuthRoute && user) {
+  if (isAuthRoute && user && !isUpdatePasswordRoute) {
     return NextResponse.redirect(new URL("/profile", request.url));
   }
 

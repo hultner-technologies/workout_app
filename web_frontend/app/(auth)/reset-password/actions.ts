@@ -8,7 +8,7 @@ export async function requestPasswordReset(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${
       process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
-    }/update-password`,
+    }/auth/callback?type=recovery&next=/update-password`,
   });
 
   if (error) {
