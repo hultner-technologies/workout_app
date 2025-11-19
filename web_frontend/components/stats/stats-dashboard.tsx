@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { WorkoutFrequencyChart } from './workout-frequency-chart'
 
 interface Session {
   performed_session_id: string
@@ -95,11 +96,9 @@ export function StatsDashboard({ sessions, exercises }: StatsDashboardProps) {
         </div>
       </div>
 
-      {/* Placeholder for charts - will add in next tasks */}
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <p className="text-gray-500">
-          Charts will be added in the next tasks
-        </p>
+      {/* Workout Frequency Chart */}
+      <div className="border border-gray-200 rounded-lg p-6">
+        <WorkoutFrequencyChart sessions={sessions} />
       </div>
     </div>
   )
