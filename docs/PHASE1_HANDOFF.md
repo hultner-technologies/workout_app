@@ -1,32 +1,31 @@
-# Password Reset Flow - Handoff Documentation
+# Password Reset Flow - Web App
 
-## Current Status: WILL BE REPLACED WITH OTP APPROACH
+## Current Status: MAGIC LINKS WORKING
 
-The magic link password reset flow has session persistence issues. **Decision: Implement OTP-based password reset instead.**
+The web app uses **magic link** password reset flow, which is working correctly.
 
-### Why OTP Instead of Magic Links?
-- Web app is in a separate repository from mobile app
-- Magic link session persistence bugs are complex to debug
-- OTP provides better UX for web-only flow
-- User confirmed: "for all intents and purposes of this app and repo we only support otp"
+### Multi-Platform Strategy
+- **Web app (this repo):** Magic links via email
+- **React Native app (separate repo):** OTP codes via email
+- **Email template:** Contains both magic link AND OTP code to support both platforms
 
 ---
 
-## Previous Magic Link Issues (For Reference)
+## Web App Flow (Magic Links)
 
-## What Works ✅
+### What Works ✅
 1. Password reset request successfully generates recovery token
-2. Email link now has correct URL with `/auth/callback?type=recovery&next=/update-password`
-3. User is redirected to `/update-password` page after clicking link
-4. `/update-password` page loads and displays form
+2. Email link has correct URL with `/auth/callback?type=recovery&next=/update-password`
+3. User clicks link and is redirected to `/update-password` page
+4. User enters new password and submits
+5. Password is updated successfully
 
-## What's Broken ❌
-**Session cookies from `exchangeCodeForSession` are not persisting after redirect**
-
-Error: `Auth session missing! Auth session missing!`
-
-## Root Cause
-Session created in `/app/auth/callback/route.ts` is not available in Server Action at `/app/(auth)/update-password/actions.ts`. Cookies are being set on response but not persisting.
+### Implementation Files
+- `/app/(auth)/reset-password/page.tsx` - Email input form
+- `/app/(auth)/reset-password/actions.ts` - Sends reset email
+- `/app/auth/callback/route.ts` - Handles magic link callback
+- `/app/(auth)/update-password/page.tsx` - New password form
+- `/app/(auth)/update-password/actions.ts` - Updates password
 
 ## Key Files Modified
 
@@ -66,54 +65,15 @@ docker exec supabase_db_workout_app psql -U postgres -c "SELECT * FROM auth.sess
 - Inbucket: http://127.0.0.1:54324
 - Working dir: `.worktrees/web-auth-app/web_frontend`
 
-## Success Criteria (Magic Link - DEPRECATED)
+## Success Criteria
 User completes full flow: reset request → email link → update password form → submit → login with new password
 
 ---
 
-## OTP Implementation Plan (NEW APPROACH)
+## Notes for React Native App
 
-### What Needs to Be Built
+The React Native app (separate repository) will use OTP codes instead of magic links. The Supabase email template should include **both**:
+- Magic link URL (for web app)
+- OTP code (for mobile app)
 
-1. **Request Password Reset Page** (`/reset-password`)
-   - [x] Email input form (already exists)
-   - [ ] Update to use Supabase OTP API instead of magic link
-
-2. **OTP Entry Page** (`/verify-otp`)
-   - [ ] Create new page for OTP code entry
-   - [ ] 6-digit code input field
-   - [ ] Timer showing code expiration (60 seconds)
-   - [ ] Resend code button
-   - [ ] Verify OTP and update password in single flow
-
-3. **Supabase Configuration**
-   - [ ] Configure email template for OTP codes
-   - [ ] Set OTP expiration time (60 seconds recommended)
-   - [ ] Update email redirects (if needed)
-
-### User Flow (OTP)
-1. User visits `/reset-password`
-2. User enters email and submits
-3. Backend calls `supabase.auth.resetPasswordForEmail({ email, options: { channel: 'email', shouldCreateUser: false } })`
-4. User receives email with 6-digit OTP code
-5. User is redirected to `/verify-otp?email=<email>`
-6. User enters OTP code
-7. On valid OTP: show new password form on same page
-8. User enters new password and submits
-9. Backend calls `supabase.auth.verifyOtp({ email, token, type: 'recovery' })` then `supabase.auth.updateUser({ password })`
-10. User is logged in and redirected to `/profile`
-
-### Technical Notes
-- Supabase OTP API: https://supabase.com/docs/reference/javascript/auth-verifyotp
-- OTP codes are 6 digits, expire in 60 seconds by default
-- No session persistence issues (verification happens in same request)
-- Better UX for web-only applications
-
-### Files to Create/Modify
-- `/app/(auth)/verify-otp/page.tsx` - New OTP entry page
-- `/app/(auth)/verify-otp/actions.ts` - Server action for OTP verification
-- `/app/(auth)/reset-password/actions.ts` - Update to use OTP API
-- `/components/auth/verify-otp-form.tsx` - OTP input form component
-
-### Success Criteria (OTP)
-User completes full flow: email entry → OTP code → new password → logged in
+This allows both platforms to use the same password reset email endpoint while supporting their respective auth flows.
