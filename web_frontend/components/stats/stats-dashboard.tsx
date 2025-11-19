@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { WorkoutFrequencyChart } from './workout-frequency-chart'
+import { VolumeProgressChart } from './volume-progress-chart'
 import { PersonalRecords } from './personal-records'
 
 interface Session {
@@ -100,6 +101,11 @@ export function StatsDashboard({ sessions, exercises }: StatsDashboardProps) {
       {/* Workout Frequency Chart */}
       <div className="border border-gray-200 rounded-lg p-6">
         <WorkoutFrequencyChart sessions={sessions} />
+      </div>
+
+      {/* Volume Progress Chart */}
+      <div className="border border-gray-200 rounded-lg p-6">
+        <VolumeProgressChart exercises={exercises} />
       </div>
 
       {/* Personal Records */}
