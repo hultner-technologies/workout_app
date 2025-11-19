@@ -48,7 +48,15 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       setError(result.error);
       setLoading(false);
     } else {
-      router.push(redirect || "/profile");
+      // Validate redirect parameter to prevent open redirect vulnerability
+      const isValidRedirect = (path?: string): path is string => {
+        if (!path) return false;
+        // Must start with / but not // (to prevent protocol-relative URLs)
+        return path.startsWith('/') && !path.startsWith('//');
+      };
+
+      const redirectPath = isValidRedirect(redirect) ? redirect : "/profile";
+      router.push(redirectPath);
       router.refresh();
     }
   }

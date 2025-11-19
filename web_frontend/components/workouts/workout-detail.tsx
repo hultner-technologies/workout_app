@@ -57,10 +57,13 @@ interface WorkoutDetailProps {
 }
 
 export function WorkoutDetail({ session, exercises }: WorkoutDetailProps) {
-  const duration = intervalToDuration({
-    start: new Date(session.started_at),
-    end: new Date(session.completed_at),
-  })
+  // Calculate duration, handling case where workout might not be completed yet
+  const duration = session.completed_at
+    ? intervalToDuration({
+        start: new Date(session.started_at),
+        end: new Date(session.completed_at),
+      })
+    : null
 
   const formatWeight = (grams?: number) => {
     if (!grams) return 'Bodyweight'
@@ -113,7 +116,9 @@ export function WorkoutDetail({ session, exercises }: WorkoutDetailProps) {
           <div>
             <dt className="text-sm font-medium text-gray-500">Duration</dt>
             <dd className="mt-1 text-sm text-gray-900">
-              {formatDuration(duration, { format: ['hours', 'minutes'] }) || 'Less than a minute'}
+              {duration
+                ? formatDuration(duration, { format: ['hours', 'minutes'] }) || 'Less than a minute'
+                : 'In progress'}
             </dd>
           </div>
         </div>
