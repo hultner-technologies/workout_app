@@ -12,14 +12,14 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div>
       <div className="text-center">
-        <h2 className="text-3xl font-bold tracking-tight">
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Or{" "}
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Don't have an account?{" "}
           <a
             href="/signup"
-            className="font-medium text-blue-600 hover:text-blue-500"
+            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Sign up
           </a>
