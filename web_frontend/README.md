@@ -1,6 +1,6 @@
-# Workout App - Web Frontend
+# GymR8 - Web Frontend
 
-Next.js 14 web application that powers the Workout App authentication experience.
+Next.js 14 web application that powers the GymR8 authentication and analytics experience.
 
 ## Features
 

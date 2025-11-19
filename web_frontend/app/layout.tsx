@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Workout App - Track Your Fitness",
-  description: "Track your workouts and monitor your progress",
+  title: "GymR8 - Smart Workout Tracking & Progress Analytics",
+  description: "Track your workouts, visualize your progress, and crush your personal records with GymR8 - the intelligent fitness platform for serious athletes.",
 };
 
 export default function RootLayout({
