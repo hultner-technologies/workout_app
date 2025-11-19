@@ -14,8 +14,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Python lib directories (but not Next.js web_frontend/lib/)
+/lib/
 lib64/
+!web_frontend/lib/
 parts/
 sdist/
 var/
@@ -111,6 +113,9 @@ venv.bak/
 
 # Claude Code
 .claude/
+
+# Git worktrees
+.worktrees/
 
 .DS_Store
 .env.local
