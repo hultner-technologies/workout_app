@@ -4,11 +4,29 @@ Next.js 14 web application that powers the Workout App authentication experience
 
 ## Features
 
+**Phase 1: Core Authentication**
 - User signup with Supabase email verification
 - Email/password login with session management
-- Password reset request + password update flows
-- Protected pages (profile, workouts, stats)
-- Server-side rendering with Supabase SSR helpers
+- Password reset with magic links
+- Protected routes with middleware
+- Profile page with user information
+- Dark mode support for all auth pages
+
+**Phase 2: Workout History**
+- View all workout sessions with filtering and sorting
+- Search workouts by name or notes
+- Detailed workout view with exercise breakdown
+- Sets, reps, and weights display
+- Weight conversion (grams to kg)
+- Duration calculations
+
+**Phase 3: Stats & Analytics**
+- Workout frequency chart (last 3 months)
+- Volume progress tracking over time
+- Personal records (PR) for each exercise
+- Total workouts, exercises, and volume metrics
+- Interactive charts using Recharts
+- Server-side data aggregation
 
 ## Tech Stack
 
@@ -16,6 +34,9 @@ Next.js 14 web application that powers the Workout App authentication experience
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS with shadcn/ui components
 - **Authentication:** Supabase Auth + @supabase/ssr
+- **Charts:** Recharts for data visualization
+- **Date Handling:** date-fns for formatting and calculations
+- **Forms:** React Hook Form + Zod validation
 - **Deployment:** Vercel
 
 ## Getting Started
@@ -62,17 +83,30 @@ npm run start
 ```
 web_frontend/
 ├── app/
-│   ├── (auth)/           # Public auth pages
+│   ├── (auth)/           # Public auth pages (login, signup, etc.)
 │   ├── auth/callback/    # OAuth/email callbacks
 │   ├── profile/          # Protected profile page
+│   ├── workouts/         # Workout history pages
+│   │   ├── [id]/         # Individual workout detail
+│   │   └── page.tsx      # Workout list
+│   ├── stats/            # Statistics dashboard
 │   ├── layout.tsx        # Root layout
 │   └── page.tsx          # Landing page
 ├── components/
 │   ├── auth/             # Auth form components
 │   ├── profile/          # Profile UI
+│   ├── workouts/         # Workout components
+│   │   ├── workout-list.tsx
+│   │   └── workout-detail.tsx
+│   ├── stats/            # Stats components
+│   │   ├── stats-dashboard.tsx
+│   │   ├── workout-frequency-chart.tsx
+│   │   ├── volume-progress-chart.tsx
+│   │   └── personal-records.tsx
 │   └── ui/               # shadcn/ui primitives
 ├── lib/
-│   └── supabase/         # Supabase helpers
+│   ├── supabase/         # Supabase client helpers
+│   └── utils.ts          # Utility functions
 ├── middleware.ts         # Session refresh + route protection
 └── tailwind.config.ts
 ```
@@ -119,11 +153,18 @@ Before deploying:
 
 - [ ] Update `NEXT_PUBLIC_SUPABASE_URL` to production Supabase URL
 - [ ] Update `NEXT_PUBLIC_SUPABASE_ANON_KEY` to production anon key
-- [ ] Set `NEXT_PUBLIC_SITE_URL` to production domain
-- [ ] Configure Supabase email templates
-- [ ] Test signup + verification end-to-end
+- [ ] Set `NEXT_PUBLIC_SITE_URL` to production domain (e.g., `https://app.example.com`)
+- [ ] Configure Supabase email templates (verification, password reset)
+- [ ] Test signup + verification end-to-end with real email
 - [ ] Test password reset flow
+- [ ] Test workout history with sample data
+- [ ] Test stats dashboard with varied data
+- [ ] Verify all charts render correctly
 - [ ] Ensure Supabase RLS policies are enabled
+- [ ] Set up proper error monitoring (e.g., Sentry)
+- [ ] Configure security headers (CSP, X-Frame-Options, etc.)
+- [ ] Test dark mode across all pages
+- [ ] Verify mobile responsiveness
 
 ## License
 
