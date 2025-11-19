@@ -87,6 +87,73 @@ Phase 2 (Workout History) and Phase 3 (Stats & Analytics) have been successfully
 
 ---
 
+## Post-Implementation UI Fixes (2025-11-19)
+
+After Phase 2 & 3 completion, additional improvements were made based on user testing:
+
+### 9. Dark Mode Support for Auth Pages
+- **Files Modified:**
+  - `app/(auth)/layout.tsx` - Added dark:bg-gray-900 background
+  - `app/(auth)/login/page.tsx` - Dark mode for text and links
+  - `app/(auth)/signup/page.tsx` - Dark mode for text and links
+  - `app/(auth)/reset-password/page.tsx` - Dark mode for form and success state
+  - `app/(auth)/verify-email/page.tsx` - Dark mode for all elements
+- **Commit:** `fix: add dark mode support and fix autofill styling for auth pages`
+
+### 10. Apple Autofill Styling Fix
+- **File Modified:** `components/ui/input.tsx`
+- **Problem:** Yellow autofill background with white text had no contrast in dark mode
+- **Solution:** Used CSS shadow trick to override browser autofill styling
+  ```css
+  autofill:shadow-[inset_0_0_0px_1000px_white]
+  dark:autofill:shadow-[inset_0_0_0px_1000px_rgb(31,41,55)]
+  ```
+- **Result:** Proper contrast in both light and dark mode
+- **Commit:** `fix: add dark mode support and fix autofill styling for auth pages`
+
+### 11. Profile Name Editing
+- **File Modified:** `components/profile/profile-info.tsx`
+- **Server Action Added:** `app/profile/actions.ts::updateName()`
+- **Features:**
+  - Inline edit mode for name field
+  - Edit/Save/Cancel buttons
+  - Input validation (non-empty)
+  - Error handling
+  - Auto-refresh after save
+- **Commit:** `feat: add name editing to profile and make username/name optional on signup`
+
+### 12. Optional Signup Fields
+- **Files Modified:**
+  - `components/auth/signup-form.tsx` - Made username and name optional
+  - `app/(auth)/signup/actions.ts` - Handle optional metadata fields
+- **Schema Changes:**
+  ```typescript
+  username: z.string().optional()
+    .refine((val) => !val || (val.length >= 3 && val.length <= 20), "...")
+    .refine((val) => !val || /^[a-z0-9_]+$/.test(val), "...")
+  name: z.string().optional()
+  ```
+- **UI:** Labels show "(optional)" indicator
+- **Commit:** `feat: add name editing to profile and make username/name optional on signup`
+
+### 13. Apple Password Manager Support
+- **File Modified:** `components/auth/signup-form.tsx`
+- **Problem:** Apple's native password manager not triggering autofill
+- **Solution:** Added proper `autoComplete` attributes:
+  - email: `"email"`
+  - username: `"username"`
+  - name: `"name"`
+  - password: `"new-password"`
+- **Commit:** `fix: add autocomplete attributes for Apple password manager support`
+
+### Link Text Improvements
+- **Files Modified:**
+  - `app/(auth)/login/page.tsx` - Changed "Or" to "Don't have an account?"
+  - `app/(auth)/signup/page.tsx` - Changed "Or" to "Already have an account?"
+- **Result:** Clearer call-to-action for navigation between auth pages
+
+---
+
 ## Technical Details
 
 ### Dependencies Added
@@ -131,6 +198,7 @@ Route (app)                              Size     First Load JS
 
 ## Commits Summary
 
+### Phase 2 & 3 Implementation
 1. `fix: add missing Supabase client utilities and utils from phase 1`
 2. `chore: add recharts and date-fns for data visualization`
 3. `feat: add workout history list page with filtering and sorting`
@@ -140,8 +208,14 @@ Route (app)                              Size     First Load JS
 7. `feat: add personal records tracking to stats dashboard`
 8. `feat: add volume progress chart to stats dashboard`
 9. `feat: add navigation links to workouts and stats from profile page`
+10. `docs: add Phase 2 & 3 completion summary`
 
-**Total:** 9 commits, all pushed to remote branch
+### Post-Implementation UI Fixes
+11. `fix: add dark mode support and fix autofill styling for auth pages`
+12. `feat: add name editing to profile and make username/name optional on signup`
+13. `fix: add autocomplete attributes for Apple password manager support`
+
+**Total:** 13 commits, all pushed to remote branch
 
 ---
 
@@ -238,11 +312,20 @@ Then visit:
 
 ## Next Steps
 
-1. **Manual Testing:** Test all pages with actual Supabase data
-2. **Data Seeding:** Add sample workout data to test all features
-3. **Mobile Testing:** Verify responsive design on mobile devices
-4. **Performance:** Monitor page load times with real data
-5. **Future Enhancements:**
+### Immediate (Phase 1 Completion)
+1. **OTP-Based Password Reset:** Implement OTP code entry for password reset
+   - Current magic link flow has session persistence issues (see `docs/PHASE1_HANDOFF.md`)
+   - Web app is in separate repository, OTP-only approach preferred
+   - User confirmed: "for all intents and purposes of this app and repo we only support otp"
+
+### Testing & Validation
+2. **Manual Testing:** Test all pages with actual Supabase data
+3. **Data Seeding:** Add sample workout data to test all features
+4. **Mobile Testing:** Verify responsive design on mobile devices
+5. **Performance:** Monitor page load times with real data
+
+### Future Enhancements
+6. **Additional Features:**
    - Add filtering by date range
    - Export workout data
    - More chart types (pie, radar)
@@ -259,9 +342,12 @@ Then visit:
 - Fixed missing Phase 1 files (lib/supabase) as prerequisite
 - Handled Supabase foreign key array types properly throughout
 - All features fully integrated with existing authentication system
+- Additional UI polish based on user testing (dark mode, autofill, profile editing)
+- Password reset will be replaced with OTP flow (see `docs/PHASE1_HANDOFF.md`)
 
 ---
 
 **Implementation Complete:** 2025-11-19
 **Developer:** Claude with Superpowers (executing-plans skill)
-**Branch Ready for:** Review and merge to `feature/web-auth-app`
+**Branch:** `claude/web-auth-phase-1-01NPdYeVQXN3LMUNywhvoM1e`
+**Status:** Ready for testing and OTP password reset implementation
