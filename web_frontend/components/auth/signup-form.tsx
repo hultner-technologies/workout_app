@@ -23,13 +23,16 @@ const signupSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   username: z
     .string()
-    .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be at most 20 characters")
-    .regex(
-      /^[a-z0-9_]+$/,
+    .optional()
+    .refine(
+      (val) => !val || (val.length >= 3 && val.length <= 20),
+      "Username must be between 3 and 20 characters",
+    )
+    .refine(
+      (val) => !val || /^[a-z0-9_]+$/.test(val),
       "Username must be lowercase letters, numbers, and underscores only",
     ),
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().optional(),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -86,7 +89,9 @@ export function SignupForm() {
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>
+                  Username <span className="text-gray-500">(optional)</span>
+                </FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="johndoe_123" {...field} />
                 </FormControl>
@@ -100,7 +105,9 @@ export function SignupForm() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>
+                  Full Name <span className="text-gray-500">(optional)</span>
+                </FormLabel>
                 <FormControl>
                   <Input type="text" placeholder="John Doe" {...field} />
                 </FormControl>
