@@ -67,6 +67,20 @@ export function ProfileInfo({ user, appUser }: ProfileInfoProps) {
       </div>
 
       <div className="border-t border-gray-200 pt-5">
+        <h3 className="mb-4 text-lg font-medium text-gray-900">
+          Quick Navigation
+        </h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Button asChild variant="outline">
+            <a href="/workouts">View Workout History</a>
+          </Button>
+          <Button asChild variant="outline">
+            <a href="/stats">View Statistics</a>
+          </Button>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 pt-5">
         <Button
           onClick={handleLogout}
           variant="destructive"
