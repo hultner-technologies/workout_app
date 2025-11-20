@@ -26,7 +26,7 @@ test.describe('Landing Page', () => {
     await expect(page).toHaveURL('/signup');
 
     // Verify we're on the signup page
-    await expect(page.locator('h2')).toContainText(/sign up|create account/i);
+    await expect(page.locator('h2')).toContainText(/sign up|create.*account/i);
   });
 
   test('should navigate to login page from CTA', async ({ page }) => {

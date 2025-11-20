@@ -19,14 +19,51 @@ export default defineConfig({
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
     },
-    // Test project - uses authenticated state
+    // Unauthenticated tests - NO storageState (public pages)
     {
-      name: 'chromium',
+      name: 'unauthenticated',
+      testMatch: [
+        '**/password-reset.spec.ts',
+      ],
+      use: {
+        ...devices['Desktop Chrome'],
+        // NO storageState - users are not logged in
+      },
+    },
+    // Unauthenticated navigation tests
+    {
+      name: 'unauthenticated-nav',
+      testMatch: '**/navigation.spec.ts',
+      testIgnore: /.*\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // NO storageState - users are not logged in
+      },
+      grep: /Landing Page|Authentication Redirects/,  // Only run Landing Page and Auth Redirects tests
+    },
+    // Authenticated tests - WITH storageState (protected pages)
+    {
+      name: 'authenticated',
+      testMatch: [
+        '**/workouts.spec.ts',
+        '**/stats.spec.ts',
+      ],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'tests/.auth/user.json',
       },
       dependencies: ['setup'],
+    },
+    // Authenticated navigation tests
+    {
+      name: 'authenticated-nav',
+      testMatch: '**/navigation.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/.auth/user.json',
+      },
+      dependencies: ['setup'],
+      grep: /Authenticated Navigation/,  // Only run Authenticated Navigation tests
     },
   ],
 
