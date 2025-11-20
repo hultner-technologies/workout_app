@@ -29,14 +29,9 @@ export default async function Home() {
             Welcome to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">GymR8</span>
           </h1>
 
-          <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-600 dark:text-gray-300">
+          <p className="mx-auto mb-12 max-w-2xl text-xl text-gray-600 dark:text-gray-300">
             The intelligent fitness platform that helps you track every rep,
             visualize your progress, and crush your personal records.
-          </p>
-
-          <p className="mx-auto mb-12 max-w-xl text-lg text-gray-500 dark:text-gray-400">
-            Join thousands of athletes who&apos;ve transformed their training with
-            data-driven insights and smart workout tracking.
           </p>
 
           <div className="flex justify-center gap-4">
@@ -131,36 +126,6 @@ export default async function Home() {
               Automatically track your PRs for every exercise. Get notified
               when you hit a new personal best and celebrate your victories.
             </p>
-          </div>
-        </div>
-
-        {/* Social Proof / Stats */}
-        <div className="border-t border-gray-200 py-16 dark:border-gray-700">
-          <div className="grid gap-8 text-center md:grid-cols-3">
-            <div>
-              <div className="mb-2 text-4xl font-bold text-blue-600 dark:text-blue-400">
-                10,000+
-              </div>
-              <div className="text-gray-600 dark:text-gray-300">
-                Workouts Logged
-              </div>
-            </div>
-            <div>
-              <div className="mb-2 text-4xl font-bold text-purple-600 dark:text-purple-400">
-                500+
-              </div>
-              <div className="text-gray-600 dark:text-gray-300">
-                Active Athletes
-              </div>
-            </div>
-            <div>
-              <div className="mb-2 text-4xl font-bold text-green-600 dark:text-green-400">
-                50,000+
-              </div>
-              <div className="text-gray-600 dark:text-gray-300">
-                Personal Records
-              </div>
-            </div>
           </div>
         </div>
 

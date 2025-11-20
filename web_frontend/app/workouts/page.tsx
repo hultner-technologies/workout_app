@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { WorkoutList } from '@/components/workouts/workout-list'
+import { AuthNavWrapper } from '@/components/nav/auth-nav-wrapper'
 
 export const metadata: Metadata = {
   title: "Workout History | GymR8",
@@ -40,6 +41,7 @@ export default async function WorkoutsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AuthNavWrapper />
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">

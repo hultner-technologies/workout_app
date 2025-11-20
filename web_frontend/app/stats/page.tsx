@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { StatsDashboard } from '@/components/stats/stats-dashboard'
+import { AuthNavWrapper } from '@/components/nav/auth-nav-wrapper'
 
 export const metadata: Metadata = {
   title: "Workout Statistics | GymR8",
@@ -69,6 +70,7 @@ export default async function StatsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AuthNavWrapper />
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link

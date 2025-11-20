@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 import { ProfileInfo } from "@/components/profile/profile-info";
+import { AuthNavWrapper } from "@/components/nav/auth-nav-wrapper";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AuthNavWrapper />
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="rounded-lg bg-white shadow">
           <div className="px-4 py-5 sm:p-6">
