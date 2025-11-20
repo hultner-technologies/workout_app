@@ -27,7 +27,7 @@ test.describe('Workout History Page', () => {
     await expect(page.locator('h1')).toContainText('Workout Statistics');
   });
 
-  test('should display either workout list or empty state', async ({ page }) => {
+  test('should display either workout list or empty state (but not both)', async ({ page }) => {
     await page.goto('/workouts');
 
     // One of these elements must be visible
@@ -37,8 +37,17 @@ test.describe('Workout History Page', () => {
     const listVisible = await workoutList.isVisible().catch(() => false);
     const emptyVisible = await emptyMessage.isVisible().catch(() => false);
 
-    // At least one must be visible (XOR-like check)
-    expect(listVisible || emptyVisible).toBe(true);
+    // Exactly one must be visible (XOR logic)
+    expect(listVisible !== emptyVisible).toBe(true);
+
+    // Additionally verify what we're showing makes sense
+    if (listVisible) {
+      await expect(workoutList).toBeVisible();
+      await expect(emptyMessage).not.toBeVisible();
+    } else {
+      await expect(emptyMessage).toBeVisible();
+      await expect(workoutList).not.toBeVisible();
+    }
   });
 });
 
@@ -55,26 +64,44 @@ test.describe('Workout Filtering', () => {
     await expect(emptyMessage).toContainText('No workouts found matching your search');
   });
 
-  test('should clear filter results when search input is cleared', async ({ page }) => {
+  test('should clear filter and show default empty message', async ({ page }) => {
     await page.goto('/workouts');
 
     const searchInput = page.getByTestId('workout-search-input');
+    const emptyMessage = page.getByTestId('empty-workouts-message');
 
     // Filter to show no results
     await searchInput.fill('ZZZZNONEXISTENT999');
-    await expect(page.getByTestId('empty-workouts-message')).toBeVisible();
+    await expect(emptyMessage).toBeVisible();
+    await expect(emptyMessage).toContainText('No workouts found matching your search');
 
     // Clear the search
     await searchInput.clear();
 
-    // Empty message should update or disappear
-    const emptyMessage = page.getByTestId('empty-workouts-message');
-    const stillVisible = await emptyMessage.isVisible().catch(() => false);
+    // Should show default empty message (not search-specific)
+    await expect(emptyMessage).toBeVisible();
+    await expect(emptyMessage).not.toContainText('No workouts found matching your search');
+  });
 
-    if (stillVisible) {
-      // If still showing empty state, text should change to default message
-      await expect(emptyMessage).not.toContainText('No workouts found matching');
-    }
+  test('should restore workout list when clearing filter', async ({ page }) => {
+    await page.goto('/workouts');
+
+    const searchInput = page.getByTestId('workout-search-input');
+    const workoutList = page.getByTestId('workout-list');
+
+    // Check if workouts exist initially
+    const hasWorkouts = await workoutList.isVisible().catch(() => false);
+    test.skip(!hasWorkouts, 'Requires workout data');
+
+    // Filter to hide workouts
+    await searchInput.fill('ZZZZNONEXISTENT999');
+    const emptyMessage = page.getByTestId('empty-workouts-message');
+    await expect(emptyMessage).toBeVisible();
+
+    // Clear search - workouts should reappear
+    await searchInput.clear();
+    await expect(workoutList).toBeVisible();
+    await expect(emptyMessage).not.toBeVisible();
   });
 });
 
