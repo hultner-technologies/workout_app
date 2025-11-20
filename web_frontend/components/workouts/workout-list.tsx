@@ -86,10 +86,12 @@ export function WorkoutList({ sessions }: WorkoutListProps) {
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="max-w-sm"
+          data-testid="workout-search-input"
         />
         <Button
           variant="outline"
           onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+          data-testid="workout-sort-button"
         >
           Sort: {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
         </Button>
@@ -97,21 +99,22 @@ export function WorkoutList({ sessions }: WorkoutListProps) {
 
       {/* Session List */}
       {sortedSessions.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12" data-testid="empty-workouts-message">
           <p className="text-gray-500">
             {filter ? 'No workouts found matching your search.' : 'No workouts recorded yet.'}
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4" data-testid="workout-list">
           {sortedSessions.map((session) => (
             <div
               key={session.performed_session_id}
               className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+              data-testid="workout-item"
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900" data-testid="workout-name">
                     {(Array.isArray(session.session_schedule)
                       ? session.session_schedule[0]?.name
                       : session.session_schedule?.name) || 'Unknown Workout'}
@@ -127,6 +130,7 @@ export function WorkoutList({ sessions }: WorkoutListProps) {
                 <a
                   href={`/workouts/${session.performed_session_id}`}
                   className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                  data-testid="workout-details-link"
                 >
                   View Details →
                 </a>

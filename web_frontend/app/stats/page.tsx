@@ -74,6 +74,7 @@ export default async function StatsPage() {
           <Link
             href="/workouts"
             className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            data-testid="back-to-workouts-link"
           >
             ← Back to Workouts
           </Link>

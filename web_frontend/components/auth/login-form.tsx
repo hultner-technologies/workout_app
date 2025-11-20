@@ -76,6 +76,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
                     type="email"
                     placeholder="you@example.com"
                     autoComplete="email"
+                    data-testid="email-input"
                     {...field}
                   />
                 </FormControl>
@@ -95,6 +96,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
                     type="password"
                     placeholder="••••••••"
                     autoComplete="current-password"
+                    data-testid="password-input"
                     {...field}
                   />
                 </FormControl>
@@ -118,7 +120,12 @@ export function LoginForm({ redirect }: { redirect?: string }) {
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading}
+            data-testid="login-button"
+          >
             {loading ? "Signing in..." : "Sign in"}
           </Button>
         </form>

@@ -52,7 +52,7 @@ interface TimeRangeSelectorProps {
  */
 export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex gap-2 flex-wrap" data-testid="time-range-selector">
       {Object.entries(TIME_RANGE_LABELS).map(([rangeValue, label]) => (
         <button
           key={rangeValue}
@@ -62,6 +62,7 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
           }`}
+          data-testid={`time-range-${rangeValue}`}
         >
           {label}
         </button>

@@ -14,9 +14,19 @@ export default defineConfig({
   },
 
   projects: [
+    // Setup project - runs authentication before tests
+    {
+      name: 'setup',
+      testMatch: /.*\.setup\.ts/,
+    },
+    // Test project - uses authenticated state
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
   ],
 

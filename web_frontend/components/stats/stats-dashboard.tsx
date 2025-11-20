@@ -163,28 +163,28 @@ export function StatsDashboard({ sessions, exercises }: StatsDashboardProps) {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-blue-50 p-6 rounded-lg dark:bg-blue-900/20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6" data-testid="overview-stats">
+        <div className="bg-blue-50 p-6 rounded-lg dark:bg-blue-900/20" data-testid="total-workouts-card">
           <dt className="text-sm font-medium text-blue-600 uppercase dark:text-blue-400">
             Total Workouts
           </dt>
-          <dd className="mt-2 text-3xl font-bold text-blue-900 dark:text-blue-100">
+          <dd className="mt-2 text-3xl font-bold text-blue-900 dark:text-blue-100" data-testid="total-workouts-value">
             {totalWorkouts}
           </dd>
         </div>
-        <div className="bg-green-50 p-6 rounded-lg dark:bg-green-900/20">
+        <div className="bg-green-50 p-6 rounded-lg dark:bg-green-900/20" data-testid="total-exercises-card">
           <dt className="text-sm font-medium text-green-600 uppercase dark:text-green-400">
             Total Exercises
           </dt>
-          <dd className="mt-2 text-3xl font-bold text-green-900 dark:text-green-100">
+          <dd className="mt-2 text-3xl font-bold text-green-900 dark:text-green-100" data-testid="total-exercises-value">
             {totalExercises}
           </dd>
         </div>
-        <div className="bg-purple-50 p-6 rounded-lg dark:bg-purple-900/20">
+        <div className="bg-purple-50 p-6 rounded-lg dark:bg-purple-900/20" data-testid="total-volume-card">
           <dt className="text-sm font-medium text-purple-600 uppercase dark:text-purple-400">
             Total Volume
           </dt>
-          <dd className="mt-2 text-3xl font-bold text-purple-900 dark:text-purple-100">
+          <dd className="mt-2 text-3xl font-bold text-purple-900 dark:text-purple-100" data-testid="total-volume-value">
             {totalVolume.toFixed(0)} kg
           </dd>
         </div>

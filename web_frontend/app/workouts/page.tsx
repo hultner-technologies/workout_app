@@ -50,6 +50,7 @@ export default async function WorkoutsPage() {
               <Link
                 href="/stats"
                 className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                data-testid="view-stats-link"
               >
                 View Stats →
               </Link>
