@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { logout, updateName } from "@/app/profile/actions";
 import { Button } from "@/components/ui/button";
@@ -146,10 +147,10 @@ export function ProfileInfo({ user, appUser }: ProfileInfoProps) {
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Button asChild variant="outline">
-            <a href="/workouts">View Workout History</a>
+            <Link href="/workouts">View Workout History</Link>
           </Button>
           <Button asChild variant="outline">
-            <a href="/stats">View Statistics</a>
+            <Link href="/stats">View Statistics</Link>
           </Button>
         </div>
       </div>

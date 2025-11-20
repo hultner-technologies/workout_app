@@ -5,11 +5,18 @@ import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+/**
+ * Session data structure from performed_session table
+ */
 interface Session {
   performed_session_id: string
+  /** ISO timestamp when session started */
   started_at: string
+  /** ISO timestamp when session completed */
   completed_at: string
+  /** Optional notes about the workout session */
   note?: string
+  /** Foreign key reference to session_schedule */
   session_schedule?: {
     session_schedule_id: string
     name: string
@@ -19,10 +26,33 @@ interface Session {
   }[]
 }
 
+/**
+ * Props for WorkoutList component
+ */
 interface WorkoutListProps {
+  /** Array of workout sessions to display */
   sessions: Session[]
 }
 
+/**
+ * WorkoutList - Interactive list of workout sessions with filtering and sorting
+ *
+ * Displays all completed workout sessions with the following features:
+ * - Search/filter by session name or notes
+ * - Sort by date (ascending or descending)
+ * - Click to view detailed workout information
+ * - Shows session name, date, and duration for each workout
+ *
+ * Empty state: Shows helpful message when no sessions are found.
+ *
+ * @param {WorkoutListProps} props - Component props
+ * @returns {JSX.Element} Filterable, sortable list of workout sessions
+ *
+ * @example
+ * ```tsx
+ * <WorkoutList sessions={userSessions} />
+ * ```
+ */
 export function WorkoutList({ sessions }: WorkoutListProps) {
   const [filter, setFilter] = useState('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')

@@ -14,11 +14,17 @@ import {
 } from 'recharts'
 import { TIME_RANGES } from './time-range-selector'
 
+/**
+ * Exercise data structure from performed_exercise table
+ */
 interface Exercise {
   performed_exercise_id: string
+  /** Array of reps performed for each set */
   reps: number[]
+  /** Weight used in grams (stored in database) */
   weight?: number
   started_at: string
+  /** Foreign key reference to performed_session (can be array or object) */
   performed_session?: {
     started_at: string
   } | {
@@ -26,16 +32,50 @@ interface Exercise {
   }[]
 }
 
+/**
+ * Props for VolumeProgressChart component
+ */
 interface VolumeProgressChartProps {
+  /** Array of exercises to calculate volume from */
   exercises: Exercise[]
+  /** Selected time range for filtering (from TIME_RANGES constants) */
   timeRange: string
 }
 
+/**
+ * VolumeProgressChart - Line chart showing total training volume over time
+ *
+ * Displays the total volume (weight × reps) performed per time period.
+ * Volume is calculated as the sum of (weight in kg × total reps) for all
+ * exercises in each period.
+ *
+ * Automatically switches between weekly and monthly buckets based on the
+ * selected time range:
+ * - Weekly buckets: 1Y, YTD time ranges
+ * - Monthly buckets: 3Y, 5Y, All Time ranges
+ *
+ * Weight conversion: Database stores weight in grams, chart displays in kg.
+ *
+ * Uses useMemo for performance optimization to avoid recalculating volume
+ * on every render.
+ *
+ * @param {VolumeProgressChartProps} props - Component props
+ * @returns {JSX.Element} Line chart visualization of volume progress
+ *
+ * @example
+ * ```tsx
+ * <VolumeProgressChart
+ *   exercises={userExercises}
+ *   timeRange={TIME_RANGES.ONE_YEAR}
+ * />
+ * ```
+ */
 export function VolumeProgressChart({ exercises, timeRange }: VolumeProgressChartProps) {
   const chartData = useMemo(() => {
     if (exercises.length === 0) return []
 
     const now = new Date()
+    const nowTime = now.getTime() // Calculate stable default timestamp
 
     // Determine if we should use monthly or weekly buckets
     const useMonthlyBuckets =
@@ -50,7 +90,7 @@ export function VolumeProgressChart({ exercises, timeRange }: VolumeProgressChar
             const date = Array.isArray(e.performed_session)
               ? e.performed_session[0]?.started_at
               : e.performed_session?.started_at
-            return date ? new Date(date).getTime() : Date.now()
+            return date ? new Date(date).getTime() : nowTime
           })))
         : sub(now, { years: 1 })
 
@@ -94,7 +134,7 @@ export function VolumeProgressChart({ exercises, timeRange }: VolumeProgressChar
             const date = Array.isArray(e.performed_session)
               ? e.performed_session[0]?.started_at
               : e.performed_session?.started_at
-            return date ? new Date(date).getTime() : Date.now()
+            return date ? new Date(date).getTime() : nowTime
           })))
         : sub(now, { months: 3 })
 

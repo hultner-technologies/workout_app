@@ -1,12 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { WorkoutList } from '@/components/workouts/workout-list'
 
-export default async function WorkoutsPage({
-  searchParams,
-}: {
-  searchParams: { filter?: string; sort?: string }
-}) {
+export default async function WorkoutsPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -44,12 +41,12 @@ export default async function WorkoutsPage({
               <h1 className="text-3xl font-bold text-gray-900">
                 Workout History
               </h1>
-              <a
+              <Link
                 href="/stats"
                 className="text-sm font-medium text-blue-600 hover:text-blue-500"
               >
                 View Stats →
-              </a>
+              </Link>
             </div>
             <WorkoutList sessions={sessions || []} />
           </div>

@@ -2,16 +2,26 @@
 
 import { format, formatDuration, intervalToDuration } from 'date-fns'
 
+/**
+ * Exercise data structure from performed_exercise table
+ */
 interface Exercise {
   performed_exercise_id: string
   name?: string
+  /** Array of reps performed for each set */
   reps: number[]
   sets: number
+  /** Weight used in grams (stored in database) */
   weight?: number
+  /** Array of rest periods between sets */
   rest?: string[]
+  /** ISO timestamp when exercise started */
   started_at: string
+  /** ISO timestamp when exercise completed */
   completed_at?: string
+  /** Optional notes about the exercise */
   note?: string
+  /** Foreign key reference to exercise and base_exercise */
   exercise?: {
     exercise_id: string
     base_exercise?: {
@@ -37,11 +47,18 @@ interface Exercise {
   }[]
 }
 
+/**
+ * Session data structure from performed_session table
+ */
 interface Session {
   performed_session_id: string
+  /** ISO timestamp when session started */
   started_at: string
+  /** ISO timestamp when session completed */
   completed_at: string
+  /** Optional notes about the workout session */
   note?: string
+  /** Foreign key reference to session_schedule */
   session_schedule?: {
     session_schedule_id: string
     name: string
@@ -51,11 +68,39 @@ interface Session {
   }[]
 }
 
+/**
+ * Props for WorkoutDetail component
+ */
 interface WorkoutDetailProps {
+  /** The workout session to display */
   session: Session
+  /** Array of exercises performed in this session */
   exercises: Exercise[]
 }
 
+/**
+ * WorkoutDetail - Detailed view of a single workout session
+ *
+ * Displays comprehensive information about a completed workout including:
+ * - Session name, date, and total duration
+ * - List of all exercises performed
+ * - For each exercise: sets, reps, weight, and notes
+ * - Total session statistics (exercises, sets, volume)
+ *
+ * Weight conversion: Database stores weight in grams, displays in kg.
+ * Duration calculation: Automatically calculates from start/end timestamps.
+ *
+ * @param {WorkoutDetailProps} props - Component props
+ * @returns {JSX.Element} Detailed workout information with statistics
+ *
+ * @example
+ * ```tsx
+ * <WorkoutDetail
+ *   session={workoutSession}
+ *   exercises={sessionExercises}
+ * />
+ * ```
+ */
 export function WorkoutDetail({ session, exercises }: WorkoutDetailProps) {
   // Calculate duration, handling case where workout might not be completed yet
   const duration = session.completed_at

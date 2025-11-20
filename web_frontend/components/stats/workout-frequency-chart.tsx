@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { format, startOfWeek, startOfMonth, eachWeekOfInterval, eachMonthOfInterval, sub } from 'date-fns'
+import { format, eachWeekOfInterval, eachMonthOfInterval, sub } from 'date-fns'
 import {
   BarChart,
   Bar,
@@ -13,17 +13,48 @@ import {
 } from 'recharts'
 import { TIME_RANGES } from './time-range-selector'
 
+/**
+ * Session data structure from performed_session table
+ */
 interface Session {
   performed_session_id: string
   started_at: string
   completed_at: string
 }
 
+/**
+ * Props for WorkoutFrequencyChart component
+ */
 interface WorkoutFrequencyChartProps {
+  /** Array of workout sessions to analyze */
   sessions: Session[]
+  /** Selected time range for filtering (from TIME_RANGES constants) */
   timeRange: string
 }
 
+/**
+ * WorkoutFrequencyChart - Bar chart showing workout frequency over time
+ *
+ * Displays the number of workouts performed per time period (week or month).
+ * Automatically switches between weekly and monthly buckets based on the
+ * selected time range:
+ * - Weekly buckets: 1Y, YTD time ranges
+ * - Monthly buckets: 3Y, 5Y, All Time ranges
+ *
+ * Uses useMemo for performance optimization to avoid recalculating chart
+ * data on every render.
+ *
+ * @param {WorkoutFrequencyChartProps} props - Component props
+ * @returns {JSX.Element} Bar chart visualization of workout frequency
+ *
+ * @example
+ * ```tsx
+ * <WorkoutFrequencyChart
+ *   sessions={userSessions}
+ *   timeRange={TIME_RANGES.ONE_YEAR}
+ * />
+ * ```
+ */
 export function WorkoutFrequencyChart({ sessions, timeRange }: WorkoutFrequencyChartProps) {
   const chartData = useMemo(() => {
     if (sessions.length === 0) return []

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -34,16 +35,16 @@ export default async function Home() {
           </p>
 
           <p className="mx-auto mb-12 max-w-xl text-lg text-gray-500 dark:text-gray-400">
-            Join thousands of athletes who've transformed their training with
+            Join thousands of athletes who&apos;ve transformed their training with
             data-driven insights and smart workout tracking.
           </p>
 
           <div className="flex justify-center gap-4">
             <Button asChild size="lg" className="text-lg px-8 py-6">
-              <a href="/signup">Start Free Today</a>
+              <Link href="/signup">Start Free Today</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
-              <a href="/login">Sign In</a>
+              <Link href="/login">Sign In</Link>
             </Button>
           </div>
 
@@ -170,10 +171,10 @@ export default async function Home() {
           </h2>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
             Start tracking your workouts today and see the difference data-driven
-            training can make. It's completely free to get started.
+            training can make. It&apos;s completely free to get started.
           </p>
           <Button asChild size="lg" className="text-lg px-8 py-6">
-            <a href="/signup">Create Your Free Account</a>
+            <Link href="/signup">Create Your Free Account</Link>
           </Button>
         </div>
       </div>

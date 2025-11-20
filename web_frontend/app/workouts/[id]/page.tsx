@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
 import { WorkoutDetail } from '@/components/workouts/workout-detail'
 
 export default async function WorkoutDetailPage({
@@ -69,12 +70,12 @@ export default async function WorkoutDetailPage({
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <a
+          <Link
             href="/workouts"
             className="text-sm font-medium text-blue-600 hover:text-blue-500"
           >
             ← Back to Workouts
-          </a>
+          </Link>
         </div>
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">

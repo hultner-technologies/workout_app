@@ -2,13 +2,19 @@
 
 import { useMemo } from 'react'
 
+/**
+ * Exercise data structure from performed_exercise table
+ */
 interface Exercise {
   performed_exercise_id: string
   name?: string
+  /** Array of reps performed for each set */
   reps: number[]
   sets: number
+  /** Weight used in grams (stored in database) */
   weight?: number
   started_at: string
+  /** Foreign key reference to exercise and base_exercise */
   exercise?: {
     base_exercise?: {
       name: string
@@ -24,17 +30,48 @@ interface Exercise {
   }[]
 }
 
+/**
+ * Props for PersonalRecords component
+ */
 interface PersonalRecordsProps {
+  /** Array of exercises to find PRs from */
   exercises: Exercise[]
 }
 
+/**
+ * Personal record data structure
+ */
 interface PR {
+  /** Name of the exercise */
   exerciseName: string
+  /** Maximum weight lifted in kg */
   maxWeight: number
+  /** Number of reps performed at max weight */
   reps: number
+  /** Date the PR was achieved (ISO format) */
   date: string
 }
 
+/**
+ * PersonalRecords - Table displaying personal records for each exercise
+ *
+ * Analyzes all exercises and finds the maximum weight (1-rep max) achieved
+ * for each unique exercise. Groups exercises by name and displays the top
+ * 10 PRs sorted by weight in descending order.
+ *
+ * Weight conversion: Database stores weight in grams, table displays in kg.
+ *
+ * Uses useMemo for performance optimization to avoid recalculating PRs
+ * on every render.
+ *
+ * @param {PersonalRecordsProps} props - Component props
+ * @returns {JSX.Element} Table of personal records with exercise names, weights, reps, and dates
+ *
+ * @example
+ * ```tsx
+ * <PersonalRecords exercises={userExercises} />
+ * ```
+ */
 export function PersonalRecords({ exercises }: PersonalRecordsProps) {
   const personalRecords = useMemo(() => {
     // Helper function to get exercise name
