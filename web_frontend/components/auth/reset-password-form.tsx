@@ -65,6 +65,7 @@ export function ResetPasswordForm() {
                     type="email"
                     placeholder="you@example.com"
                     autoComplete="email"
+                    data-testid="reset-email-input"
                     {...field}
                   />
                 </FormControl>
@@ -74,12 +75,12 @@ export function ResetPasswordForm() {
           />
 
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600" data-testid="reset-error-message">
               {error}
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading} data-testid="reset-submit-button">
             {loading ? "Sending email..." : "Send reset link"}
           </Button>
         </form>

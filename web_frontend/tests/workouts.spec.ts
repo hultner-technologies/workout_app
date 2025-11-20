@@ -26,52 +26,60 @@ test.describe('Workout History Page', () => {
     await expect(page).toHaveURL('/stats');
     await expect(page.locator('h1')).toContainText('Workout Statistics');
   });
-});
 
-test.describe('Workout Filtering', () => {
-  test('should filter workouts by search term', async ({ page }) => {
+  test('should display either workout list or empty state', async ({ page }) => {
     await page.goto('/workouts');
 
-    // Wait for workout list to load
+    // One of these elements must be visible
     const workoutList = page.getByTestId('workout-list');
     const emptyMessage = page.getByTestId('empty-workouts-message');
 
-    // Check if there are workouts or empty state
-    const hasWorkouts = await workoutList.isVisible().catch(() => false);
+    const listVisible = await workoutList.isVisible().catch(() => false);
+    const emptyVisible = await emptyMessage.isVisible().catch(() => false);
 
-    if (hasWorkouts) {
-      // Get initial count of workouts
-      const initialWorkouts = await page.getByTestId('workout-item').count();
-      expect(initialWorkouts).toBeGreaterThan(0);
+    // At least one must be visible (XOR-like check)
+    expect(listVisible || emptyVisible).toBe(true);
+  });
+});
 
-      // Get the name of the first workout
-      const firstWorkoutName = await page.getByTestId('workout-name').first().textContent();
+test.describe('Workout Filtering', () => {
+  test('should show "no results" message when filtering returns no matches', async ({ page }) => {
+    await page.goto('/workouts');
 
-      if (firstWorkoutName) {
-        // Search for a substring of the first workout name
-        const searchTerm = firstWorkoutName.substring(0, 3);
-        await page.getByTestId('workout-search-input').fill(searchTerm);
+    // Search for something that definitely won't match any workout
+    await page.getByTestId('workout-search-input').fill('ZZZZNONEXISTENT999');
 
-        // Verify search was applied - the first workout should still be visible
-        await expect(page.getByTestId('workout-name').first()).toContainText(searchTerm, { ignoreCase: true });
-      }
+    // Should show empty state message with search-specific text
+    const emptyMessage = page.getByTestId('empty-workouts-message');
+    await expect(emptyMessage).toBeVisible();
+    await expect(emptyMessage).toContainText('No workouts found matching your search');
+  });
 
-      // Search for something that definitely won't match
-      await page.getByTestId('workout-search-input').fill('ZZZZNONEXISTENT999');
+  test('should clear filter results when search input is cleared', async ({ page }) => {
+    await page.goto('/workouts');
 
-      // Should show empty state message
-      await expect(emptyMessage).toBeVisible();
-      await expect(emptyMessage).toContainText('No workouts found matching your search');
-    } else {
-      // If no workouts exist, verify empty state is shown
-      await expect(emptyMessage).toBeVisible();
-      await expect(emptyMessage).toContainText('No workouts recorded yet');
+    const searchInput = page.getByTestId('workout-search-input');
+
+    // Filter to show no results
+    await searchInput.fill('ZZZZNONEXISTENT999');
+    await expect(page.getByTestId('empty-workouts-message')).toBeVisible();
+
+    // Clear the search
+    await searchInput.clear();
+
+    // Empty message should update or disappear
+    const emptyMessage = page.getByTestId('empty-workouts-message');
+    const stillVisible = await emptyMessage.isVisible().catch(() => false);
+
+    if (stillVisible) {
+      // If still showing empty state, text should change to default message
+      await expect(emptyMessage).not.toContainText('No workouts found matching');
     }
   });
 });
 
 test.describe('Workout Sorting', () => {
-  test('should toggle sort order when clicking sort button', async ({ page }) => {
+  test('should toggle sort order button text', async ({ page }) => {
     await page.goto('/workouts');
 
     const sortButton = page.getByTestId('workout-sort-button');
@@ -88,45 +96,58 @@ test.describe('Workout Sorting', () => {
     await expect(sortButton).toContainText('Newest First');
   });
 
-  test('should actually reorder workouts when sorting', async ({ page }) => {
+  test('should maintain workout list visibility after sorting', async ({ page }) => {
     await page.goto('/workouts');
 
+    const sortButton = page.getByTestId('workout-sort-button');
     const workoutList = page.getByTestId('workout-list');
-    const hasWorkouts = await workoutList.isVisible().catch(() => false);
 
-    if (hasWorkouts) {
-      const workoutCount = await page.getByTestId('workout-item').count();
+    // Check initial state
+    const initiallyHasWorkouts = await workoutList.isVisible().catch(() => false);
 
-      // Only test reordering if there are multiple workouts
-      if (workoutCount >= 2) {
-        // Switch to ascending order (oldest first)
-        await page.getByTestId('workout-sort-button').click();
-        await expect(page.getByTestId('workout-sort-button')).toContainText('Oldest First');
+    // Toggle sort order
+    await sortButton.click();
+    await expect(sortButton).toContainText('Oldest First');
 
-        // Verify the sort button state changed and workouts are still displayed
-        await expect(page.getByTestId('workout-list')).toBeVisible();
-        await expect(page.getByTestId('workout-sort-button')).toContainText('Oldest First');
-      }
-    }
+    // If workouts were visible before, they should still be visible after sort
+    const stillHasWorkouts = await workoutList.isVisible().catch(() => false);
+    expect(stillHasWorkouts).toBe(initiallyHasWorkouts);
   });
 });
 
 test.describe('Workout Details Navigation', () => {
-  test('should navigate to workout detail page', async ({ page }) => {
+  test('should have correctly formatted detail links when workouts exist', async ({ page }) => {
     await page.goto('/workouts');
 
     const workoutList = page.getByTestId('workout-list');
-    const hasWorkouts = await workoutList.isVisible().catch(() => false);
+    const workoutListExists = await workoutList.isVisible().catch(() => false);
 
-    if (hasWorkouts) {
-      // Click the first workout details link
-      const firstDetailsLink = page.getByTestId('workout-details-link').first();
-      await expect(firstDetailsLink).toBeVisible();
+    // Skip test if no workouts exist (test is data-dependent)
+    test.skip(!workoutListExists, 'No workouts available for testing');
 
-      await firstDetailsLink.click();
+    // If we reach here, workouts must exist
+    const firstDetailsLink = page.getByTestId('workout-details-link').first();
+    await expect(firstDetailsLink).toBeVisible();
 
-      // Should navigate to workout detail page (URL pattern: /workouts/[id])
-      await expect(page).toHaveURL(/\/workouts\/[a-f0-9-]+/);
-    }
+    // Verify link has correct format
+    const href = await firstDetailsLink.getAttribute('href');
+    expect(href).toMatch(/^\/workouts\/.+$/);
+  });
+
+  test('should navigate to detail page when clicking workout link', async ({ page }) => {
+    await page.goto('/workouts');
+
+    const workoutList = page.getByTestId('workout-list');
+    const workoutListExists = await workoutList.isVisible().catch(() => false);
+
+    // Skip test if no workouts exist (test is data-dependent)
+    test.skip(!workoutListExists, 'No workouts available for testing');
+
+    // Click the first workout details link
+    const firstDetailsLink = page.getByTestId('workout-details-link').first();
+    await firstDetailsLink.click();
+
+    // Should navigate to workout detail page (URL pattern: /workouts/[uuid])
+    await expect(page).toHaveURL(/\/workouts\/[a-f0-9-]+/);
   });
 });

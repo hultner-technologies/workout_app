@@ -11,7 +11,7 @@ export default function ResetPasswordPage({
 }: ResetPasswordPageProps) {
   if (searchParams.success) {
     return (
-      <div className="text-center">
+      <div className="text-center" data-testid="reset-success-message">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
           <svg
             className="h-6 w-6 text-green-600 dark:text-green-400"
@@ -37,6 +37,7 @@ export default function ResetPasswordPage({
           <a
             href="/login"
             className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+            data-testid="back-to-login-link"
           >
             Back to login
           </a>

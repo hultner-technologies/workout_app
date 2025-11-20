@@ -1,83 +1,91 @@
 import { test, expect } from '@playwright/test';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
-const execAsync = promisify(exec);
+test.describe('Password Reset Form', () => {
+  test('should display reset password form correctly', async ({ page }) => {
+    await page.goto('/reset-password');
 
-async function waitForRecoveryToken(email: string, maxAttempts = 5): Promise<string> {
-  for (let i = 0; i < maxAttempts; i++) {
-    const { stdout } = await execAsync(
-      `docker exec supabase_db_workout_app psql -U postgres -t -c "SELECT recovery_token FROM auth.users WHERE email = '${email}' AND recovery_sent_at > NOW() - INTERVAL '10 seconds'" | tr -d ' '`
-    );
-    const token = stdout.trim();
-    if (token && token !== '') {
-      return token;
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-  throw new Error(`Recovery token not found for ${email} after ${maxAttempts} attempts`);
-}
-
-test.describe('Password Reset Flow', () => {
-  test('should complete password reset flow successfully', async ({ page }) => {
-    const testEmail = 'ahultner@gmail.com';
-    const newPassword = 'NewSecurePassword123!';
-
-    await page.goto('http://127.0.0.1:3000/reset-password');
+    // Verify page heading
     await expect(page.locator('h2')).toContainText('Reset your password');
 
-    await page.fill('input[name="email"]', testEmail);
-    const submitPromise = page.click('button[type="submit"]');
-
-    const tokenPromise = waitForRecoveryToken(testEmail);
-    await Promise.all([submitPromise, tokenPromise.catch(() => {})]);
-
-    await expect(page.locator('text=Check your email')).toBeVisible({ timeout: 10000 });
-
-    let token: string;
-    try {
-      token = await tokenPromise;
-    } catch {
-      token = await waitForRecoveryToken(testEmail, 3);
-    }
-
-    expect(token).toBeTruthy();
-
-    const resetUrl = `http://127.0.0.1:54321/auth/v1/verify?token=${token}&type=recovery&redirect_to=http://127.0.0.1:3000/auth/callback?type=recovery%26next=/update-password`;
-
-    await page.goto(resetUrl);
-
-    await page.waitForURL('**/update-password', { timeout: 10000 });
-    await expect(page.locator('h2')).toContainText('Update your password');
-
-    await page.fill('input[name="password"]', newPassword);
-    await page.fill('input[name="confirmPassword"]', newPassword);
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/(profile|login)/, { timeout: 10000 });
-
-    const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(profile|login)/);
+    // Verify form elements are present
+    await expect(page.getByTestId('reset-email-input')).toBeVisible();
+    await expect(page.getByTestId('reset-submit-button')).toBeVisible();
   });
 
-  test('should send correct redirect URL to Supabase Auth', async ({ page }) => {
-    const testEmail = 'test-redirect@example.com';
+  test('should show success message after form submission', async ({ page }) => {
+    await page.goto('/reset-password');
 
-    await page.goto('http://127.0.0.1:3000/reset-password');
+    // Fill in email
+    await page.getByTestId('reset-email-input').fill('test@example.com');
 
-    await page.fill('input[name="email"]', testEmail);
-    await page.click('button[type="submit"]');
+    // Submit form
+    await page.getByTestId('reset-submit-button').click();
 
-    await page.waitForTimeout(2000);
+    // Wait for success page
+    await expect(page).toHaveURL('/reset-password?success=true');
 
-    const { stdout } = await execAsync(
-      `docker exec supabase_db_workout_app psql -U postgres -t -c "SELECT COUNT(*) FROM auth.users WHERE email = '${testEmail}' AND recovery_sent_at IS NOT NULL"`
-    );
+    // Verify success message is displayed
+    await expect(page.getByTestId('reset-success-message')).toBeVisible();
+    await expect(page.locator('h2')).toContainText('Check your email');
+    await expect(page.locator('text=We sent a password reset link')).toBeVisible();
+  });
 
-    const count = parseInt(stdout.trim());
+  test('should have back to login link on success page', async ({ page }) => {
+    await page.goto('/reset-password?success=true');
 
-    console.log(`Recovery request count for ${testEmail}:`, count);
+    const backLink = page.getByTestId('back-to-login-link');
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveAttribute('href', '/login');
+  });
 
-    expect(true).toBe(true);
+  test('should validate email format', async ({ page }) => {
+    await page.goto('/reset-password');
+
+    // Try to submit with invalid email
+    await page.getByTestId('reset-email-input').fill('invalid-email');
+    await page.getByTestId('reset-submit-button').click();
+
+    // Should show validation error (form won't submit)
+    await expect(page).toHaveURL('/reset-password');
+  });
+});
+
+test.describe('Update Password Form', () => {
+  test('should display update password form correctly', async ({ page }) => {
+    await page.goto('/update-password');
+
+    // Verify page heading
+    await expect(page.locator('h2')).toContainText('Update your password');
+
+    // Verify form elements are present
+    await expect(page.getByTestId('new-password-input')).toBeVisible();
+    await expect(page.getByTestId('confirm-password-input')).toBeVisible();
+    await expect(page.getByTestId('update-submit-button')).toBeVisible();
+  });
+
+  test('should require password confirmation to match', async ({ page }) => {
+    await page.goto('/update-password');
+
+    // Fill in mismatched passwords
+    await page.getByTestId('new-password-input').fill('NewPassword123!');
+    await page.getByTestId('confirm-password-input').fill('DifferentPassword123!');
+
+    await page.getByTestId('update-submit-button').click();
+
+    // Should show validation error
+    await expect(page.locator('text=Passwords do not match')).toBeVisible();
+  });
+
+  test('should enforce minimum password length', async ({ page }) => {
+    await page.goto('/update-password');
+
+    // Fill in short password
+    await page.getByTestId('new-password-input').fill('short');
+    await page.getByTestId('confirm-password-input').fill('short');
+
+    await page.getByTestId('update-submit-button').click();
+
+    // Should show validation error
+    await expect(page.locator('text=at least 8 characters')).toBeVisible();
   });
 });

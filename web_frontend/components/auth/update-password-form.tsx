@@ -73,7 +73,7 @@ export function UpdatePasswordForm() {
               <FormItem>
                 <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input type="password" placeholder="••••••••" data-testid="new-password-input" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,7 +87,7 @@ export function UpdatePasswordForm() {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input type="password" placeholder="••••••••" data-testid="confirm-password-input" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -95,12 +95,12 @@ export function UpdatePasswordForm() {
           />
 
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600" data-testid="update-error-message">
               {error}
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading} data-testid="update-submit-button">
             {loading ? "Updating password..." : "Update password"}
           </Button>
         </form>
