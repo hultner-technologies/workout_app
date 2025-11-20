@@ -50,14 +50,43 @@ interface Exercise {
 }
 
 interface StatsDashboardProps {
+  /** Array of workout sessions for the user */
   sessions: Session[]
+  /** Array of performed exercises for the user */
   exercises: Exercise[]
 }
 
+/**
+ * StatsDashboard - Main container for workout statistics
+ *
+ * Displays comprehensive workout statistics including:
+ * - Overview metrics (total workouts, exercises, volume)
+ * - Workout frequency chart over time
+ * - Volume progress chart over time
+ * - Personal records table
+ *
+ * Features time-range filtering (YTD, 1Y, 3Y, 5Y, All Time) that
+ * filters all data client-side for responsive UX.
+ *
+ * @param {StatsDashboardProps} props - Component props
+ * @returns {JSX.Element} Complete stats dashboard with charts
+ *
+ * @example
+ * ```tsx
+ * <StatsDashboard
+ *   sessions={userSessions}
+ *   exercises={userExercises}
+ * />
+ * ```
+ */
 export function StatsDashboard({ sessions, exercises }: StatsDashboardProps) {
   const [timeRange, setTimeRange] = useState<string>(TIME_RANGES.ONE_YEAR)
 
-  // Calculate date range based on selection
+  /**
+   * Calculate start date based on selected time range
+   * @param {string} range - Time range constant
+   * @returns {Date | null} Start date for filtering, or null for "All Time"
+   */
   const getStartDate = (range: string): Date | null => {
     const now = new Date()
     switch (range) {
@@ -76,7 +105,13 @@ export function StatsDashboard({ sessions, exercises }: StatsDashboardProps) {
     }
   }
 
-  // Filter sessions and exercises based on time range
+  /**
+   * Filter sessions and exercises based on selected time range
+   * Uses useMemo for performance optimization to avoid recalculating
+   * filtered data on every render.
+   *
+   * Handles Supabase's foreign key array pattern for performed_session.
+   */
   const { filteredSessions, filteredExercises } = useMemo(() => {
     const startDate = getStartDate(timeRange)
 
@@ -98,13 +133,17 @@ export function StatsDashboard({ sessions, exercises }: StatsDashboardProps) {
     return { filteredSessions, filteredExercises }
   }, [sessions, exercises, timeRange])
 
-  // Calculate total workouts
+  // Calculate total workouts in selected time range
   const totalWorkouts = filteredSessions.length
 
-  // Calculate total exercises performed
+  // Calculate total exercises performed in selected time range
   const totalExercises = filteredExercises.length
 
-  // Calculate total volume (sum of weight * reps for all sets)
+  /**
+   * Calculate total volume (weight × reps) for all exercises in time range
+   * Volume is measured in kilograms (converted from grams stored in database)
+   * Uses useMemo to avoid expensive calculations on every render
+   */
   const totalVolume = useMemo(() => {
     return filteredExercises.reduce((total, exercise) => {
       const weight = exercise.weight || 0

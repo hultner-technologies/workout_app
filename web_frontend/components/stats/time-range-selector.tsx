@@ -1,10 +1,9 @@
 'use client'
 
-interface TimeRangeSelectorProps {
-  value: string
-  onChange: (value: string) => void
-}
-
+/**
+ * Time range constants for filtering statistics data
+ * @constant
+ */
 export const TIME_RANGES = {
   ALL: 'all',
   FIVE_YEARS: '5y',
@@ -13,6 +12,10 @@ export const TIME_RANGES = {
   YTD: 'ytd',
 } as const
 
+/**
+ * Human-readable labels for each time range
+ * @constant
+ */
 export const TIME_RANGE_LABELS: Record<string, string> = {
   [TIME_RANGES.ALL]: 'All Time',
   [TIME_RANGES.FIVE_YEARS]: '5 Years',
@@ -21,6 +24,32 @@ export const TIME_RANGE_LABELS: Record<string, string> = {
   [TIME_RANGES.YTD]: 'YTD',
 }
 
+interface TimeRangeSelectorProps {
+  /** Currently selected time range */
+  value: string
+  /** Callback when time range changes */
+  onChange: (value: string) => void
+}
+
+/**
+ * TimeRangeSelector - Button group for selecting stats time range
+ *
+ * Allows users to filter statistics by different time periods:
+ * - YTD (Year to Date)
+ * - 1 Year, 3 Years, 5 Years
+ * - All Time
+ *
+ * @param {TimeRangeSelectorProps} props - Component props
+ * @returns {JSX.Element} Rendered button group
+ *
+ * @example
+ * ```tsx
+ * <TimeRangeSelector
+ *   value={timeRange}
+ *   onChange={setTimeRange}
+ * />
+ * ```
+ */
 export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
   return (
     <div className="flex gap-2 flex-wrap">
