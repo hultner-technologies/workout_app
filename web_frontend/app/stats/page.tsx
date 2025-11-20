@@ -1,7 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Metadata } from 'next'
 import { StatsDashboard } from '@/components/stats/stats-dashboard'
+
+export const metadata: Metadata = {
+  title: "Workout Statistics | GymR8",
+  description: "Analyze your workout performance with comprehensive charts and statistics. Track volume, frequency, and personal records over time.",
+}
 
 export default async function StatsPage() {
   const supabase = await createClient()

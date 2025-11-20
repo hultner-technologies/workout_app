@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
 
 import { ProfileInfo } from "@/components/profile/profile-info";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Profile | GymR8",
+  description: "Manage your GymR8 profile, view account information, and access your fitness journey dashboard.",
+}
 
 export default async function ProfilePage() {
   const supabase = await createClient();

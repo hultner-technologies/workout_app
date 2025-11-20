@@ -55,3 +55,36 @@ body {
   @apply bg-background text-foreground;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    rgb(229, 231, 235) 0%,
+    rgb(243, 244, 246) 20%,
+    rgb(229, 231, 235) 40%,
+    rgb(229, 231, 235) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    to right,
+    rgb(55, 65, 81) 0%,
+    rgb(75, 85, 99) 20%,
+    rgb(55, 65, 81) 40%,
+    rgb(55, 65, 81) 100%
+  );
+  background-size: 1000px 100%;
+}

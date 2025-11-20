@@ -1,7 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Metadata } from 'next'
 import { WorkoutList } from '@/components/workouts/workout-list'
+
+export const metadata: Metadata = {
+  title: "Workout History | GymR8",
+  description: "View and manage your complete workout history. Track all your training sessions, exercises, and progress over time.",
+}
 
 export default async function WorkoutsPage() {
   const supabase = await createClient()

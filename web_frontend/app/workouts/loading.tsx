@@ -5,8 +5,8 @@ export default function WorkoutsLoading() {
         <div className="rounded-lg bg-white shadow dark:bg-gray-800">
           <div className="px-4 py-5 sm:p-6">
             <div className="mb-8 flex items-center justify-between">
-              <div className="h-10 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-              <div className="h-6 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+              <div className="h-10 w-48 animate-shimmer rounded"></div>
+              <div className="h-6 w-24 animate-shimmer rounded"></div>
             </div>
 
             <div className="space-y-4">
@@ -17,10 +17,10 @@ export default function WorkoutsLoading() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1 space-y-3">
-                      <div className="h-6 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-600"></div>
-                      <div className="h-4 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-600"></div>
+                      <div className="h-6 w-48 animate-shimmer rounded"></div>
+                      <div className="h-4 w-32 animate-shimmer rounded"></div>
                     </div>
-                    <div className="h-6 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-600"></div>
+                    <div className="h-6 w-24 animate-shimmer rounded"></div>
                   </div>
                 </div>
               ))}
