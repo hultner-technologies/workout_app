@@ -60,6 +60,9 @@ jobs:
 
       - name: Build Project Artifacts for Vercel
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Deploy to Vercel (Preview)
         id: deploy-preview
