@@ -2,28 +2,43 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteName = "GymR8";
+const siteDescription = "Track your workouts, visualize your progress, and crush your personal records with GymR8 - the intelligent fitness platform for serious athletes.";
+
 export const metadata: Metadata = {
   title: "GymR8 - Smart Workout Tracking & Progress Analytics",
-  description: "Track your workouts, visualize your progress, and crush your personal records with GymR8 - the intelligent fitness platform for serious athletes.",
+  description: siteDescription,
   keywords: ["workout tracking", "fitness app", "gym log", "exercise tracker", "personal records", "workout analytics", "strength training"],
   authors: [{ name: "GymR8 Team" }],
-  creator: "GymR8",
-  publisher: "GymR8",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://gymr8.app"),
+  creator: siteName,
+  publisher: siteName,
+  metadataBase: new URL(siteUrl),
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
     title: "GymR8 - Smart Workout Tracking & Progress Analytics",
-    description: "Track your workouts, visualize your progress, and crush your personal records with GymR8 - the intelligent fitness platform for serious athletes.",
-    siteName: "GymR8",
+    description: siteDescription,
+    siteName: siteName,
+    // Add images when available:
+    // images: [
+    //   {
+    //     url: '/og-image.png',
+    //     width: 1200,
+    //     height: 630,
+    //     alt: 'GymR8 - Smart Workout Tracking',
+    //   },
+    // ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "GymR8 - Smart Workout Tracking & Progress Analytics",
-    description: "Track your workouts, visualize your progress, and crush your personal records with GymR8 - the intelligent fitness platform for serious athletes.",
-    creator: "@gymr8app",
-  },
+  // Twitter/X Card metadata (optional - configure when social handle is available)
+  // twitter: {
+  //   card: "summary_large_image",
+  //   title: "GymR8 - Smart Workout Tracking & Progress Analytics",
+  //   description: siteDescription,
+  //   creator: process.env.NEXT_PUBLIC_TWITTER_HANDLE, // e.g., "@gymr8app"
+  //   images: ['/og-image.png'],
+  // },
   robots: {
     index: true,
     follow: true,

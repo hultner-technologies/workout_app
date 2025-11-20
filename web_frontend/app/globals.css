@@ -88,3 +88,16 @@ body {
   );
   background-size: 1000px 100%;
 }
+
+/* Respect user's motion preferences (WCAG 2.1 Level AA) */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer {
+    animation: none;
+    background: rgb(229, 231, 235);
+  }
+
+  .dark .animate-shimmer {
+    animation: none;
+    background: rgb(55, 65, 81);
+  }
+}
