@@ -193,7 +193,9 @@ engine = create_engine(settings.pg_dsn)
 # In[ ]:
 
 
-df = pd.read_sql("select * from performed_exercise", engine)
+# NOTE: exercise_stats view now aggregates from performed_exercise_set table
+# This provides accurate weight/reps data from the new data model
+df = pd.read_sql("select * from exercise_stats", engine)
 fig = px.scatter(
     df,
     x="completed_at",
