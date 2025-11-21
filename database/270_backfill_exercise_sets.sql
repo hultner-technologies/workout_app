@@ -6,7 +6,19 @@
 -- weight/reps fields. This migration backfills that historical data into the sets table
 -- so we can fully deprecate the legacy fields and update all views/functions.
 --
+-- Strategy: Conservative session-level exclusion
+--   - Skip entire performed_session if ANY exercise in it has sets
+--   - Prevents mixing pre-migration and post-migration data in same session
+--   - Safe for data integrity, can run additional passes if needed
+--
+-- Rules:
+--   1. Only backfill if performed_session.completed_at IS NOT NULL
+--   2. Allow NULL weight (body weight exercises like push-ups, pull-ups)
+--   3. Use reps array as source of truth for number of sets
+--   4. Handle mismatched rest arrays gracefully (use default if missing)
+--
 -- Created: 2025-11-21
+-- Updated: 2025-11-21 (conservative session-level exclusion)
 
 -- Backfill performed_exercise_set for all completed performed_exercises
 -- that don't already have sets in the performed_exercise_set table
@@ -23,7 +35,8 @@ DECLARE
     current_started_at timestamp;
     current_completed_at timestamp;
 BEGIN
-    -- Loop through all completed performed_exercises that don't have sets yet
+    -- Loop through all performed_exercises in completed sessions that don't have sets yet
+    -- Conservative approach: Skip entire session if ANY exercise in it has sets
     FOR pe_record IN
         SELECT
             pe.performed_exercise_id,
@@ -32,19 +45,23 @@ BEGIN
             pe.rest,
             pe.started_at,
             pe.completed_at,
-            pe.sets
+            pe.sets,
+            pe.performed_session_id
         FROM performed_exercise pe
-        WHERE pe.completed_at IS NOT NULL  -- Only finished exercises
-          AND pe.weight IS NOT NULL        -- Must have weight data
-          AND pe.sets IS NOT NULL          -- Must have sets
+        JOIN performed_session ps ON pe.performed_session_id = ps.performed_session_id
+        WHERE ps.completed_at IS NOT NULL  -- Only backfill exercises in completed sessions
+          AND pe.sets IS NOT NULL          -- Must have set count
           AND pe.sets > 0                  -- Must have at least one set
-          -- Don't backfill if sets already exist
+          AND pe.reps IS NOT NULL          -- Must have reps array
+          AND array_length(pe.reps, 1) > 0 -- Reps array must not be empty
+          -- Conservative session-level exclusion: Skip entire session if ANY exercise has sets
           AND NOT EXISTS (
               SELECT 1
               FROM performed_exercise_set pes
-              WHERE pes.performed_exercise_id = pe.performed_exercise_id
+              JOIN performed_exercise pe2 ON pes.performed_exercise_id = pe2.performed_exercise_id
+              WHERE pe2.performed_session_id = pe.performed_session_id
           )
-        ORDER BY pe.started_at
+        ORDER BY ps.completed_at, pe.started_at
     LOOP
         -- Calculate exercise duration (default to reasonable value if null)
         exercise_duration := COALESCE(
@@ -92,7 +109,7 @@ BEGIN
             ) VALUES (
                 pe_record.performed_exercise_id,
                 'regular',  -- All legacy sets are regular sets
-                pe_record.weight,  -- Same weight for all sets in legacy data
+                COALESCE(pe_record.weight, 0),  -- Body weight exercises: NULL → 0
                 rep_value,
                 rest_value,
                 set_index,  -- Order is 1-indexed
@@ -106,43 +123,45 @@ BEGIN
             current_started_at := current_completed_at;
         END LOOP;
 
-        -- Log progress every 1000 exercises
-        IF pe_record.performed_exercise_id::text = ANY(
-            ARRAY(
-                SELECT performed_exercise_id::text
-                FROM performed_exercise
-                WHERE completed_at IS NOT NULL
-                  AND weight IS NOT NULL
-                  AND NOT EXISTS (
-                      SELECT 1 FROM performed_exercise_set pes
-                      WHERE pes.performed_exercise_id = performed_exercise.performed_exercise_id
-                  )
-                ORDER BY started_at
-                OFFSET 1000 * (
-                    SELECT COUNT(*)::integer / 1000
-                    FROM performed_exercise pe2
-                    WHERE pe2.started_at <= pe_record.started_at
-                      AND pe2.completed_at IS NOT NULL
-                      AND pe2.weight IS NOT NULL
-                      AND NOT EXISTS (
-                          SELECT 1 FROM performed_exercise_set pes2
-                          WHERE pes2.performed_exercise_id = pe2.performed_exercise_id
-                      )
-                )
-                LIMIT 1
+        -- Log progress every 100 exercises (more frequent feedback)
+        IF MOD((
+            SELECT COUNT(*)::integer
+            FROM performed_exercise_set pes2
+            WHERE pes2.performed_exercise_id IN (
+                SELECT pe3.performed_exercise_id
+                FROM performed_exercise pe3
+                WHERE pe3.performed_session_id = pe_record.performed_session_id
             )
-        ) THEN
-            RAISE NOTICE 'Backfilled sets up to %', pe_record.started_at;
+        ), 100) = 0 THEN
+            RAISE NOTICE 'Backfilled session % (exercise started at %)',
+                pe_record.performed_session_id, pe_record.started_at;
         END IF;
     END LOOP;
 
     RAISE NOTICE 'Backfill complete!';
 
     -- Report statistics
-    RAISE NOTICE 'Total performed_exercises with sets: %',
+    RAISE NOTICE '=== Backfill Statistics ===';
+    RAISE NOTICE 'Total sets created: %',
         (SELECT COUNT(*) FROM performed_exercise_set);
-    RAISE NOTICE 'Total performed_exercises completed: %',
-        (SELECT COUNT(*) FROM performed_exercise WHERE completed_at IS NOT NULL);
+    RAISE NOTICE 'Total exercises with sets: %',
+        (SELECT COUNT(DISTINCT performed_exercise_id) FROM performed_exercise_set);
+    RAISE NOTICE 'Total completed sessions: %',
+        (SELECT COUNT(*) FROM performed_session WHERE completed_at IS NOT NULL);
+    RAISE NOTICE 'Total completed exercises: %',
+        (SELECT COUNT(*) FROM performed_exercise pe
+         JOIN performed_session ps ON pe.performed_session_id = ps.performed_session_id
+         WHERE ps.completed_at IS NOT NULL);
+    RAISE NOTICE 'Sessions with sets (post-migration or backfilled): %',
+        (SELECT COUNT(DISTINCT ps.performed_session_id)
+         FROM performed_session ps
+         WHERE EXISTS (
+             SELECT 1
+             FROM performed_exercise_set pes
+             JOIN performed_exercise pe ON pes.performed_exercise_id = pe.performed_exercise_id
+             WHERE pe.performed_session_id = ps.performed_session_id
+         ));
+    RAISE NOTICE '=========================';
 END $$;
 
 -- Create index to speed up queries that aggregate from sets
