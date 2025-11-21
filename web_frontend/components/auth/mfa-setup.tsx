@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,9 +39,13 @@ export function MFASetup({ onSuccess, onCancel }: MFASetupProps) {
 
       if (error) throw error
 
-      // Generate QR code from the URI
-      const qrCodeDataUrl = await QRCode.toDataURL(data.totp.qr_code)
-      setQrCode(qrCodeDataUrl)
+      // Generate QR code as SVG
+      const qrCodeSvg = await QRCode.toString(data.totp.qr_code, {
+        type: 'svg',
+        width: 256,
+        margin: 1,
+      })
+      setQrCode(qrCodeSvg)
       setSecret(data.totp.secret)
       setStep('verify')
     } catch (err) {
@@ -130,7 +133,13 @@ export function MFASetup({ onSuccess, onCancel }: MFASetupProps) {
       </div>
 
       <div className="flex justify-center bg-white p-4 rounded-lg dark:bg-gray-800" data-testid="mfa-qr-code">
-        {qrCode && <Image src={qrCode} alt="MFA QR Code" width={256} height={256} className="max-w-xs" />}
+        {qrCode && (
+          <div
+            className="max-w-xs"
+            dangerouslySetInnerHTML={{ __html: qrCode }}
+            aria-label="MFA QR Code"
+          />
+        )}
       </div>
 
       <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
