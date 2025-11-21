@@ -7,6 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { login } from "@/app/(auth)/login/actions";
+import { verifyMFA } from "@/app/(auth)/login/mfa-actions";
+import { MFAVerify } from "./mfa-verify";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -29,6 +31,8 @@ export function LoginForm({ redirect }: { redirect?: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showMFA, setShowMFA] = useState(false);
+  const [mfaError, setMfaError] = useState<string | null>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -48,10 +52,38 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       setError(result.error);
       setLoading(false);
     } else {
-      // Validate redirect parameter to prevent open redirect vulnerability
+      // Check if MFA is required
+      if (result.mfaRequired) {
+        setShowMFA(true);
+        setLoading(false);
+      } else {
+        // Validate redirect parameter to prevent open redirect vulnerability
+        const isValidRedirect = (path?: string): path is string => {
+          if (!path) return false;
+          // Must start with / but not // (to prevent protocol-relative URLs)
+          return path.startsWith('/') && !path.startsWith('//');
+        };
+
+        const redirectPath = isValidRedirect(redirect) ? redirect : "/profile";
+        router.push(redirectPath);
+        router.refresh();
+      }
+    }
+  }
+
+  async function handleMFAVerify(code: string) {
+    setLoading(true);
+    setMfaError(null);
+
+    const result = await verifyMFA(code);
+
+    if (result.error) {
+      setMfaError(result.error);
+      setLoading(false);
+    } else {
+      // Validate redirect parameter
       const isValidRedirect = (path?: string): path is string => {
         if (!path) return false;
-        // Must start with / but not // (to prevent protocol-relative URLs)
         return path.startsWith('/') && !path.startsWith('//');
       };
 
@@ -59,6 +91,25 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       router.push(redirectPath);
       router.refresh();
     }
+  }
+
+  function handleMFACancel() {
+    setShowMFA(false);
+    setMfaError(null);
+    form.reset();
+  }
+
+  if (showMFA) {
+    return (
+      <div className="mt-8">
+        <MFAVerify
+          onVerify={handleMFAVerify}
+          onCancel={handleMFACancel}
+          loading={loading}
+          error={mfaError}
+        />
+      </div>
+    );
   }
 
   return (

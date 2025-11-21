@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 import { ProfileInfo } from "@/components/profile/profile-info";
+import { MFAManage } from "@/components/auth/mfa-manage";
 import { AuthNavWrapper } from "@/components/nav/auth-nav-wrapper";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,10 +32,20 @@ export default async function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <AuthNavWrapper />
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="rounded-lg bg-white shadow">
-          <div className="px-4 py-5 sm:p-6">
-            <h1 className="mb-8 text-3xl font-bold text-gray-900">Profile</h1>
-            <ProfileInfo user={user} appUser={appUser} />
+        <h1 className="mb-8 text-3xl font-bold text-gray-900">Profile</h1>
+
+        <div className="space-y-6">
+          <div className="rounded-lg bg-white shadow">
+            <div className="px-4 py-5 sm:p-6">
+              <ProfileInfo user={user} appUser={appUser} />
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-white shadow">
+            <div className="px-4 py-5 sm:p-6">
+              <h2 className="mb-6 text-2xl font-bold text-gray-900">Security</h2>
+              <MFAManage />
+            </div>
           </div>
         </div>
       </div>

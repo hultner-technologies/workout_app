@@ -10,20 +10,29 @@ interface LoginInput {
 export async function login(data: LoginInput) {
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error: signInError } = await supabase.auth.signInWithPassword({
     email: data.email,
     password: data.password,
   });
 
-  if (error) {
-    if (error.message.includes("Email not confirmed")) {
+  if (signInError) {
+    if (signInError.message.includes("Email not confirmed")) {
       return {
         error: "Please verify your email address before signing in.",
       };
     }
 
-    return { error: error.message };
+    return { error: signInError.message };
   }
 
-  return { success: true };
+  // Check if user has MFA enabled
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  const hasMFAEnabled = factors?.totp?.some(f => f.status === 'verified');
+
+  // If user has MFA enabled, they need to complete the second factor
+  if (hasMFAEnabled) {
+    return { success: true, mfaRequired: true };
+  }
+
+  return { success: true, mfaRequired: false };
 }
