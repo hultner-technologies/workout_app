@@ -1190,7 +1190,7 @@ All security fixes have been successfully implemented, tested, and committed.
 - Non-breaking: Function access preserved via SECURITY DEFINER
 
 #### ✅ Priority 3: WARN - Session Function Security
-**Status**: Completed
+**Status**: Completed (Updated after code review)
 **Files**:
 - Migration: `database/272_secure_session_functions.sql`
 - Tests: `tests/database/test_session_function_security.py`
@@ -1198,16 +1198,23 @@ All security fixes have been successfully implemented, tested, and committed.
 - Supabase: `supabase/migrations/20240101000037_secure_session_functions.sql`
 
 **Changes**:
-- Added `auth.uid()` validation to `create_session_from_name()` and `create_full_session()`
-- Service role bypasses validation (auth.uid() = NULL)
+- Added `search_path = public` protection to all session functions
+- Uses SECURITY INVOKER (default) - functions respect RLS policies
+- Simplified from plpgsql to sql for better performance
 - Created convenience functions: `create_my_session_from_name()`, `create_my_full_session()`
-- Added `search_path` protection to all session functions
 - **NON-BREAKING**: Existing function signatures unchanged
 
-**Defense-in-Depth Layers**:
-1. Function validates auth.uid() == app_user_id parameter
-2. RLS policy enforces user can only insert their own sessions
-3. search_path protection prevents hijacking
+**Security Model** (Updated based on code review):
+1. **SECURITY INVOKER** (default): Functions run as calling user, respect RLS
+2. **RLS enforcement**: Authenticated users can only insert app_user_id = auth.uid()
+3. **Service role** (superuser): Bypasses RLS, can create for any user_id
+4. **search_path = public**: Prevents function hijacking attacks
+5. **Follows SECURITY_MODEL.md**: No SECURITY DEFINER for user data
+
+**Code Review Fix** (2025-11-21):
+Initial implementation used SECURITY DEFINER which violated SECURITY_MODEL.md (lines 97-102).
+Updated to use default SECURITY INVOKER and rely on RLS policy enforcement instead.
+This is simpler, follows documented architecture, and provides true defense-in-depth.
 
 #### ✅ Priority 4: WARN - Function Search Path Protection
 **Status**: Completed

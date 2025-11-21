@@ -1,110 +1,76 @@
--- Migration: Secure Session Creation Functions - Defense-in-Depth
--- Description: Add auth.uid() validation to session creation functions
+-- Migration: Session Function Security - Search Path Protection
+-- Description: Add search_path protection to session creation functions
 -- Created: 2025-11-21
--- Priority: WARN level (High - user impersonation risk)
+-- Priority: WARN level (search_path hijacking prevention)
 
 -- ============================================================================
--- SECURE SESSION CREATION FUNCTIONS - DEFENSE-IN-DEPTH
+-- SESSION FUNCTION SECURITY - SEARCH PATH PROTECTION
 -- ============================================================================
--- Issue: Session creation functions accept user_id parameter, allowing
---        authenticated users to potentially create sessions for other users
--- Fix: Add validation layer - authenticated users must use their own auth.uid()
---      Service role (auth.uid() = NULL) bypasses validation (for legacy backend)
--- Defense-in-Depth: Function validation + RLS policies + search_path protection
+-- Issue: Functions lacked search_path protection against hijacking attacks
+-- Fix: Add SET search_path = public to all session creation functions
+-- Security Model: RLS enforces user isolation, functions use SECURITY INVOKER
 -- Result: NON-BREAKING - existing function signatures unchanged
+--
+-- HOW SECURITY WORKS:
+-- - SECURITY INVOKER (default): Functions run as calling user, respect RLS
+-- - RLS Policy: WITH CHECK (app_user_id = auth.uid()) on performed_session
+-- - Authenticated users: Can only insert sessions where app_user_id = auth.uid()
+-- - Service role (superuser): Bypasses RLS, can insert for any user_id
+-- - search_path = public: Prevents function hijacking attacks
 
 -- ============================================================================
--- LAYER 1: UPDATE EXISTING FUNCTIONS WITH VALIDATION
+-- UPDATE EXISTING FUNCTIONS WITH SEARCH PATH PROTECTION
 -- ============================================================================
 
--- Update create_session_from_name with auth.uid() validation
+-- Update create_session_from_name with search_path protection
 CREATE OR REPLACE FUNCTION create_session_from_name(
     schedule_name text,
     app_user_id uuid DEFAULT '65585c04-0525-11ed-9a8f-0bd67a64ac86'::uuid
 )
 RETURNS TABLE("like" performed_session)
-LANGUAGE plpgsql
-SECURITY DEFINER
+LANGUAGE sql
 SET search_path = public
 AS $$
-DECLARE
-    v_authenticated_user_id uuid;
-BEGIN
-    -- Layer 1: Entry point validation
-    -- Get the authenticated user's ID (NULL for service role)
-    v_authenticated_user_id := auth.uid();
-
-    -- If authenticated (not service role), verify parameter matches authenticated user
-    -- Service role (v_authenticated_user_id IS NULL) bypasses this check
-    IF v_authenticated_user_id IS NOT NULL THEN
-        IF app_user_id != v_authenticated_user_id THEN
-            RAISE EXCEPTION 'Cannot create session for another user. Authenticated as % but tried to create for %. Use your own user_id or omit parameter.',
-                v_authenticated_user_id, app_user_id;
-        END IF;
-    END IF;
-
-    -- Layer 2: Business logic - create session
-    -- Layer 3: RLS policy also enforces user can only insert their own sessions
-    RETURN QUERY
     INSERT INTO performed_session (session_schedule_id, app_user_id)
     VALUES (
         (SELECT ss.session_schedule_id FROM session_schedule ss WHERE ss.name = schedule_name),
         app_user_id
     )
     RETURNING *;
-END;
 $$;
 
 COMMENT ON FUNCTION create_session_from_name IS
     'Create a session for specified user. '
-    'Defense-in-depth: Authenticated users (auth.uid() != NULL) can only create for themselves. '
-    'Service role (auth.uid() = NULL) can create for any user. '
-    'SECURITY DEFINER with search_path protection. RLS provides second layer of defense.';
+    'SECURITY INVOKER (default): Runs as calling user, respects RLS policies. '
+    'RLS enforces: Authenticated users can only insert app_user_id = auth.uid(). '
+    'Service role (superuser): Bypasses RLS, can create for any user_id. '
+    'Search path protection prevents hijacking attacks.';
 
--- Update create_full_session with auth.uid() validation
+-- Update create_full_session with search_path protection
 CREATE OR REPLACE FUNCTION create_full_session(
     schedule_name text,
     app_user_id uuid DEFAULT '65585c04-0525-11ed-9a8f-0bd67a64ac86'::uuid
 )
 RETURNS TABLE("like" performed_exercise)
-LANGUAGE plpgsql
-SECURITY DEFINER
+LANGUAGE sql
 SET search_path = public
 AS $$
-DECLARE
-    v_authenticated_user_id uuid;
-BEGIN
-    -- Layer 1: Entry point validation
-    v_authenticated_user_id := auth.uid();
-
-    -- If authenticated (not service role), verify parameter matches authenticated user
-    IF v_authenticated_user_id IS NOT NULL THEN
-        IF app_user_id != v_authenticated_user_id THEN
-            RAISE EXCEPTION 'Cannot create session for another user. Authenticated as % but tried to create for %. Use your own user_id or omit parameter.',
-                v_authenticated_user_id, app_user_id;
-        END IF;
-    END IF;
-
-    -- Layer 2: Create session and exercises
-    RETURN QUERY
     SELECT * FROM create_session_exercises(
         (SELECT performed_session_id FROM create_session_from_name(schedule_name, app_user_id))
     );
-END;
 $$;
 
 COMMENT ON FUNCTION create_full_session IS
     'Create a full session with exercises for specified user. '
-    'Defense-in-depth: Authenticated users can only create for themselves. '
-    'Service role can create for any user. '
-    'Multi-layer validation + RLS enforcement.';
+    'SECURITY INVOKER: Runs as calling user, respects RLS policies. '
+    'RLS enforces user isolation automatically. '
+    'Service role bypasses RLS for legacy backend compatibility.';
 
--- Update create_session_exercises - add search_path protection
--- (Already safe - takes session_id, RLS prevents access to other users' sessions)
+-- Update create_session_exercises with search_path protection
+-- (RLS on performed_exercise ensures user can only insert for their own sessions)
 CREATE OR REPLACE FUNCTION create_session_exercises(performed_session_id_ uuid)
 RETURNS TABLE ("like" performed_exercise)
 LANGUAGE sql
-SECURITY DEFINER
 SET search_path = public
 AS $$
     INSERT INTO performed_exercise (exercise_id, performed_session_id, name, reps, rest, weight)
@@ -114,84 +80,58 @@ $$;
 
 COMMENT ON FUNCTION create_session_exercises IS
     'Create exercises for a session. '
-    'RLS ensures user can only access their own sessions (defense layer). '
-    'SECURITY DEFINER with search_path protection.';
+    'SECURITY INVOKER: Runs as calling user, respects RLS on performed_exercise. '
+    'RLS ensures user can only access their own sessions. '
+    'Search path protection prevents hijacking.';
 
 -- ============================================================================
--- LAYER 2 (OPTIONAL): CONVENIENCE FUNCTIONS FOR FUTURE MIGRATION
+-- CONVENIENCE FUNCTIONS FOR SIMPLER API
 -- ============================================================================
--- These functions automatically use auth.uid() - simpler API for new code
--- Frontends can migrate to these over time (no urgency since existing functions are now secure)
+-- These functions automatically use auth.uid() - simpler API for new frontend code
+-- No user_id parameter needed - always uses authenticated user's ID
 
--- Create session from schedule name (for current user only - convenience wrapper)
+-- Create session from schedule name for authenticated user
 CREATE OR REPLACE FUNCTION create_my_session_from_name(schedule_name text)
 RETURNS TABLE("like" performed_session)
-LANGUAGE plpgsql
-SECURITY DEFINER
+LANGUAGE sql
 SET search_path = public
 AS $$
-DECLARE
-    v_user_id uuid;
-BEGIN
-    -- Get authenticated user
-    v_user_id := auth.uid();
-
-    IF v_user_id IS NULL THEN
-        RAISE EXCEPTION 'Not authenticated - cannot create session';
-    END IF;
-
-    -- Call the validated function with auth.uid()
-    RETURN QUERY
-    SELECT * FROM create_session_from_name(schedule_name, v_user_id);
-END;
+    SELECT * FROM create_session_from_name(schedule_name, auth.uid());
 $$;
 
 COMMENT ON FUNCTION create_my_session_from_name IS
-    'Convenience function: Create session for authenticated user (no user_id parameter needed). '
-    'Automatically uses auth.uid(). New frontends should prefer this simpler API. '
-    'Internally calls create_session_from_name() with validation.';
+    'Convenience function: Create session for authenticated user (no user_id parameter). '
+    'Automatically uses auth.uid(). Simpler API for new frontend code. '
+    'SECURITY INVOKER with RLS enforcement.';
 
 GRANT EXECUTE ON FUNCTION create_my_session_from_name(text) TO authenticated;
 
--- Create full session with exercises (for current user only - convenience wrapper)
+-- Create full session with exercises for authenticated user
 CREATE OR REPLACE FUNCTION create_my_full_session(schedule_name text)
 RETURNS TABLE("like" performed_exercise)
-LANGUAGE plpgsql
-SECURITY DEFINER
+LANGUAGE sql
 SET search_path = public
 AS $$
-DECLARE
-    v_user_id uuid;
-BEGIN
-    -- Get authenticated user
-    v_user_id := auth.uid();
-
-    IF v_user_id IS NULL THEN
-        RAISE EXCEPTION 'Not authenticated - cannot create session';
-    END IF;
-
-    -- Call the validated function with auth.uid()
-    RETURN QUERY
-    SELECT * FROM create_full_session(schedule_name, v_user_id);
-END;
+    SELECT * FROM create_full_session(schedule_name, auth.uid());
 $$;
 
 COMMENT ON FUNCTION create_my_full_session IS
-    'Convenience function: Create full session for authenticated user (no user_id parameter needed). '
-    'Automatically uses auth.uid(). New frontends should prefer this simpler API. '
-    'Internally calls create_full_session() with validation.';
+    'Convenience function: Create full session for authenticated user (no user_id parameter). '
+    'Automatically uses auth.uid(). Simpler API for new frontend code. '
+    'SECURITY INVOKER with RLS enforcement.';
 
 GRANT EXECUTE ON FUNCTION create_my_full_session(text) TO authenticated;
 
 -- ============================================================================
 -- VERIFICATION
 -- ============================================================================
--- All session creation functions now have defense-in-depth protection:
--- 1. Function validates auth.uid() matches app_user_id parameter
--- 2. RLS policies enforce user can only insert their own sessions
--- 3. search_path protection prevents hijacking attacks
+-- All session creation functions now have proper security configuration:
+-- 1. SECURITY INVOKER (default): Functions run as calling user, respect RLS
+-- 2. RLS policies enforce: authenticated users can only insert app_user_id = auth.uid()
+-- 3. search_path = public: Prevents function hijacking attacks
 --
 -- NON-BREAKING CHANGES:
--- - Legacy backend (service role): auth.uid() = NULL, validation bypassed ✅
--- - New frontend (authenticated): Must use their own user_id ✅
--- - Convenience functions available for migration: create_my_*() ✅
+-- - Legacy backend (service role/superuser): Bypasses RLS, can create for any user ✅
+-- - New frontend (authenticated): RLS enforces app_user_id = auth.uid() ✅
+-- - Convenience functions available for simpler API: create_my_*() ✅
+-- - No SECURITY DEFINER used (follows SECURITY_MODEL.md) ✅

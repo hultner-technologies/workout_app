@@ -1,19 +1,23 @@
 """
 Tests for Session Creation Function Security
 
-This test suite verifies defense-in-depth validation on session creation functions.
+This test suite verifies RLS enforcement on session creation functions.
 
-Issue: Functions accept user_id parameter, allowing potential impersonation
-Fix: Add auth.uid() validation - authenticated users must use their own ID
-      Service role (auth.uid() = NULL) bypasses validation (for legacy backend)
-Result: NON-BREAKING security upgrade with multi-layer protection
+Issue: Functions lacked search_path protection
+Fix: Add SET search_path = public to prevent hijacking attacks
+Security Model: SECURITY INVOKER (default) + RLS enforcement
+Result: NON-BREAKING security upgrade
 
-Functions:
-- create_session_from_name(schedule_name, app_user_id)
-- create_full_session(schedule_name, app_user_id)
-- create_session_exercises(performed_session_id)
+Functions tested:
+- create_session_from_name(schedule_name, app_user_id) - SECURITY INVOKER
+- create_full_session(schedule_name, app_user_id) - SECURITY INVOKER
+- create_session_exercises(performed_session_id) - SECURITY INVOKER
 - create_my_session_from_name(schedule_name) - convenience function
 - create_my_full_session(schedule_name) - convenience function
+
+Security enforcement:
+- Authenticated users: RLS enforces app_user_id = auth.uid()
+- Service role: Bypasses RLS, can create for any user
 """
 
 import uuid
@@ -63,7 +67,7 @@ async def test_authenticated_user_can_create_own_session(db_transaction):
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_authenticated_user_cannot_create_session_for_another_user(db_transaction):
-    """Test that authenticated user CANNOT create session for another user_id"""
+    """Test that authenticated user CANNOT create session for another user_id (RLS enforcement)"""
     user_id = uuid.uuid4()
     other_user_id = uuid.uuid4()
 
@@ -93,21 +97,18 @@ async def test_authenticated_user_cannot_create_session_for_another_user(db_tran
         "SELECT set_config('request.jwt.claim.sub', $1, true)", str(user_id)
     )
 
-    # Should be blocked by function validation (Layer 1: auth.uid() check)
-    with pytest.raises(Exception) as exc_info:
+    # Should be blocked by RLS policy (WITH CHECK app_user_id = auth.uid())
+    with pytest.raises(exceptions.InsufficientPrivilegeError):
         await db_transaction.fetchval(
             "SELECT performed_session_id FROM create_session_from_name('Test Schedule 2', $1)",
             other_user_id,
         )
 
-    assert "Cannot create session for another user" in str(exc_info.value), \
-        "Function should block creating session for another user"
-
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_authenticated_user_cannot_create_full_session_for_another_user(db_transaction):
-    """Test that authenticated user CANNOT create full session for another user_id"""
+    """Test that authenticated user CANNOT create full session for another user_id (RLS enforcement)"""
     user_id = uuid.uuid4()
     other_user_id = uuid.uuid4()
 
@@ -161,15 +162,12 @@ async def test_authenticated_user_cannot_create_full_session_for_another_user(db
         "SELECT set_config('request.jwt.claim.sub', $1, true)", str(user_id)
     )
 
-    # Should be blocked by function validation
-    with pytest.raises(Exception) as exc_info:
+    # Should be blocked by RLS policy
+    with pytest.raises(exceptions.InsufficientPrivilegeError):
         await db_transaction.fetch(
             "SELECT * FROM create_full_session('Test Schedule 3', $1)",
             other_user_id,
         )
-
-    assert "Cannot create session for another user" in str(exc_info.value), \
-        "Function should block creating full session for another user"
 
 
 @pytest.mark.unit
