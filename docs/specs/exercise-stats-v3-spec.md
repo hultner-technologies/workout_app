@@ -62,56 +62,49 @@ Build the "most data-focused workout app" with evidence-based analytics that pro
 ```sql
 -- Add columns to performed_exercise_set table
 ALTER TABLE performed_exercise_set
-  -- RIR tracking for effective volume calculations
-  ADD COLUMN estimated_rir INTEGER CHECK (estimated_rir >= 0 AND estimated_rir <= 10),
+  -- RIR tracking for effective volume calculations (optional - historical data won't have this)
+  ADD COLUMN estimated_rir INTEGER,
 
-  -- RPE tracking (Rate of Perceived Exertion, 1-10 scale)
-  ADD COLUMN rpe NUMERIC(3,1) CHECK (rpe >= 1 AND rpe <= 10),
+  -- RPE tracking (Rate of Perceived Exertion, 1-10 scale, optional)
+  ADD COLUMN rpe NUMERIC(3,1),
 
-  -- Myo-rep specific tracking
-  ADD COLUMN activation_reps INTEGER CHECK (activation_reps > 0),
-  ADD COLUMN mini_set_reps INTEGER CHECK (mini_set_reps > 0),
-  ADD COLUMN mini_set_count INTEGER CHECK (mini_set_count > 0),
-
-  -- Superset grouping
+  -- Superset grouping (optional - links sets performed together)
   ADD COLUMN superset_group_id UUID,
 
-  -- Calculated fields (auto-updated via trigger)
+  -- Calculated fields (auto-updated via trigger, nullable for historical data)
   ADD COLUMN effective_volume_kg NUMERIC(10,2),
   ADD COLUMN estimated_1rm_kg NUMERIC(10,2),
-  ADD COLUMN relative_intensity NUMERIC(5,2) CHECK (relative_intensity >= 0 AND relative_intensity <= 100);
+  ADD COLUMN relative_intensity NUMERIC(5,2);
 
 -- Add comments
-COMMENT ON COLUMN performed_exercise_set.estimated_rir IS 'Reps in reserve (0 = failure, 1-3 = optimal hypertrophy)';
-COMMENT ON COLUMN performed_exercise_set.rpe IS 'Rate of perceived exertion (1-10 scale, often matches 10-RIR)';
-COMMENT ON COLUMN performed_exercise_set.activation_reps IS 'For myo-reps: initial activation set reps';
-COMMENT ON COLUMN performed_exercise_set.mini_set_reps IS 'For myo-reps: reps per mini-set';
-COMMENT ON COLUMN performed_exercise_set.mini_set_count IS 'For myo-reps: number of mini-sets';
-COMMENT ON COLUMN performed_exercise_set.superset_group_id IS 'Links sets performed as supersets';
-COMMENT ON COLUMN performed_exercise_set.effective_volume_kg IS 'Auto-calculated: volume adjusted for set type and RIR';
-COMMENT ON COLUMN performed_exercise_set.estimated_1rm_kg IS 'Auto-calculated: 1RM estimate using adaptive formula';
-COMMENT ON COLUMN performed_exercise_set.relative_intensity IS 'Auto-calculated: % of estimated 1RM';
+COMMENT ON COLUMN performed_exercise_set.estimated_rir IS
+  'Reps in reserve (0 = failure, 1-3 = optimal hypertrophy).
+   NULLABLE - historical data will not have this field.
+   When NULL, effective_volume_kg uses unadjusted volume.';
+
+COMMENT ON COLUMN performed_exercise_set.rpe IS
+  'Rate of perceived exertion (1-10 scale, often matches 10-RIR).
+   NULLABLE - optional field for users who track RPE.';
+
+COMMENT ON COLUMN performed_exercise_set.superset_group_id IS
+  'Links sets performed as supersets. NULL for regular sets.';
+
+COMMENT ON COLUMN performed_exercise_set.effective_volume_kg IS
+  'Auto-calculated: volume adjusted for set type and RIR (if available).
+   Falls back to standard volume calculation when RIR is NULL.';
+
+COMMENT ON COLUMN performed_exercise_set.estimated_1rm_kg IS
+  'Auto-calculated: 1RM estimate using adaptive formula (Epley/Brzycki/Mayhew).
+   NULL for sets with >15 reps (unreliable estimation).';
+
+COMMENT ON COLUMN performed_exercise_set.relative_intensity IS
+  'Auto-calculated: % of estimated 1RM. NULL when 1RM estimation is unavailable.';
+
+-- Note: Myo-reps are already supported via set_type = 'myo-rep' and parent/child
+-- set relationships. No additional columns needed.
 ```
 
-### 2. Exercise Metadata Enhancements
-
-```sql
--- Add activation percentage to muscle junction tables
-ALTER TABLE base_exercise_primary_muscle
-  ADD COLUMN activation_percentage INTEGER DEFAULT 100
-    CHECK (activation_percentage >= 0 AND activation_percentage <= 100);
-
-ALTER TABLE base_exercise_secondary_muscle
-  ADD COLUMN activation_percentage INTEGER DEFAULT 50
-    CHECK (activation_percentage >= 0 AND activation_percentage <= 100);
-
-COMMENT ON COLUMN base_exercise_primary_muscle.activation_percentage IS
-  'Percentage of volume attributed to this muscle (default 100% for primary)';
-COMMENT ON COLUMN base_exercise_secondary_muscle.activation_percentage IS
-  'Percentage of volume attributed to this muscle (default 50% for secondary)';
-```
-
-### 3. User Training Preferences
+### 2. User Training Preferences
 
 ```sql
 -- Add training preferences to app_user
@@ -250,8 +243,8 @@ WITH muscle_sets AS (
     mg.name AS muscle_name,
     mg.body_part,
 
-    -- Primary muscle volume (100% or custom activation_percentage)
-    COALESCE(bepm.activation_percentage, 100) / 100.0 AS primary_activation_factor,
+    -- Primary muscle volume (100% attribution - research shows primary muscles get full volume credit)
+    1.0 AS activation_factor,
     wev.total_volume_kg AS exercise_volume_kg,
     wev.working_sets AS exercise_sets,
     wev.exercise_mechanic,
@@ -273,8 +266,8 @@ WITH muscle_sets AS (
     mg.name AS muscle_name,
     mg.body_part,
 
-    -- Secondary muscle volume (50% or custom activation_percentage)
-    COALESCE(besm.activation_percentage, 50) / 100.0 AS secondary_activation_factor,
+    -- Secondary muscle volume (50% attribution - research consensus for synergist muscles)
+    0.5 AS activation_factor,
     wev.total_volume_kg AS exercise_volume_kg,
     wev.working_sets AS exercise_sets,
     wev.exercise_mechanic,
@@ -294,15 +287,15 @@ SELECT
   muscle_name,
   body_part,
 
-  -- Volume metrics (weighted by activation percentage)
-  SUM(exercise_volume_kg * primary_activation_factor) AS total_volume_kg,
-  SUM(exercise_sets * primary_activation_factor) AS total_sets,
+  -- Volume metrics (weighted by activation factor: 1.0 for primary, 0.5 for secondary)
+  SUM(exercise_volume_kg * activation_factor) AS total_volume_kg,
+  SUM(exercise_sets * activation_factor) AS total_sets,
 
   -- Primary vs secondary breakdown
-  SUM(exercise_volume_kg * primary_activation_factor) FILTER (WHERE is_primary) AS primary_volume_kg,
-  SUM(exercise_sets * primary_activation_factor) FILTER (WHERE is_primary) AS primary_sets,
-  SUM(exercise_volume_kg * primary_activation_factor) FILTER (WHERE NOT is_primary) AS secondary_volume_kg,
-  SUM(exercise_sets * primary_activation_factor) FILTER (WHERE NOT is_primary) AS secondary_sets,
+  SUM(exercise_volume_kg * activation_factor) FILTER (WHERE is_primary) AS primary_volume_kg,
+  SUM(exercise_sets * activation_factor) FILTER (WHERE is_primary) AS primary_sets,
+  SUM(exercise_volume_kg * activation_factor) FILTER (WHERE NOT is_primary) AS secondary_volume_kg,
+  SUM(exercise_sets * activation_factor) FILTER (WHERE NOT is_primary) AS secondary_sets,
 
   -- Exercise selection quality
   COUNT(DISTINCT exercise_mechanic) AS exercise_variety_score,
@@ -323,8 +316,10 @@ CREATE INDEX idx_weekly_muscle_volume_muscle
   ON weekly_muscle_volume(muscle_group_id, week_start DESC);
 
 COMMENT ON MATERIALIZED VIEW weekly_muscle_volume IS
-  'Volume per muscle group per week. Uses activation_percentage from junction tables
-   (default: primary=100%, secondary=50%). Refresh with weekly_exercise_volume.';
+  'Volume per muscle group per week. Uses fixed activation factors:
+   primary muscles = 100% (1.0x), secondary muscles = 50% (0.5x).
+   Based on research consensus from Menno Henselmans and fractional set counting methodology.
+   Refresh with weekly_exercise_volume.';
 ```
 
 ---
@@ -720,56 +715,46 @@ COMMENT ON VIEW muscle_balance_ratios IS
 
 ### 6. Calculate Effective Volume
 
-**Purpose:** Auto-calculate effective volume based on set type and RIR
+**Purpose:** Auto-calculate effective volume based on set type and RIR (when available)
 
 ```sql
 CREATE OR REPLACE FUNCTION calculate_effective_volume(
   p_set_type TEXT,
   p_weight INTEGER,      -- in grams
   p_reps INTEGER,
-  p_estimated_rir INTEGER DEFAULT NULL,
-  p_activation_reps INTEGER DEFAULT NULL,
-  p_mini_set_reps INTEGER DEFAULT NULL,
-  p_mini_set_count INTEGER DEFAULT NULL
+  p_estimated_rir INTEGER DEFAULT NULL  -- Nullable - historical data won't have this
 ) RETURNS NUMERIC AS $$
 DECLARE
   v_base_volume NUMERIC;
   v_rir_multiplier NUMERIC := 1.0;
   v_effective_volume NUMERIC;
 BEGIN
-  -- Base volume calculation by set type
+  -- Base volume calculation: weight × reps for all set types
+  -- (Myo-reps are handled via parent/child set relationships, not special calculation)
   CASE p_set_type
-    WHEN 'regular', 'pyramid-set', 'super-set', 'amrap' THEN
+    WHEN 'regular', 'pyramid-set', 'super-set', 'amrap', 'drop-set', 'myo-rep' THEN
       v_base_volume := (p_weight * p_reps) / 1000.0;  -- Convert grams to kg
-
-    WHEN 'myo-rep' THEN
-      -- Myo-rep: activation set + mini-sets
-      IF p_activation_reps IS NULL OR p_mini_set_reps IS NULL OR p_mini_set_count IS NULL THEN
-        RAISE EXCEPTION 'Myo-rep requires activation_reps, mini_set_reps, mini_set_count';
-      END IF;
-      v_base_volume := (p_weight * (p_activation_reps + (p_mini_set_count * p_mini_set_reps))) / 1000.0;
-
-    WHEN 'drop-set' THEN
-      -- Drop-set: count full volume (multiple weight decrements recorded as separate sets)
-      v_base_volume := (p_weight * p_reps) / 1000.0;
 
     WHEN 'warm-up' THEN
       -- Warm-ups don't count toward effective volume
       RETURN 0;
 
     ELSE
-      RAISE EXCEPTION 'Unknown set_type: %', p_set_type;
+      -- Default to standard volume calculation for unknown set types
+      v_base_volume := (p_weight * p_reps) / 1000.0;
   END CASE;
 
-  -- RIR adjustment (optional, based on research showing hypertrophy decreases with higher RIR)
+  -- RIR adjustment (optional, only when data is available)
+  -- Based on research showing hypertrophy decreases linearly with higher RIR
   IF p_estimated_rir IS NOT NULL THEN
     v_rir_multiplier := CASE
-      WHEN p_estimated_rir <= 3 THEN 1.0   -- Optimal
-      WHEN p_estimated_rir = 4 THEN 0.9
-      WHEN p_estimated_rir = 5 THEN 0.8
+      WHEN p_estimated_rir <= 3 THEN 1.0   -- Optimal (0-3 RIR)
+      WHEN p_estimated_rir = 4 THEN 0.9    -- Good
+      WHEN p_estimated_rir = 5 THEN 0.8    -- Fair
       ELSE 0.6                              -- 6+ RIR not recommended for hypertrophy
     END;
   END IF;
+  -- Note: When RIR is NULL (historical data), multiplier stays 1.0 (unadjusted)
 
   v_effective_volume := v_base_volume * v_rir_multiplier;
 
@@ -778,10 +763,13 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
 COMMENT ON FUNCTION calculate_effective_volume IS
-  'Calculate effective volume based on set type and RIR.
-   Myo-reps include activation + mini-sets. Warm-ups return 0.
-   RIR multipliers: 0-3=1.0x, 4=0.9x, 5=0.8x, 6+=0.6x.
-   Research: 2025 meta-analysis on proximity-to-failure.';
+  'Calculate effective volume based on set type and RIR (when available).
+   - Base calculation: weight × reps converted to kg
+   - Warm-ups return 0 (excluded from working volume)
+   - Myo-reps: Handled via parent/child set relationships, not special calculation here
+   - RIR multipliers (when RIR data exists): 0-3=1.0x, 4=0.9x, 5=0.8x, 6+=0.6x
+   - When RIR is NULL (historical data): Uses unadjusted volume (1.0x multiplier)
+   Research: Robinson et al. 2024 (proximity-to-failure dose-response).';
 ```
 
 ### 7. Estimate 1RM (Adaptive Formula)
@@ -842,21 +830,18 @@ COMMENT ON FUNCTION estimate_1rm_adaptive IS
 CREATE OR REPLACE FUNCTION update_set_calculations()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Calculate effective volume
+  -- Calculate effective volume (handles NULL RIR gracefully)
   NEW.effective_volume_kg := calculate_effective_volume(
     NEW.set_type,
     NEW.weight,
     NEW.reps,
-    NEW.estimated_rir,
-    NEW.activation_reps,
-    NEW.mini_set_reps,
-    NEW.mini_set_count
+    NEW.estimated_rir  -- NULL for historical data, uses 1.0x multiplier
   );
 
-  -- Calculate estimated 1RM
+  -- Calculate estimated 1RM (NULL for >15 reps)
   NEW.estimated_1rm_kg := estimate_1rm_adaptive(NEW.weight, NEW.reps);
 
-  -- Calculate relative intensity (% of 1RM)
+  -- Calculate relative intensity (% of 1RM) - only when 1RM estimate is available
   IF NEW.estimated_1rm_kg IS NOT NULL AND NEW.estimated_1rm_kg > 0 THEN
     NEW.relative_intensity := ROUND(
       ((NEW.weight / 1000.0) / NEW.estimated_1rm_kg) * 100,
@@ -871,13 +856,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_update_set_calculations
-  BEFORE INSERT OR UPDATE OF weight, reps, set_type, estimated_rir, activation_reps, mini_set_reps, mini_set_count
+  BEFORE INSERT OR UPDATE OF weight, reps, set_type, estimated_rir
   ON performed_exercise_set
   FOR EACH ROW
   EXECUTE FUNCTION update_set_calculations();
 
 COMMENT ON TRIGGER trigger_update_set_calculations ON performed_exercise_set IS
   'Auto-calculate effective_volume_kg, estimated_1rm_kg, relative_intensity on insert/update.
+   Handles NULL RIR gracefully (uses 1.0x volume multiplier for historical data).
    Ensures derived metrics stay in sync with source data.';
 ```
 

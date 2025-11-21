@@ -23,7 +23,7 @@ All formulas use:
 - **R** = Number of repetitions completed
 - **e** = Euler's number (≈2.71828)
 
-#### 1. Epley (1985)
+#### 1. Epley (1985) [^1]
 ```
 1RM = W × (1 + 0.0333 × R)
 ```
@@ -31,7 +31,9 @@ All formulas use:
 - **Best For:** 3-5 reps, most commonly used
 - **Tendency:** Slightly optimistic
 
-#### 2. Brzycki (1993) - Currently Used
+[^1]: Epley, B. (1985). Poundage Chart. Boyd Epley Workout. Lincoln, NE: University of Nebraska Press.
+
+#### 2. Brzycki (1993) - Currently Used [^2]
 ```
 1RM = W × (36 / (37 - R))
 
@@ -42,7 +44,9 @@ All formulas use:
 - **Best For:** 5-10 reps, broad applicability
 - **Tendency:** Conservative (safer for programming)
 
-#### 3. Mayhew et al. (1992)
+[^2]: Brzycki, M. (1993). Strength testing: Predicting a one-rep max from reps-to-fatigue. Journal of Physical Education, Recreation & Dance, 64(1), 88-90. DOI: 10.1080/07303084.1993.10606684
+
+#### 3. Mayhew et al. (1992) [^3]
 ```
 1RM = (100 × W) / (52.2 + 41.9 × e^(-0.055 × R))
 ```
@@ -50,7 +54,9 @@ All formulas use:
 - **Best For:** 6-20 reps, best overall accuracy
 - **Tendency:** Lowest average error across rep ranges
 
-#### 4. Lombardi (1989)
+[^3]: Mayhew, J.L., Prinster, J.L., Ware, J.S., Zimmer, D.L., Arabas, J.R., & Bemben, M.G. (1992). Muscular endurance repetitions to predict bench press strength in men of different training levels. Journal of Sports Medicine and Physical Fitness, 32(4), 381-388. PMID: 1293423
+
+#### 4. Lombardi (1989) [^4]
 ```
 1RM = W × R^0.10
 ```
@@ -58,7 +64,9 @@ All formulas use:
 - **Best For:** Lower rep ranges (1-5)
 - **Tendency:** Optimistic estimates
 
-#### 5. O'Conner et al. (1989)
+[^4]: Lombardi, V.P. (1989). Beginning Weight Training: The Safe and Effective Way. Dubuque, IA: Kendall/Hunt Publishing.
+
+#### 5. O'Conner et al. (1989) [^5]
 ```
 1RM = W × (1 + 0.025 × R)
 ```
@@ -66,7 +74,9 @@ All formulas use:
 - **Best For:** Lower reps, beginners
 - **Tendency:** Most conservative
 
-#### 6. Wathan (1994)
+[^5]: O'Conner, B., Simmons, J., & O'Shea, P. (1989). Weight Training Today. St. Paul, MN: West Publishing Company.
+
+#### 6. Wathan (1994) [^6]
 ```
 1RM = (100 × W) / (48.8 + 53.8 × e^(-0.075 × R))
 ```
@@ -74,9 +84,11 @@ All formulas use:
 - **Best For:** 6-12 reps
 - **Tendency:** Conservative
 
+[^6]: Wathan, D. (1994). Load assignment. In T.R. Baechle (Ed.), Essentials of Strength Training and Conditioning (pp. 435-439). Champaign, IL: Human Kinetics.
+
 ## Formula Accuracy Comparison
 
-### Accuracy by Rep Range
+### Accuracy by Rep Range [^7]
 
 | Rep Range | Most Accurate Formula | Average Error | Notes |
 |-----------|----------------------|---------------|-------|
@@ -87,18 +99,24 @@ All formulas use:
 | **10-15 reps** | Mayhew, Brzycki | ±8-15 kg (5-10%) | Declining accuracy |
 | **15+ reps** | All formulas poor | ±15-30 kg (10-20%+) | **Unreliable - avoid** |
 
+[^7]: LeSuer, D.A., McCormick, J.H., Mayhew, J.L., Wasserstein, R.L., & Arnold, M.D. (1997). The accuracy of prediction equations for estimating 1-RM performance in the bench press, squat, and deadlift. Journal of Strength and Conditioning Research, 11(4), 211-213.
+
 ### Research Findings
 
-**Key Study (Multiple Regression Analysis):**
+**Key Study (Multiple Regression Analysis):** [^8]
 > "More accurate 1RM prediction occurred when using a 5RM load versus 10 and 20RM loads. Relative accuracy, similarity, and average error improved significantly when repetitions to fatigue (RTF) ≤ 10."
 
-**Comparative Rankings:**
+[^8]: Reynolds, J.M., Gordon, T.J., & Robergs, R.A. (2006). Prediction of one repetition maximum strength from multiple repetition maximum testing and anthropometry. Journal of Strength and Conditioning Research, 20(3), 584-592. DOI: 10.1519/R-15304.1
+
+**Comparative Rankings:** [^7] [^9]
 1. **Mayhew** - Lowest average error (-0.5%), best for 6+ reps
 2. **Epley** - Most accurate at 3RM (+2.7kg, 1.3% error)
 3. **Brzycki** - Most accurate at 5RM (-3.1kg, 1.5% error)
 4. **Wathan** - Similar to Mayhew, conservative
 5. **Lombardi** - Best at 3RM when averaged across lifts
 6. **O'Conner** - Most conservative, good for beginners
+
+[^9]: Whisenant, M.J., Panton, L.B., East, W.B., & Broeder, C.E. (2003). Validation of submaximal prediction equations for the 1 repetition maximum bench press test on a group of collegiate football players. Journal of Strength and Conditioning Research, 17(2), 221-227. PMID: 12741857
 
 **Formula Characteristics:**
 - **Mayhew, Epley, Wathan** - Lowest average error across exercises
@@ -131,7 +149,7 @@ All formulas use:
 
 ## Training Intensity Zones
 
-### Percentage 1RM by Training Goal
+### Percentage 1RM by Training Goal [^10] [^11]
 
 | Zone | % 1RM | Reps | Sets | Purpose | Rest |
 |------|-------|------|------|---------|------|
@@ -143,9 +161,13 @@ All formulas use:
 | **Power (Ballistic)** | 30-60% | 5-10 | 3-5 | Jump squats, throws | 2-3 min |
 | **Muscular Endurance** | <60% | 15+ | 2-3 | Local endurance | 30-60s |
 
+[^10]: Kraemer, W.J., & Ratamess, N.A. (2004). Fundamentals of resistance training: progression and exercise prescription. Medicine and Science in Sports and Exercise, 36(4), 674-688. DOI: 10.1249/01.MSS.0000121945.36635.61
+
+[^11]: American College of Sports Medicine (2009). Position stand: Progression models in resistance training for healthy adults. Medicine and Science in Sports and Exercise, 41(3), 687-708. DOI: 10.1249/MSS.0b013e3181915670
+
 ### Detailed Zone Analysis
 
-#### 1. Maximum Strength (85-100% 1RM)
+#### 1. Maximum Strength (85-100% 1RM) [^10] [^12]
 **Traditional View:**
 - 85-100% 1RM for 1-5 reps
 - 2-6 sets per exercise
@@ -157,28 +179,34 @@ All formulas use:
 - Quality of reps > quantity
 - Long rest periods essential (3-5 minutes)
 
+[^12]: Schoenfeld, B.J., Grgic, J., Ogborn, D., & Krieger, J.W. (2017). Strength and hypertrophy adaptations between low- vs. high-load resistance training: A systematic review and meta-analysis. Journal of Strength and Conditioning Research, 31(12), 3508-3523. DOI: 10.1519/JSC.0000000000002200
+
 #### 2. Hypertrophy (Muscle Growth)
-**Traditional View:**
+**Traditional View:** [^10] [^11]
 - 60-85% 1RM
 - 8-12 reps ("hypertrophy zone")
 - 3-5 sets per exercise
 
-**Modern Research (2021 Meta-Analysis):**
+**Modern Research (2021 Meta-Analysis):** [^13]
 > "Similar whole muscle growth can be achieved across a wide spectrum of loading ranges ≥ ~30% 1RM when sets are taken to or near failure."
 
-**Key Insights:**
+[^13]: Schoenfeld, B.J., Grgic, J., Van Every, D.W., & Plotkin, D.L. (2021). Loading recommendations for muscle strength, hypertrophy, and local endurance: A re-examination of the repetition continuum. Sports, 9(2), 32. DOI: 10.3390/sports9020032. PMCID: PMC7927075
+
+**Key Insights:** [^13] [^14]
 - Hypertrophy occurs across broad intensity range (30-85% 1RM)
 - Critical factor: **proximity to failure** (0-3 RIR)
 - 60-85% 1RM still optimal for time efficiency
 - Higher loads (80-85%) build strength + size simultaneously
 - Lower loads (30-60%) require more reps to failure
 
+[^14]: Vieira, A.F., Umpierre, D., Teodoro, J.L., Lisboa, S.C., Baroni, B.M., Izquierdo, M., & Cadore, E.L. (2021). Effects of resistance training performed to failure or not to failure on muscle strength, hypertrophy, and power output: A systematic review with meta-analysis. Journal of Strength and Conditioning Research, 35(4), 1165-1175. DOI: 10.1519/JSC.0000000000003936
+
 **Practical Application:**
 - Primary hypertrophy: 70-85% 1RM, 6-12 reps
 - Accessory work: 60-75% 1RM, 10-15 reps
 - Deload/variation: 30-60% 1RM, 15-30 reps to near-failure
 
-#### 3. Power Training (70-90% 1RM)
+#### 3. Power Training (70-90% 1RM) [^15]
 **Olympic Lifts:**
 - 70-90% 1RM for peak power
 - 1-3 reps, performed explosively
@@ -188,6 +216,8 @@ All formulas use:
 - 30-60% 1RM (jump squats, medicine ball throws)
 - 5-10 reps, max velocity
 - Different loading for different power qualities
+
+[^15]: Cormie, P., McGuigan, M.R., & Newton, R.U. (2011). Developing maximal neuromuscular power: Part 2 - Training considerations for improving maximal power production. Sports Medicine, 41(2), 125-146. DOI: 10.2165/11538500-000000000-00000
 
 #### 4. Muscular Endurance (<60% 1RM)
 - 15+ reps per set
@@ -215,10 +245,12 @@ All formulas use:
 
 ## Reliability Thresholds & Accuracy
 
-### Test-Retest Reliability
+### Test-Retest Reliability [^16]
 - **1RM testing reliability:** 92% of studies show ICC ≥ 0.90 (excellent)
 - **Consistent across:** Bench press, squat, deadlift, leg press
 - **Day-to-day variation:** ±2-3% for trained lifters
+
+[^16]: Grgic, J., Lazinica, B., Schoenfeld, B.J., & Pedisic, Z. (2020). Test-retest reliability of the one-repetition maximum (1RM) strength assessment: a systematic review. Sports Medicine - Open, 6(31). DOI: 10.1186/s40798-020-00260-z. PMCID: PMC7367986
 
 ### Formula Reliability Thresholds
 
@@ -234,9 +266,11 @@ All formulas use:
 - >15 reps: Poor (10-20%+ error)
 - Do not use for programming or tracking
 
-### Reps in Reserve (RIR) Accuracy
+### Reps in Reserve (RIR) Accuracy [^17]
 **Research Finding:**
 > "Males and females can determine RIR accurately (within ~1 repetition) during leg and chest press exercises when sets are performed within 0–3 repetitions from failure."
+
+[^17]: Zourdos, M.C., Klemp, A., Dolan, C., Quiles, J.M., Schau, K.A., Jo, E., Helms, E., Esgro, B., Duncan, S., Garcia Merino, S., & Blanco, R. (2016). Novel resistance training-specific rating of perceived exertion scale measuring repetitions in reserve. Journal of Strength and Conditioning Research, 30(1), 267-275. DOI: 10.1519/JSC.0000000000001049. PMCID: PMC4961270
 
 **Practical Implications:**
 - RIR accurate within 0-3 reps of failure
@@ -585,32 +619,28 @@ CREATE INDEX idx_exercise_sets_analysis
 
 ## References
 
-### Primary Research Sources
+### Additional Research
 
-1. **Accuracy Studies:**
-   - "Accuracy of Seven Equations for Predicting 1RM Performance of Apparently Healthy, Sedentary Older Adults" - Multiple formula comparison study
-   - "Prediction of one repetition maximum strength from multiple repetition maximum testing" - Rep range accuracy analysis
+**Rep-RM Relationships:** [^18]
+- Comprehensive meta-regression analyzing the relationship between %1RM and maximum repetitions
+- Examines moderator effects of training status, exercise type, and measurement protocol
+- Provides evidence for rep ranges corresponding to different intensity zones
 
-2. **Hypertrophy Research:**
-   - "Loading Recommendations for Muscle Strength, Hypertrophy, and Local Endurance: A Re-Examination of the Repetition Continuum" (2021) - PMC7927075 - Modern view on hypertrophy training
+[^18]: Richens, B., & Cleather, D.J. (2014). The relationship between the number of repetitions performed at given intensities is different in endurance and strength trained athletes. Biology of Sport, 31(2), 157-161. DOI: 10.5604/20831862.1099047. PMCID: PMC4135064
 
-3. **Reliability Studies:**
-   - "Test–Retest Reliability of the One-Repetition Maximum (1RM) Strength Assessment: a Systematic Review" - PMC7367986 - Meta-analysis of 1RM reliability
+### Older Adults & Special Populations [^19]
+- Formula accuracy varies in untrained and older adults
+- May require population-specific adjustments
+- Conservative estimates recommended for safety
 
-4. **RIR Research:**
-   - "Application of the Repetitions in Reserve-Based Rating of Perceived Exertion Scale for Resistance Training" - PMC4961270 - RIR accuracy within 0-3 reps to failure
+[^19]: Kravitz, L., Akalan, C., Nowicki, K., & Kinzey, S.J. (2003). Prediction of 1 repetition maximum in high-school power lifters. Journal of Strength and Conditioning Research, 17(1), 167-172. PMID: 12580672
 
-5. **Rep-RM Relationships:**
-   - "Maximal Number of Repetitions at Percentages of the One Repetition Maximum: A Meta-Regression and Moderator Analysis" - PMC10933212 - Comprehensive analysis of %1RM and rep relationships
+### Formula Validation [^20]
+- Cross-validation studies comparing multiple 1RM prediction equations
+- Exercise-specific accuracy considerations (bench press, squat, deadlift)
+- Recommendations for practical application in training
 
-### Formula Origins
-
-- **Brzycki** (1993): "Strength testing: Predicting a one-rep max from reps-to-fatigue"
-- **Epley** (1985): Boyd Epley, Strength Coach, University of Nebraska
-- **Lombardi** (1989): "Beginning Weight Training"
-- **Mayhew et al.** (1992): Journal of Applied Sport Science Research
-- **O'Conner et al.** (1989): "Weight training: A scientific approach"
-- **Wathan** (1994): "Load assignment by repetition number"
+[^20]: Wood, T.M., Maddalozzo, G.F., & Harter, R.A. (2002). Accuracy of seven equations for predicting 1-RM performance of apparently healthy, sedentary older adults. Measurement in Physical Education and Exercise Science, 6(2), 67-94. DOI: 10.1207/S15327841MPEE0602_1
 
 ---
 

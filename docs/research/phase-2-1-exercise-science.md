@@ -22,17 +22,19 @@
 #### Scientific Definition & Measurement
 
 **Core Principle:**
-Progressive overload is the systematic increase in training stimulus over time to drive continued adaptations in muscle growth and strength. The primary mechanisms include:
+Progressive overload is the systematic increase in training stimulus over time to drive continued adaptations in muscle growth and strength (foundational principle in exercise science). The primary mechanisms include:
 - Increasing absolute load (weight)
 - Increasing volume (sets × reps)
 - Increasing proximity to failure (reducing RIR)
 - Increasing training frequency
 
-**Measurement Recommendations (Dr. Mike Israetel):**
-- Add weight in small increments: 2.5-5 lbs per week for upper body, 5-10 lbs for lower body
+Research by Plotkin et al. (2022) confirms that both load progression and repetition progression are viable strategies for achieving progressive overload.
+
+**Measurement Recommendations:**
+- Add weight in small increments: 2.5-5 lbs per week for upper body, 5-10 lbs for lower body (Israetel, Renaissance Periodization)
 - Increase reps within target range (e.g., 8-12 reps) before adding weight
 - Progress in small, manageable increments to avoid plateaus and injury risk
-- Track both absolute metrics (weight × reps) and relative intensity (RIR/proximity to failure)
+- Track both absolute metrics (weight × reps) and relative intensity (RIR/proximity to failure) (Plotkin et al., 2022, [https://doi.org/10.7717/peerj.14142](https://doi.org/10.7717/peerj.14142))
 
 #### Time Windows for Assessment
 
@@ -49,7 +51,7 @@ The fundamental unit for hypertrophy programming:
 - **Standard Structure:** 4:1 ratio (4 weeks accumulation, 1 week deload)
 - **Progression Pattern:** Start at MEV, accumulate to MRV by week 4-6, then deload
 
-**Key Finding:** Research shows mesocycles of 4-6 weeks with weekly volume increases push toward Maximum Recoverable Volume (MRV), culminating in a deload or pivot week.
+**Key Finding:** Research shows mesocycles of 4-6 weeks with weekly volume increases push toward Maximum Recoverable Volume (MRV), culminating in a deload or pivot week (Renaissance Periodization, 2024; Rogerson et al., 2024).
 
 **Macrocycle (3-12 months):**
 - Season-long training organization
@@ -59,7 +61,8 @@ The fundamental unit for hypertrophy programming:
 #### Deload Week Handling & Periodization
 
 **Deload Timing:**
-- Every 4-8 weeks depending on training intensity and accumulated fatigue
+- Every 4-8 weeks depending on training intensity and accumulated fatigue (Rogerson et al., 2024, [https://doi.org/10.1186/s40798-024-00691-y](https://doi.org/10.1186/s40798-024-00691-y))
+- Research shows athletes typically deload every 5.6 ± 2.3 weeks for 6.4 ± 1.7 days
 - Typically after mesocycle completion (week 5-7)
 - Earlier if signs of overreaching appear (persistent fatigue, performance decline, motivation loss)
 
@@ -76,7 +79,7 @@ Two primary approaches:
    - Reduce weight to 40-50% of 1RM or working weight
    - Less common for hypertrophy training
 
-**Rationale:** Deload weeks prevent overtraining, allow supercompensation, and maintain training skills without accumulating fatigue. Strength is maintained for 7-10 days without training, so brief deloads don't cause detraining.
+**Rationale:** Deload weeks prevent overtraining, allow supercompensation, and maintain training skills without accumulating fatigue. Research shows that muscle strength and size are well maintained during short-term (<4 weeks) detraining periods, with minimal changes occurring in the first 2 weeks (Sci-Fit, 2024; Stronger by Science Detraining Guide, [https://www.strongerbyscience.com/detraining/](https://www.strongerbyscience.com/detraining/)).
 
 #### Missed Session Compensation Strategies
 
@@ -86,10 +89,10 @@ Two primary approaches:
 - **Exception:** If missed due to high stress/illness, reduce next 1-2 workouts by 20-30% volume
 
 **3-7 Days Missed:**
-- No meaningful fitness loss occurs within 7 consecutive days
+- Minimal fitness loss occurs within 7 consecutive days for trained individuals
 - Resume normal training schedule
 - May need one "reintroduction" session at 80% planned volume
-- Markers of fitness are resilient with consistent prior training
+- Markers of fitness are resilient with consistent prior training (Stronger by Science, 2024, [https://www.strongerbyscience.com/detraining/](https://www.strongerbyscience.com/detraining/))
 
 **Progressive Workout Considerations:**
 - For sequenced progressions (e.g., deload → baseline → overreach), re-assign missed session in following week
@@ -122,10 +125,11 @@ A plateau is **no improvement in weight or reps for 3+ consecutive weeks** on ke
    - May indicate reaching near-genetic potential for that training phase
 
 **Research-Based Timing:**
-- Power/strength curves plateau around week 3-4 of unchanging stimulus
+- Power/strength curves plateau around week 3-4 of unchanging stimulus (practitioner consensus based on periodization literature)
 - Isokinetic training optimization occurs in 3-4 week cycles
 - Programs shouldn't cycle shorter than 6 weeks (insufficient adaptation time)
-- Plateau effects appear after 8-12 sessions of identical programming
+- Plateau effects appear after 8-12 sessions of identical programming (Renaissance Periodization, 2024)
+- **Note:** Specific research on the "3-week plateau threshold" as a distinct concept is limited; this threshold is based on practitioner consensus and mesocycle periodization principles
 
 **False Positive Prevention:**
 - Exclude deload weeks from plateau detection
@@ -266,10 +270,10 @@ WINDOW
 #### Why This Approach?
 
 **Evidence-Based Foundation:**
-1. **Mesocycle Structure (4-8 weeks):** Supported by Mike Israetel (Renaissance Periodization), Greg Nuckols (Stronger by Science), and research showing adaptation curves plateau at 3-4 weeks
-2. **Volume as Primary Metric:** Simple, trackable, highly correlated with hypertrophy (weight × reps × sets)
-3. **3-Week Plateau Threshold:** Consensus across sources, balances sensitivity with false positive prevention
-4. **Deload Timing:** 4-8 week cycles align with fatigue accumulation research and practical experience
+1. **Mesocycle Structure (4-8 weeks):** Supported by Renaissance Periodization (Israetel), Stronger by Science (Nuckols), and deloading research showing athletes typically cycle every 5-6 weeks (Rogerson et al., 2024)
+2. **Volume as Primary Metric:** Simple, trackable, highly correlated with hypertrophy (Plotkin et al., 2022)
+3. **3-Week Plateau Threshold:** Practitioner consensus based on mesocycle periodization principles, balances sensitivity with false positive prevention
+4. **Deload Timing:** 4-8 week cycles align with fatigue accumulation research (Rogerson et al., 2024) and practical experience
 
 **Alternatives Considered:**
 
@@ -428,7 +432,7 @@ Working volume = sum of (weight × reps) for all working sets (excluding warm-up
 Most experts recommend counting only working sets, as warm-up sets don't contribute meaningful stimulus for adaptation. A typical threshold: sets above 60% of working weight are counted.
 
 **Research Finding:**
-A study comparing progressive overload methods found that volume (sets × reps × load) is the most practical metric, though simpler "hard set counting" is equally effective for hypertrophy tracking.
+A study by Plotkin et al. (2022) comparing load progression versus repetition progression found that both methods produce similar hypertrophy and strength gains, confirming that volume (sets × reps × load) is a practical and effective metric for tracking progressive overload ([https://doi.org/10.7717/peerj.14142](https://doi.org/10.7717/peerj.14142)).
 
 #### Hard Sets vs Junk Volume Distinction
 
@@ -442,9 +446,9 @@ Training that consumes time and energy but provides no meaningful adaptation ben
 3. Excessive volume causes systemic fatigue without additional stimulus
 
 **Threshold Research:**
-- Sets beyond 4-5 RIR show significantly reduced hypertrophy compared to 0-4 RIR
+- Sets beyond 4-5 RIR show significantly reduced hypertrophy compared to 0-4 RIR (Refalo et al., 2023, [https://doi.org/10.1007/s40279-022-01784-y](https://doi.org/10.1007/s40279-022-01784-y))
 - Average optimal range: 6-8 hard sets per muscle group per session
-- Weekly range: 12-24 sets per muscle group (frequency of 2-3x per week)
+- Weekly range: 12-24 sets per muscle group (frequency of 2-3x per week) (Renaissance Periodization, 2024)
 - Beyond 25-30 sets per week: diminishing returns, increased junk volume risk
 
 **Key Insight:**
@@ -462,7 +466,7 @@ While not formally defined as a single metric, the concept appears throughout tr
 - Exercise selection and proximity to failure significantly impact SFR
 
 **Proximity to Failure Impact:**
-Research shows:
+Research by Refalo et al. (2023) demonstrates a linear relationship between proximity-to-failure and neuromuscular fatigue:
 - **0 RIR (failure):** Highest stimulus, but disproportionately high fatigue
   - Velocity loss at 4 min post-exercise: -25%
   - Greatest perceived discomfort and muscle soreness
@@ -470,13 +474,15 @@ Research shows:
 
 - **1-2 RIR:** Near-optimal stimulus with better fatigue management
   - Velocity loss at 4 min post-exercise: -13%
-  - Equivalent hypertrophy to training to failure
+  - Equivalent hypertrophy to training to failure (Refalo et al., 2023)
   - Superior stimulus-to-fatigue ratio
 
 - **3 RIR:** Good stimulus, minimal fatigue
   - Velocity loss at 4 min post-exercise: -8%
   - Slightly reduced stimulus vs 1-2 RIR
   - Useful for accumulation phases and high-frequency training
+
+(Refalo et al., 2023, [https://doi.org/10.1186/s40798-023-00554-y](https://doi.org/10.1186/s40798-023-00554-y))
 
 **Practical Application:**
 Start mesocycles at 3-4 RIR, progress to 2 RIR mid-mesocycle, end at 0-1 RIR in final week before deload. This maximizes SFR across the mesocycle.
@@ -490,11 +496,11 @@ Not all reps in a set contribute equally to muscle growth. The last ~5 reps befo
 - An S-curve starting around 5 RIR, with acceleration toward failure
 - The last 5 reps before failure trigger significant muscle growth potential
 - However, these reps don't all provide equal stimulus—there's a gradient
-- The last 2 reps (0-1 RIR) provide marginally more stimulus but disproportionate fatigue
+- The last 2 reps (0-1 RIR) provide marginally more stimulus but disproportionate fatigue (Renaissance Periodization, 2024)
 
 **Counterpoint (Greg Nuckols):**
-Questions the effective reps concept, noting the evidence is thin. Research shows:
-- Hypertrophy is similar from 1-2 RIR vs failure
+Nuckols critiques the effective reps concept in "The Evidence is Lacking for 'Effective Reps'" (Stronger by Science, [https://www.strongerbyscience.com/effective-reps/](https://www.strongerbyscience.com/effective-reps/)). Research shows:
+- Hypertrophy is similar from 1-2 RIR vs failure (Refalo et al., 2023)
 - Volume (total hard sets) matters more than squeezing out last reps
 - Effective reps may be a useful heuristic but not a hard physiological boundary
 
@@ -512,7 +518,7 @@ If using RIR data in the app, weight sets within 0-4 RIR more heavily in volume 
 **Definition:**
 The minimum amount of training volume (sets per muscle group per week) required to produce muscle growth. Below MEV, you maintain muscle but don't grow it.
 
-**General Guidelines (Renaissance Periodization):**
+**General Guidelines (Renaissance Periodization, 2024, [https://rpstrength.com/training-volume-landmarks-muscle-growth/](https://rpstrength.com/training-volume-landmarks-muscle-growth/)):**
 - **Beginners:** MEV is very low (4-6 sets per muscle per week)
 - **Intermediate:** MEV increases (6-10 sets per muscle per week)
 - **Advanced:** MEV is highest (10-12+ sets per muscle per week)
@@ -535,7 +541,7 @@ MEV is the starting point for mesocycle accumulation phases. Begin at MEV and pr
 **Definition:**
 The maximum volume you can perform for a muscle group per week and still recover adequately for the next session. Training beyond MRV prevents recovery, causing performance decline and injury risk.
 
-**General Guidelines (Renaissance Periodization):**
+**General Guidelines (Renaissance Periodization, 2024, [https://rpstrength.com/training-volume-landmarks-muscle-growth/](https://rpstrength.com/training-volume-landmarks-muscle-growth/)):**
 - **Typical Range:** 15-25 sets per muscle per week
 - **Individual Variation:** Very high (some lifters have MRV of 10 sets, others 30+ sets)
 - **Context Dependent:** MRV decreases under high life stress, poor sleep, caloric deficit
@@ -562,7 +568,7 @@ Week 4-6 of accumulation phase should approach MRV, followed by immediate deload
 **Definition:**
 The volume range that produces optimal muscle growth—the "sweet spot" between MEV and MRV. This is where most training should occur for hypertrophy.
 
-**General Guidelines:**
+**General Guidelines (Renaissance Periodization, 2024):**
 - **Typical Range:** 12-18 sets per muscle per week
 - **Individual Variation:** Less variable than MEV/MRV (most people cluster around 12-18)
 - **Progression:** MAV can increase during a mesocycle as adaptation occurs
@@ -592,7 +598,7 @@ The minimum volume required to maintain (not grow) muscle and strength. Surprisi
 4. **Fat Loss Phases:** Volume at MV while in caloric deficit
 
 **Research Support:**
-Studies show muscle and strength are maintained for 7-10 days without training. With minimal volume (MV), maintenance extends indefinitely.
+Studies show muscle and strength are well maintained during short-term (<4 weeks) detraining periods, with minimal changes in the first 2 weeks (Stronger by Science, 2024, [https://www.strongerbyscience.com/detraining/](https://www.strongerbyscience.com/detraining/)). With minimal volume (MV), maintenance extends indefinitely.
 
 ### 2.2 Recommendations
 
@@ -822,8 +828,8 @@ Triceps         | 12   | MAV (optimal) | +0 (0%)
 #### Why Volume Landmarks (MEV/MAV/MRV)?
 
 **Evidence Base:**
-1. **Renaissance Periodization (Mike Israetel):** Extensive articles and books defining these landmarks with muscle-specific recommendations
-2. **Research Support:** Meta-analyses show dose-response relationship between volume and hypertrophy up to ~12-18 sets per muscle per week, with diminishing returns beyond
+1. **Renaissance Periodization (Mike Israetel, 2024):** Extensive articles and books defining these landmarks with muscle-specific recommendations ([https://rpstrength.com/training-volume-landmarks-muscle-growth/](https://rpstrength.com/training-volume-landmarks-muscle-growth/))
+2. **Research Support:** Meta-analyses show dose-response relationship between volume and hypertrophy, with research supporting training in the 12-20 set range per muscle per week (Refalo et al., 2023; Stronger by Science, 2024)
 3. **Practitioner Consensus:** Widely adopted framework among evidence-based coaches
 
 **User Value:**
@@ -1268,32 +1274,39 @@ What makes this analytics implementation world-class:
 - ⚠️ Optimal deload frequency (depends on training intensity, recovery, stress)
 - ⚠️ Junk volume thresholds (context-dependent)
 
-### Research Sources
+### References
 
-**Primary Sources:**
-1. **Renaissance Periodization** (Mike Israetel):
-   - Training Volume Landmarks for Muscle Growth
-   - Scientific Principles of Hypertrophy Training
-   - Mesocycle Progression articles
-   - RIR and effective reps discussions
+**Peer-Reviewed Research:**
 
-2. **Stronger by Science** (Greg Nuckols):
-   - Complete Strength Training Guide
-   - Training volume research summaries
-   - Periodization discussions
-   - Fatigue management articles
+1. Plotkin, D., Coleman, M., Van Every, D., Maldonado, J., Oberlin, D., Israetel, M., Feather, J., Alto, A., Vigotsky, A.D., & Schoenfeld, B.J. (2022). Progressive overload without progressing load? The effects of load or repetition progression on muscular adaptations. *PeerJ*, 10, e14142. https://doi.org/10.7717/peerj.14142
 
-3. **PubMed Research:**
-   - "Progressive overload without progressing load?" (2022) - PubMed 36199287
-   - "Influence of Resistance Training Proximity-to-Failure on Skeletal Muscle Hypertrophy: A Systematic Review with Meta-analysis" - PubMed 36334240
-   - "Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy: A Series of Meta-Regressions" - PubMed 38970765
-   - "Effects of Drop Sets on Skeletal Muscle Hypertrophy: A Systematic Review and Meta-analysis" - PMC 10390395
-   - "Influence of Resistance Training Proximity-to-Failure, Determined by Repetitions-in-Reserve, on Neuromuscular Fatigue" - PMC 9908800
+2. Refalo, M. C., Helms, E. R., Trexler, E. T., Hamilton, D. L., & Fyfe, J. J. (2023). Influence of resistance training proximity-to-failure on skeletal muscle hypertrophy: A systematic review with meta-analysis. *Sports Medicine*, 53(3), 649-665. https://doi.org/10.1007/s40279-022-01784-y (PMID: 36334240)
 
-4. **Practitioner Sources:**
-   - Juggernaut Training Systems (mesocycle progression)
-   - Evidence-based coaching resources
-   - Training periodization textbooks
+3. Refalo, M. C., Helms, E. R., Hamilton, D. L., & Fyfe, J. J. (2023). Influence of resistance training proximity-to-failure, determined by repetitions-in-reserve, on neuromuscular fatigue in resistance-trained males and females. *Sports Medicine - Open*, 9, 10. https://doi.org/10.1186/s40798-023-00554-y (PMC9908800)
+
+4. Rogerson, D., Nolan, D., Androulakis Korakakis, P., Immonen, V., Wolf, M., & Bell, L. (2024). Deloading practices in strength and physique sports: A cross-sectional survey. *Sports Medicine - Open*, 10, 26. https://doi.org/10.1186/s40798-024-00691-y (PMC10948666)
+
+5. Sødal, L. K., Kristiansen, E., Larsen, S., & van den Tillaar, R. (2023). Effects of drop sets on skeletal muscle hypertrophy: A systematic review and meta-analysis. *Sports Medicine - Open*, 9, 66. https://doi.org/10.1186/s40798-023-00620-5 (PMC10390395)
+
+**Evidence-Based Practitioner Resources:**
+
+6. Israetel, M. (2024). Training volume landmarks for muscle growth. Renaissance Periodization. https://rpstrength.com/training-volume-landmarks-muscle-growth/
+
+7. Nuckols, G. (2024). The evidence is lacking for "effective reps". Stronger by Science. https://www.strongerbyscience.com/effective-reps/
+
+8. Nuckols, G. (2024). A guide to detraining: What to expect, how to mitigate losses, and how to get back to full strength. Stronger by Science. https://www.strongerbyscience.com/detraining/
+
+9. Nuckols, G. (2024). The complete strength training guide. Stronger by Science. https://www.strongerbyscience.com/complete-strength-training-guide/
+
+**Additional Resources:**
+
+10. Sci-Fit. (2024). The science of detraining: How long you can take a break from the gym before you lose muscle mass & strength. https://sci-fit.net/detraining/
+
+**Notes on Citation Quality:**
+
+- **High Confidence:** Progressive overload mechanisms (Plotkin et al., 2022), proximity-to-failure research (Refalo et al., 2023), deload timing (Rogerson et al., 2024)
+- **Moderate Confidence:** Volume landmarks (Renaissance Periodization), mesocycle structure (practitioner consensus)
+- **Requires Personalization:** Individual MEV/MRV values, optimal deload frequency, junk volume thresholds
 
 ---
 

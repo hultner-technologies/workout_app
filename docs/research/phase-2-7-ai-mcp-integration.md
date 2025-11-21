@@ -11,7 +11,7 @@ This research explores AI/MCP (Model Context Protocol) integration patterns for 
 
 **Key Finding:** MCP should serve as a **data & tool provider**, not an AI coach itself. The consuming LLM (Claude, GPT-4, etc.) provides coaching intelligence, while the MCP server exposes workout data and executable actions through standardized primitives.
 
-**Recommended Architecture:** Three-layer approach with Resources (read-only data), Tools (executable actions), and Prompts (conversation templates), combined with intelligent caching and privacy-first data filtering.
+**Recommended Architecture:** [Three-layer approach](https://modelcontextprotocol.io/specification/2025-03-26) with Resources (read-only data), Tools (executable actions), and Prompts (conversation templates), combined with intelligent caching and privacy-first data filtering.
 
 ---
 
@@ -19,7 +19,7 @@ This research explores AI/MCP (Model Context Protocol) integration patterns for 
 
 ### 1.1 Core MCP Primitives for Workout Data
 
-Based on MCP specification 2025-03-26 and best practices research, workout data should be exposed through three standardized primitives:
+Based on [MCP specification 2025-03-26](https://modelcontextprotocol.io/specification/2025-03-26) and [best practices research](https://oshea00.github.io/posts/mcp-practices/), workout data should be exposed through three standardized primitives:
 
 #### **Resources** (Read-Only Context)
 Resources are passive, side-effect-free data access points that provide context for LLM reasoning.
@@ -273,10 +273,10 @@ async def suggest_deload():
 
 ### 1.2 Data Format for LLM Consumption
 
-Research shows **structured formats optimize LLM context windows**. Key findings:
+Research shows **structured formats optimize LLM context windows** ([context engineering best practices](https://www.decodingai.com/p/context-engineering-2025s-1-skill)). Key findings:
 
 **Format Choice: YAML > JSON for Analytics**
-- **YAML is 66% more token-efficient than JSON** (2025 research)
+- **YAML shows 15-40% token efficiency gains over JSON** in structured data scenarios ([2025 research](https://saurav-samantray.medium.com/token-optimization-vs-context-loss-across-data-formats-json-vs-yaml-vs-csv-vs-toon-b2b145e06510)), though results vary by data structure
 - More readable for LLMs, clearer delineation of data types
 - Use for complex nested structures (exercise history, program design)
 
@@ -325,7 +325,7 @@ exercise_history:
 
 ### 1.3 Real-Time vs Historical Data Balance
 
-**Research Finding:** Conversational AI demands speed - **MCP servers must respond within 2 seconds** (p95 latency) for acceptable UX.
+**Research Finding:** Conversational AI demands speed - **MCP servers must respond within 2 seconds** (p95 latency) for acceptable UX ([MCP best practices](https://oshea00.github.io/posts/mcp-practices/)).
 
 **Recommended Strategy:**
 
@@ -875,7 +875,7 @@ deload_recommendation:
 
 ### 3.1 Context Window Management
 
-**Research Finding:** Modern LLMs have large context windows (Claude 3.5 Sonnet: 200K tokens), but **performance degrades with excessive context**.
+**Research Finding:** Modern LLMs have large context windows (Claude 3.5 Sonnet: 200K tokens), but **performance degrades with excessive context** ([context engineering principles](https://www.decodingai.com/p/context-engineering-2025s-1-skill)).
 
 **Best Practices:**
 
@@ -936,7 +936,7 @@ async def get_all_muscle_analytics():
 
 ### 3.2 Temporal Data Structuring
 
-**Research Finding:** Time series data benefits from **hybrid representation** (raw + aggregated).
+**Research Finding:** Time series data benefits from **hybrid representation** (raw + aggregated) ([TS-RAG research](https://arxiv.org/abs/2503.07649)).
 
 **Recommended Structure:**
 
@@ -1036,7 +1036,7 @@ volume_analysis:
 
 ### 4.1 Privacy-First Data Access
 
-**Research Finding:** 80% of fitness apps transfer user data to third parties. **MCP server must be privacy-first by default.**
+**Research Finding:** [80% of fitness apps share user data with third parties](https://surfshark.com/research/chart/fitness-apps-privacy) (Surfshark research, December 2024). **MCP server must be privacy-first by default.**
 
 **Principles:**
 
@@ -1132,7 +1132,7 @@ If implementing population benchmarks (future):
 MCP server leverages existing RLS policies:
 
 ```python
-# MCP server authenticates user via OAuth 2.1
+# MCP server authenticates user via OAuth 2.1 (IETF draft-ietf-oauth-v2-1-14)
 # Gets Supabase JWT token
 # All database queries automatically filtered by RLS
 
@@ -1156,7 +1156,7 @@ async def get_exercise_history(exercise_name: str):
 
 ### 5.1 Multi-Tier Caching Architecture
 
-**Research Finding:** MCP caching can reduce latency by **50-70%** while maintaining data consistency.
+**Research Finding:** [MCP caching can reduce latency by 50-70%](https://markaicode.com/mcp-caching-strategies-reducing-latency/) in high-traffic applications while maintaining data consistency.
 
 **Recommended Tiers:**
 
@@ -1252,7 +1252,7 @@ SELECT cron.schedule('refresh-exercise-stats', '0 * * * *',
 
 ### 5.2 Cache Invalidation Strategies
 
-**Research Finding:** "Common mistakes include over-relying on TTL without active invalidation."
+**Research Finding:** "Common mistakes include over-relying on TTL without active invalidation" ([Redis caching best practices](https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html)).
 
 **Recommended Strategies:**
 
@@ -1408,7 +1408,7 @@ async def on_session_completed(user_id, session_id):
 
 **Scope:**
 - HTTP + SSE transport
-- Supabase OAuth 2.1 integration
+- Supabase [OAuth 2.1](https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/) integration
 - JWT token validation
 - Deploy to Fly.io (native PostgreSQL drivers for performance)
 - Privacy settings UI (future frontend work)
@@ -1544,7 +1544,7 @@ async def on_session_completed(user_id, session_id):
 |----------|--------|-----------|
 | **MCP Role** | Data provider only | LLM provides coaching intelligence, not server |
 | **Caching Strategy** | Multi-tier (in-memory + Redis + materialized views) | 50-70% latency reduction |
-| **Data Format** | YAML for complex, JSON for simple | 66% token efficiency gain |
+| **Data Format** | YAML for complex, JSON for simple | 15-40% token efficiency gain (varies by structure) |
 | **Context Structure** | Aggregates + raw data (hybrid) | Fast reasoning + drill-down capability |
 | **Privacy** | User-configurable, no third-party sharing | 80% of fitness apps leak data - we won't |
 | **Authentication** | Supabase OAuth 2.1 + JWT | Reuse existing auth, industry standard |
@@ -1602,30 +1602,44 @@ LLM: "Done! Your new plan 'Weak Point Focus' is now active in your app."
 ## 8. References & Further Reading
 
 ### 8.1 MCP Specification & Best Practices
-- [MCP Specification 2025-03-26](https://modelcontextprotocol.io/specification/2025-03-26)
-- [FastMCP Documentation](https://gofastmcp.com/)
-- [MCP Best Practices (MikesBlog)](https://oshea00.github.io/posts/mcp-practices/)
-- [Advanced MCP Caching Strategies (Medium)](https://medium.com/@parichay2406/advanced-caching-strategies-for-mcp-servers)
+- [MCP Specification 2025-03-26](https://modelcontextprotocol.io/specification/2025-03-26) - Official Model Context Protocol specification defining resources, tools, and prompts architecture
+- [MCP Best Practices (MikesBlog)](https://oshea00.github.io/posts/mcp-practices/) - Practical guidance on MCP server design patterns and performance considerations
+- [MCP Caching Strategies: Reducing Latency](https://markaicode.com/mcp-caching-strategies-reducing-latency/) - Research on 50-70% latency reduction through effective caching
+- [Top 10 Advanced Techniques for Optimizing MCP Server Performance](https://superagi.com/top-10-advanced-techniques-for-optimizing-mcp-server-performance-in-2025/) - 2025 performance optimization guide
 
 ### 8.2 Exercise Science & Volume Landmarks
 - [Volume Landmarks - Dr. Mike Israetel (Renaissance Periodization)](https://rpstrength.com/blogs/articles/training-volume-landmarks-muscle-growth)
 - Stronger by Science (Greg Nuckols) - Progressive Overload Research
 - [AI in Fitness Industry 2025 Trends (Orangesoft)](https://orangesoft.co/blog/ai-in-fitness-industry)
 
-### 8.3 LLM Context Optimization
-- [Context Engineering: 2025's #1 Skill in AI](https://www.decodingai.com/p/context-engineering-2025s-1-skill)
-- [LLM Context Window Performance Research (Epoch AI)](https://epoch.ai/data-insights/context-windows)
-- [YAML 66% Token Efficiency Study](https://www.analyticsvidhya.com/blog/2025/11/guide-to-context-engineering/)
+### 8.3 LLM Context Optimization & Data Format Efficiency
+- [Context Engineering: 2025's #1 Skill in AI](https://www.decodingai.com/p/context-engineering-2025s-1-skill) - Overview of context optimization techniques
+- [Token Optimization vs Context Loss: JSON vs YAML vs CSV vs TOON](https://saurav-samantray.medium.com/token-optimization-vs-context-loss-across-data-formats-json-vs-yaml-vs-csv-vs-toon-b2b145e06510) - 2025 research comparing data format token efficiency for LLMs
+- [YAML vs. JSON: Which Is More Efficient for Language Models?](https://medium.com/better-programming/yaml-vs-json-which-is-more-efficient-for-language-models-5bc11dd0f6df) - Analysis of format trade-offs
+- [Tokenization Comparison Across Data Formats](https://medium.com/@rajeev.bit30/tokenization-comparison-token-usage-across-csv-json-yaml-and-toon-for-llm-interactions-3a2df3956587) - Comprehensive token usage analysis
 
 ### 8.4 Fitness App Data Privacy
-- [Fitness Apps Data Privacy Concerns (CyberGuy)](https://cyberguy.com/privacy/trade-off-between-using-fitness-apps-and-data-privacy-concerns/)
+- [80% of Fitness Apps Share User Data with Third Parties (Surfshark Research)](https://surfshark.com/research/chart/fitness-apps-privacy) - December 2024 analysis of top fitness apps
+- [Is 10,000 Steps Worth Your Personal Data? (TechRadar)](https://www.techradar.com/computing/cyber-security/beware-80-percent-of-the-most-popular-fitness-apps-are-selling-out-your-privacy) - Privacy concerns in fitness tracking
+- [Losing More Than Calories: Privacy Trade-off in Fitness Apps (Incogni)](https://blog.incogni.com/fitness-apps-privacy-research/) - 2025 privacy research
 - GDPR & HIPAA Compliance for Health Data
 
-### 8.5 RAG & Time Series Analytics
+### 8.5 Caching & Performance Optimization
+- [Database Caching Strategies Using Redis (AWS)](https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html) - Official AWS whitepaper on Redis caching patterns
+- [Redis Caching Patterns for Your Architecture](https://moldstud.com/articles/p-redis-caching-patterns-which-one-fits-your-architecture) - Comprehensive guide to cache-aside, write-through, and prefetching patterns
+- [Advanced Redis Caching Patterns](https://written.dev/post/advanced-redis-caching-patterns/) - Stale-while-revalidate, versioning, and multi-tier design
+- [Best Practices for Azure Cache for Redis](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-best-practices-development) - Microsoft's caching best practices
+
+### 8.6 Authentication & Security
+- [OAuth 2.1 Authorization Framework (IETF Draft)](https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/) - Official IETF specification for OAuth 2.1
+- [OAuth 2.1 Explained](https://connect2id.com/learn/oauth-2-1) - Comprehensive guide to OAuth 2.1 changes from 2.0
+- [What's New in OAuth 2.1](https://fusionauth.io/blog/whats-new-in-oauth-2-1) - Analysis of PKCE requirements and security improvements
+
+### 8.7 RAG & Time Series Analytics
 - [TS-RAG: Time Series Foundation Models (arXiv 2503.07649)](https://arxiv.org/abs/2503.07649)
 - [Retrieval-Augmented Generation 2025 Guide (Chitika)](https://www.chitika.com/retrieval-augmented-generation-rag-the-definitive-guide-2025/)
 
-### 8.6 Related Project Documents
+### 8.8 Related Project Documents
 - `.github/EPIC_mcp_integration.md` - Full MCP integration epic
 - `docs/plans/2025-11-21-sets-migration-analytics-design.md` - V3 analytics design
 - `docs/research/phase-2-research-plan.md` - Phase 2 research roadmap

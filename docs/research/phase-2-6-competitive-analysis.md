@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% CAGR. The landscape is dominated by established players (Strong, Hevy, JEFIT) with emerging AI-powered alternatives (Fitbod, Gymijet).
+The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% CAGR, projected to reach $9.67 billion by 2033.[^1] The landscape is dominated by established players (Strong, Hevy, JEFIT) with emerging AI-powered alternatives (Fitbod, Gymijet).
 
 **Key Finding:** Despite market maturity, significant gaps exist in:
 - **Advanced analytics** beyond basic volume/1RM tracking
@@ -26,6 +26,11 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 ### 1. Strong - Market Leader
 
 **Market Position:** Template-based workout logger, market leader
+
+**App Links:**
+- Official Website: https://www.strong.app/
+- iOS App Store: https://apps.apple.com/us/app/strong-workout-tracker-gym-log/id464254577
+- Google Play Store: https://play.google.com/store/apps/details?id=io.strongapp.strong[^2]
 
 #### Metrics & Tracking
 - ✅ Advanced Statistics: Personal records, progression tracking
@@ -66,7 +71,7 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 - Apple Watch integration works well
 - Straightforward tracking without complexity
 
-#### User Complaints (From Reviews)
+#### User Complaints (From Reviews)[^3]
 - **Speed bottlenecks:** Multiple taps for basic logging tasks break workout flow
 - **Lack of guidance:** No workout recommendations or programming help
 - **Price vs. value:** Monthly subscription but rare feature updates
@@ -93,7 +98,12 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 
 ### 2. Hevy - Social Features & Analytics
 
-**Market Position:** Strong alternative with social features, ~5 million users (June 2025)
+**Market Position:** Strong alternative with social features, 9+ million users (2025)[^4]
+
+**App Links:**
+- Official Website: https://www.hevyapp.com/
+- iOS App Store: https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350
+- Google Play Store: https://play.google.com/store/apps/details?id=com.hevyapp.hevy
 
 #### Metrics & Tracking
 - ✅ Time spent training, volume, reps (weekly trends)
@@ -160,7 +170,7 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 - Better value than Strong
 - Comprehensive muscle group analytics
 
-#### User Complaints (From Reviews)
+#### User Complaints (From Reviews)[^5]
 - **No routine saving mid-workout:** Can't save and update routine if you change exercises during workout
 - **Manual input inefficiency:** No 'Next' button to move cursor automatically between input boxes
 - **Barbell weight calculation:** Must manually calculate total weight instead of per-side entry
@@ -196,6 +206,11 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 ### 3. JEFIT - Exercise Database Champion
 
 **Market Position:** Comprehensive exercise library with community-driven programs
+
+**App Links:**
+- Official Website: https://www.jefit.com/
+- iOS App Store: https://apps.apple.com/us/app/jefit-workout-planner-gym-log/id449810000
+- Google Play Store: https://play.google.com/store/apps/details?id=je.fit
 
 #### Metrics & Tracking
 - ✅ 1RM estimation and advanced analytics
@@ -258,7 +273,7 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 - Detailed analytics and charts
 - Large program selection
 
-#### User Complaints (From Reviews)
+#### User Complaints (From Reviews)[^6]
 - **Lack of guidance:** No AI or coaching for exercise selection or programming
 - **Not beginner-friendly:** Free version offers little support
 - **Overwhelming program selection:** Hard to find right program for specific goals
@@ -292,7 +307,12 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 
 ### 4. StrongLifts 5x5 - Progressive Overload Focus
 
-**Market Position:** Specialized app for StrongLifts 5x5 program (pioneered automated progressive overload in 2011)
+**Market Position:** Specialized app for StrongLifts 5x5 program (pioneered automated progressive overload in 2011)[^7]
+
+**App Links:**
+- Official Website: https://stronglifts.com/app/
+- iOS App Store: https://apps.apple.com/us/app/stronglifts-weight-lifting-log/id488580022
+- Google Play Store: https://play.google.com/store/apps/details?id=com.stronglifts.app
 
 #### Metrics & Tracking
 - ✅ Weight, reps, sets tracking
@@ -340,7 +360,7 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 - Effective for strength gains
 - Good for beginners to intermediate
 
-#### User Complaints (From Reviews)
+#### User Complaints (From Reviews)[^8]
 - Limited to 5x5 program
 - No exercise variety
 - Not suitable for advanced lifters
@@ -368,6 +388,11 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 ### 5. Fitbod - AI-Powered Recommendations
 
 **Market Position:** AI-powered workout planner with personalization focus
+
+**App Links:**
+- Official Website: https://www.fitbod.me/
+- iOS App Store: https://apps.apple.com/us/app/fitbod-gym-workout-planner/id1041517543
+- Google Play Store: https://play.google.com/store/apps/details?id=com.fitbod.fitbod
 
 #### Metrics & Tracking
 - ✅ Strength scores
@@ -418,9 +443,10 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 - Tagged with comprehensive metadata
 - Equipment adaptability
 
-#### User Results
-- Users following AI recommendations improve 1RM ~27% faster than manual planning
+#### User Results[^9]
+- Users following AI recommendations improve 1RM ~27% faster than manual planning (based on Fitbod's internal analysis of 12 weeks of anonymized user data)
 - Average 12-15% 1RM increase within 10 weeks
+- On average, users increase bench press 1RM estimate by 12 lbs and squat by 25 lbs within their first 10 logged workouts
 
 #### Unique Value Proposition
 - AI-powered personalization
@@ -436,7 +462,7 @@ The workout app market in 2025 is valued at $2.47 billion and growing at 18.2% C
 - Helpful for variety in workouts
 - Apple ecosystem integration
 
-#### User Complaints (From Reviews)
+#### User Complaints (From Reviews)[^10]
 - **Poor progressive overload implementation:** Inaccurate weight suggestions
 - **Limited algorithm sophistication:** Doesn't consider intensity, frequency, volume properly
 - **Random suggestions:** AI feels limited, workouts seem random vs. personalized
@@ -974,7 +1000,7 @@ Based on research and volume landmark studies:
 6. **Target:** Data-driven intermediate/advanced lifters (underserved)
 
 ### Market Opportunity
-- Market growing at 18.2% CAGR ($2.47B in 2025 → $9.67B by 2033)
+- Market growing at 18.2% CAGR ($2.47B in 2025 → $9.67B by 2033)[^1]
 - Established apps (Strong, Hevy, JEFIT) have clear limitations
 - AI apps (Fitbod) haven't delivered on promise (poor execution)
 - Gap exists for sophisticated analytics + exercise science integration
@@ -1009,6 +1035,94 @@ Based on research and volume landmark studies:
    - Design schema for rich exercise metadata
    - Plan analytics engine architecture
    - Consider ML/AI infrastructure needs
+
+---
+
+---
+
+## Citations & Sources
+
+[^1]: **Market Size & Growth Data:** Straits Research. "Fitness App Market Size, Trends & Growth Report by 2033." The global fitness app market size was valued at USD 2.10 billion in 2024 and is projected to reach from USD 2.47 billion in 2025 to USD 9.67 billion by 2033, growing at a CAGR of 18.2% during the forecast period. https://straitsresearch.com/report/fitness-app-market (Note: Different research firms provide varying estimates; Grand View Research estimates $10.59B in 2024, reflecting different methodologies and market definitions.)
+
+[^2]: **Strong App Official Links:**
+- Website: https://www.strong.app/
+- iOS: https://apps.apple.com/us/app/strong-workout-tracker-gym-log/id464254577
+- Android: https://play.google.com/store/apps/details?id=io.strongapp.strong
+
+[^3]: **Strong App User Reviews:** User complaints compiled from App Store reviews, Google Play reviews, and third-party app review platforms. Common themes include:
+- Speed bottlenecks and workflow issues (multiple sources across App Store reviews)
+- Lack of programming guidance (user reviews)
+- Price vs. value concerns (App Store and Google Play review patterns)
+- Technical issues including autosave failures (App Store reviews)
+
+Note: Direct links to specific reviews are ephemeral as they change with app updates. For current user sentiment, review:
+- App Store: https://apps.apple.com/us/app/strong-workout-tracker-gym-log/id464254577#see-all/reviews
+- Google Play: https://play.google.com/store/apps/details?id=io.strongapp.strong (Reviews tab)
+- Reddit r/Strongapp: https://www.reddit.com/r/Strongapp/
+
+[^4]: **Hevy User Numbers:** Official Hevy website and app store pages state "Loved by 9+ million athletes" and "Join +9 million users" as of 2025. Sources:
+- https://www.hevyapp.com/
+- https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350
+
+[^5]: **Hevy User Reviews:** User complaints compiled from App Store reviews, Google Play reviews, and third-party platforms. Common themes include:
+- Workflow inefficiencies (no auto-advance between fields)
+- Barbell weight calculation issues
+- Coach platform limitations
+- Lack of adaptive programming
+
+For current reviews:
+- App Store: https://apps.apple.com/us/app/hevy-workout-tracker-gym-log/id1458862350#see-all/reviews
+- Google Play: https://play.google.com/store/apps/details?id=com.hevyapp.hevy (Reviews tab)
+- Reddit r/HevyApp: https://www.reddit.com/r/HevyApp/
+
+[^6]: **JEFIT User Reviews:** User complaints compiled from App Store reviews, Google Play reviews, and third-party review platforms. Key pain points:
+- Overwhelming program selection with poor quality control
+- Long-term planning efficacy rated 2.7/5 (from user reviews)
+- Technical sync issues
+- Beginner-friendliness concerns
+
+For current reviews:
+- App Store: https://apps.apple.com/us/app/jefit-workout-planner-gym-log/id449810000#see-all/reviews
+- Google Play: https://play.google.com/store/apps/details?id=je.fit (Reviews tab)
+- Third-party reviews: https://www.gymbird.com/fitness-apps/jefit-app-review
+
+[^7]: **StrongLifts 5x5 App History:** The StrongLifts app was first released in 2011 and claims to be the first weightlifting app to automate progressive overload. Sources:
+- App Store listing: https://apps.apple.com/us/app/stronglifts-weight-lifting-log/id488580022
+- Google Play: https://play.google.com/store/apps/details?id=com.stronglifts.app (states "3.4+ million lifters have started their strength journey with StrongLifts" and "191+ billion pounds lifted by StrongLifters since 2011")
+- StrongLifts official website: https://stronglifts.com/app/
+
+[^8]: **StrongLifts 5x5 User Reviews:** User feedback compiled from app store reviews and third-party platforms. Common complaints include:
+- Limited to single program (5x5 only)
+- Not suitable for advanced lifters or hypertrophy focus
+- Limited customization options
+
+For current reviews:
+- App Store: https://apps.apple.com/us/app/stronglifts-weight-lifting-log/id488580022#see-all/reviews
+- Google Play: https://play.google.com/store/apps/details?id=com.stronglifts.app (Reviews tab)
+- Independent review: https://dr-muscle.com/stronglift-5x5-app-review/
+
+[^9]: **Fitbod User Results:** Statistics from Fitbod's official blog and marketing materials:
+- "Users who consistently follow AI-recommended workouts improve their estimated 1-rep max (1RM) performance about 27% faster than those who manually build their workouts" (based on Fitbod's internal analysis of over 12 weeks of anonymized user data)
+- "On average, Fitbod athletes see 12-15% increases in estimated 1RM within 10 weeks"
+- "Users increase bench press 1RM estimate by 12 lbs and squat by 25 lbs within their first 10 logged workouts; deadlift ~35 lbs"
+
+Sources:
+- https://fitbod.me/blog/whats-the-best-app-for-building-muscle-in-2025-why-fitbod-tops-the-list/
+- https://fitbod.me/blog/how-fitbod-tracks-your-strength-progress-with-real-time-metrics-and-scores/
+
+Note: These are self-reported statistics from Fitbod's internal data analysis, not independent third-party research.
+
+[^10]: **Fitbod User Complaints:** User feedback compiled from app store reviews, Reddit discussions, and independent reviews. Key complaints:
+- Inaccurate weight suggestions and poor progressive overload implementation
+- "AI feels random vs. personalized" (common theme in reviews)
+- Poor user retention beyond first 7 workouts
+- Technical issues on Android platform
+
+Sources:
+- Independent review: https://dr-muscle.com/fitbod-workout-app-review/ (comprehensive review analyzing user complaints)
+- App Store: https://apps.apple.com/us/app/fitbod-gym-workout-planner/id1041517543#see-all/reviews
+- Google Play: https://play.google.com/store/apps/details?id=com.fitbod.fitbod (Reviews tab)
+- Reddit discussions: r/Fitbod and general fitness subreddits
 
 ---
 
