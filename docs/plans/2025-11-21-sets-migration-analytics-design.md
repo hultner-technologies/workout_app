@@ -265,6 +265,28 @@ rest_adherence = AVG(actual_rest / prescribed_rest) * 100
 
 ## Next Steps: Research Phase
 
+### Exercise Metadata Data Model (Discovered)
+
+**Rich metadata structure already in database:**
+- **Muscle Groups**: primary_muscles, secondary_muscles (normalized many-to-many)
+- **Equipment Types**: Categorized equipment requirements
+- **Exercise Categories**: strength, cardio, stretching, etc.
+- **Exercise Properties**:
+  - level: beginner, intermediate, expert
+  - mechanic: isolation, compound
+  - force: push, pull, static
+- **Helper Views**: `base_exercise_with_muscles`, `base_exercise_full`
+- **Helper Functions**: `find_exercises_by_muscle()`, etc.
+
+**Implications for V3 Analytics:**
+1. **Muscle Group Volume**: Track volume per muscle group
+2. **Push/Pull/Legs Analytics**: Aggregate by force type
+3. **Compound vs Isolation Ratios**: Track exercise type distribution
+4. **Muscle Balance Detection**: Compare primary muscle volumes
+5. **Equipment Utilization**: Track equipment usage patterns
+6. **Progressive Overload Per Muscle**: Track each muscle group individually
+7. **Weak Point Identification**: Identify under-trained muscles
+
 ### Research Topics (Priority Order)
 
 #### 1. Exercise Science - Progressive Overload Tracking
