@@ -1081,3 +1081,698 @@ async def test_no_duplicate_backfill_for_existing_sets(db_transaction):
     assert initial_count == 3
     assert final_count == 3
     assert backfilled_count is None  # No rows inserted
+
+## CRITICAL TESTS FOR FINALIZED MIGRATION RULES ##
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_backfill_body_weight_exercises_null_weight(db_transaction):
+    """
+    Test that exercises with NULL weight (body weight exercises like push-ups, pull-ups)
+    are backfilled correctly with weight set to 0.
+    
+    Rule: Allow NULL weight for body weight exercises
+    """
+    # Arrange: Create body weight exercise (NULL weight)
+    app_user_id = uuid.uuid4()
+    await create_test_user(
+        db_transaction,
+        app_user_id,
+        f"user-{uuid.uuid4()}@example.com",
+        name="Test User",
+    )
+
+    plan_id = await db_transaction.fetchval(
+        "INSERT INTO plan (name) VALUES ($1) RETURNING plan_id",
+        "Test Plan",
+    )
+
+    session_schedule_id = await db_transaction.fetchval(
+        """
+        INSERT INTO session_schedule (plan_id, name)
+        VALUES ($1, $2)
+        RETURNING session_schedule_id
+        """,
+        plan_id,
+        "Test Session",
+    )
+
+    base_exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO base_exercise (name)
+        VALUES ($1)
+        RETURNING base_exercise_id
+        """,
+        "Push-ups",
+    )
+
+    exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO exercise (
+            base_exercise_id,
+            session_schedule_id,
+            reps,
+            sets,
+            rest,
+            sort_order
+        )
+        VALUES ($1, $2, 15, 3, interval '00:01:30', 1)
+        RETURNING exercise_id
+        """,
+        base_exercise_id,
+        session_schedule_id,
+    )
+
+    # Create COMPLETED session (critical!)
+    performed_session_id = await db_transaction.fetchval(
+        """
+        INSERT INTO performed_session (
+            session_schedule_id,
+            app_user_id,
+            started_at,
+            completed_at
+        )
+        VALUES ($1, $2, $3, $4)
+        RETURNING performed_session_id
+        """,
+        session_schedule_id,
+        app_user_id,
+        datetime.now() - timedelta(hours=1),
+        datetime.now(),  # Session is completed!
+    )
+
+    # Create performed exercise with NULL weight (body weight)
+    performed_exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO performed_exercise (
+            performed_session_id,
+            exercise_id,
+            name,
+            reps,
+            weight,
+            started_at,
+            completed_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING performed_exercise_id
+        """,
+        performed_session_id,
+        exercise_id,
+        "Push-ups",
+        [15, 12, 10],  # 3 sets
+        None,  # NULL weight = body weight exercise!
+        datetime.now() - timedelta(minutes=20),
+        datetime.now() - timedelta(minutes=10),
+    )
+
+    # Act: Trigger backfill
+    await db_transaction.execute(
+        """
+        WITH pe_data AS (
+            SELECT
+                pe.performed_exercise_id,
+                pe.weight,
+                pe.reps,
+                pe.rest,
+                pe.started_at,
+                pe.completed_at,
+                pe.sets,
+                (pe.completed_at - pe.started_at) / pe.sets AS set_duration
+            FROM performed_exercise pe
+            JOIN performed_session ps ON pe.performed_session_id = ps.performed_session_id
+            WHERE pe.performed_exercise_id = $1
+              AND ps.completed_at IS NOT NULL  -- Session must be completed
+              -- Conservative session-level exclusion
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM performed_exercise_set pes
+                  JOIN performed_exercise pe2 ON pes.performed_exercise_id = pe2.performed_exercise_id
+                  WHERE pe2.performed_session_id = pe.performed_session_id
+              )
+        )
+        INSERT INTO performed_exercise_set (
+            performed_exercise_id,
+            exercise_set_type,
+            weight,
+            reps,
+            rest,
+            "order",
+            started_at,
+            completed_at
+        )
+        SELECT
+            pe_data.performed_exercise_id,
+            'regular',
+            COALESCE(pe_data.weight, 0),  -- NULL → 0 for body weight
+            rep_value,
+            COALESCE(pe_data.rest[set_index], interval '00:02:00'),
+            set_index,
+            pe_data.started_at + (pe_data.set_duration * (set_index - 1)),
+            pe_data.started_at + (pe_data.set_duration * set_index)
+        FROM pe_data,
+             LATERAL unnest(pe_data.reps) WITH ORDINALITY AS u(rep_value, set_index)
+        """,
+        performed_exercise_id,
+    )
+
+    # Assert: Sets created with weight = 0
+    sets = await db_transaction.fetch(
+        """
+        SELECT weight, reps, "order"
+        FROM performed_exercise_set
+        WHERE performed_exercise_id = $1
+        ORDER BY "order"
+        """,
+        performed_exercise_id,
+    )
+
+    assert len(sets) == 3
+    assert all(s["weight"] == 0 for s in sets)  # All weights should be 0
+    assert [s["reps"] for s in sets] == [15, 12, 10]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_backfill_skips_entire_session_if_any_exercise_has_sets(db_transaction):
+    """
+    Test conservative session-level exclusion: If ANY exercise in a session
+    has sets, skip the ENTIRE session from backfill.
+    
+    Rule: Conservative session-level exclusion to prevent mixing data
+    """
+    # Arrange: Create session with 3 exercises
+    app_user_id = uuid.uuid4()
+    await create_test_user(
+        db_transaction,
+        app_user_id,
+        f"user-{uuid.uuid4()}@example.com",
+        name="Test User",
+    )
+
+    plan_id = await db_transaction.fetchval(
+        "INSERT INTO plan (name) VALUES ($1) RETURNING plan_id",
+        "Test Plan",
+    )
+
+    session_schedule_id = await db_transaction.fetchval(
+        """
+        INSERT INTO session_schedule (plan_id, name)
+        VALUES ($1, $2)
+        RETURNING session_schedule_id
+        """,
+        plan_id,
+        "Test Session",
+    )
+
+    # Create 3 exercises
+    exercise_ids = []
+    for i in range(3):
+        base_exercise_id = await db_transaction.fetchval(
+            """
+            INSERT INTO base_exercise (name)
+            VALUES ($1)
+            RETURNING base_exercise_id
+            """,
+            f"Exercise {i+1}",
+        )
+
+        exercise_id = await db_transaction.fetchval(
+            """
+            INSERT INTO exercise (
+                base_exercise_id,
+                session_schedule_id,
+                reps,
+                sets,
+                rest,
+                sort_order
+            )
+            VALUES ($1, $2, 10, 3, interval '00:02:00', $3)
+            RETURNING exercise_id
+            """,
+            base_exercise_id,
+            session_schedule_id,
+            i + 1,
+        )
+        exercise_ids.append(exercise_id)
+
+    # Create completed session
+    performed_session_id = await db_transaction.fetchval(
+        """
+        INSERT INTO performed_session (
+            session_schedule_id,
+            app_user_id,
+            started_at,
+            completed_at
+        )
+        VALUES ($1, $2, $3, $4)
+        RETURNING performed_session_id
+        """,
+        session_schedule_id,
+        app_user_id,
+        datetime.now() - timedelta(hours=1),
+        datetime.now(),
+    )
+
+    # Create 3 performed exercises in this session
+    performed_exercise_ids = []
+    for i, exercise_id in enumerate(exercise_ids):
+        performed_exercise_id = await db_transaction.fetchval(
+            """
+            INSERT INTO performed_exercise (
+                performed_session_id,
+                exercise_id,
+                name,
+                reps,
+                weight,
+                started_at,
+                completed_at
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING performed_exercise_id
+            """,
+            performed_session_id,
+            exercise_id,
+            f"Exercise {i+1}",
+            [10, 10, 10],
+            50000,
+            datetime.now() - timedelta(minutes=60 - (i * 15)),
+            datetime.now() - timedelta(minutes=50 - (i * 15)),
+        )
+        performed_exercise_ids.append(performed_exercise_id)
+
+    # Add sets ONLY for the first exercise (simulating post-migration)
+    for order in range(1, 4):
+        await db_transaction.execute(
+            """
+            INSERT INTO performed_exercise_set (
+                performed_exercise_id,
+                exercise_set_type,
+                weight,
+                reps,
+                rest,
+                "order"
+            )
+            VALUES ($1, 'regular', 50000, 10, interval '00:02:00', $2)
+            """,
+            performed_exercise_ids[0],
+            order,
+        )
+
+    # Act: Try to backfill second and third exercises
+    # This should be BLOCKED by conservative session-level exclusion
+    backfilled_count = await db_transaction.fetchval(
+        """
+        WITH pe_data AS (
+            SELECT
+                pe.performed_exercise_id,
+                pe.weight,
+                pe.reps,
+                pe.rest,
+                pe.started_at,
+                pe.completed_at,
+                pe.sets,
+                (pe.completed_at - pe.started_at) / pe.sets AS set_duration
+            FROM performed_exercise pe
+            JOIN performed_session ps ON pe.performed_session_id = ps.performed_session_id
+            WHERE pe.performed_exercise_id = ANY($1::uuid[])
+              AND ps.completed_at IS NOT NULL
+              -- Conservative session-level exclusion: Skip if ANY exercise has sets
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM performed_exercise_set pes
+                  JOIN performed_exercise pe2 ON pes.performed_exercise_id = pe2.performed_exercise_id
+                  WHERE pe2.performed_session_id = pe.performed_session_id
+              )
+        )
+        INSERT INTO performed_exercise_set (
+            performed_exercise_id,
+            exercise_set_type,
+            weight,
+            reps,
+            rest,
+            "order",
+            started_at,
+            completed_at
+        )
+        SELECT
+            pe_data.performed_exercise_id,
+            'regular',
+            COALESCE(pe_data.weight, 0),
+            rep_value,
+            COALESCE(pe_data.rest[set_index], interval '00:02:00'),
+            set_index,
+            pe_data.started_at + (pe_data.set_duration * (set_index - 1)),
+            pe_data.started_at + (pe_data.set_duration * set_index)
+        FROM pe_data,
+             LATERAL unnest(pe_data.reps) WITH ORDINALITY AS u(rep_value, set_index)
+        RETURNING performed_exercise_id
+        """,
+        [performed_exercise_ids[1], performed_exercise_ids[2]],
+    )
+
+    # Assert: No backfill should occur (session has sets already)
+    assert backfilled_count is None
+
+    # Verify only first exercise has sets
+    for i, pe_id in enumerate(performed_exercise_ids):
+        count = await db_transaction.fetchval(
+            "SELECT COUNT(*) FROM performed_exercise_set WHERE performed_exercise_id = $1",
+            pe_id,
+        )
+        if i == 0:
+            assert count == 3  # First exercise: has sets (post-migration)
+        else:
+            assert count == 0  # Others: no sets (blocked by conservative exclusion)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_backfill_skips_in_progress_sessions(db_transaction):
+    """
+    Test that in-progress sessions (performed_session.completed_at = NULL)
+    are skipped from backfill even if exercises look complete.
+    
+    Rule: Only backfill exercises in completed sessions
+    """
+    # Arrange: Create in-progress session
+    app_user_id = uuid.uuid4()
+    await create_test_user(
+        db_transaction,
+        app_user_id,
+        f"user-{uuid.uuid4()}@example.com",
+        name="Test User",
+    )
+
+    plan_id = await db_transaction.fetchval(
+        "INSERT INTO plan (name) VALUES ($1) RETURNING plan_id",
+        "Test Plan",
+    )
+
+    session_schedule_id = await db_transaction.fetchval(
+        """
+        INSERT INTO session_schedule (plan_id, name)
+        VALUES ($1, $2)
+        RETURNING session_schedule_id
+        """,
+        plan_id,
+        "Test Session",
+    )
+
+    base_exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO base_exercise (name)
+        VALUES ($1)
+        RETURNING base_exercise_id
+        """,
+        "Squat",
+    )
+
+    exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO exercise (
+            base_exercise_id,
+            session_schedule_id,
+            reps,
+            sets,
+            rest,
+            sort_order
+        )
+        VALUES ($1, $2, 10, 5, interval '00:03:00', 1)
+        RETURNING exercise_id
+        """,
+        base_exercise_id,
+        session_schedule_id,
+    )
+
+    # Create IN-PROGRESS session (completed_at = NULL)
+    performed_session_id = await db_transaction.fetchval(
+        """
+        INSERT INTO performed_session (
+            session_schedule_id,
+            app_user_id,
+            started_at,
+            completed_at
+        )
+        VALUES ($1, $2, $3, $4)
+        RETURNING performed_session_id
+        """,
+        session_schedule_id,
+        app_user_id,
+        datetime.now() - timedelta(minutes=30),
+        None,  # Session NOT completed!
+    )
+
+    # Create performed exercise that looks "complete" (has completed_at)
+    performed_exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO performed_exercise (
+            performed_session_id,
+            exercise_id,
+            name,
+            reps,
+            weight,
+            started_at,
+            completed_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING performed_exercise_id
+        """,
+        performed_session_id,
+        exercise_id,
+        "Squat",
+        [10, 10, 10, 10, 10],
+        100000,
+        datetime.now() - timedelta(minutes=25),
+        datetime.now() - timedelta(minutes=10),  # Exercise looks complete
+    )
+
+    # Act: Try to backfill (should be blocked because session is in-progress)
+    backfilled_count = await db_transaction.fetchval(
+        """
+        WITH pe_data AS (
+            SELECT
+                pe.performed_exercise_id,
+                pe.weight,
+                pe.reps,
+                pe.rest,
+                pe.started_at,
+                pe.completed_at,
+                pe.sets,
+                (pe.completed_at - pe.started_at) / pe.sets AS set_duration
+            FROM performed_exercise pe
+            JOIN performed_session ps ON pe.performed_session_id = ps.performed_session_id
+            WHERE pe.performed_exercise_id = $1
+              AND ps.completed_at IS NOT NULL  -- CRITICAL CHECK!
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM performed_exercise_set pes
+                  JOIN performed_exercise pe2 ON pes.performed_exercise_id = pe2.performed_exercise_id
+                  WHERE pe2.performed_session_id = pe.performed_session_id
+              )
+        )
+        INSERT INTO performed_exercise_set (
+            performed_exercise_id,
+            exercise_set_type,
+            weight,
+            reps,
+            rest,
+            "order",
+            started_at,
+            completed_at
+        )
+        SELECT
+            pe_data.performed_exercise_id,
+            'regular',
+            COALESCE(pe_data.weight, 0),
+            rep_value,
+            COALESCE(pe_data.rest[set_index], interval '00:02:00'),
+            set_index,
+            pe_data.started_at + (pe_data.set_duration * (set_index - 1)),
+            pe_data.started_at + (pe_data.set_duration * set_index)
+        FROM pe_data,
+             LATERAL unnest(pe_data.reps) WITH ORDINALITY AS u(rep_value, set_index)
+        RETURNING performed_exercise_id
+        """,
+        performed_exercise_id,
+    )
+
+    # Assert: No backfill (session not completed)
+    assert backfilled_count is None
+
+    # Verify no sets were created
+    count = await db_transaction.fetchval(
+        "SELECT COUNT(*) FROM performed_exercise_set WHERE performed_exercise_id = $1",
+        performed_exercise_id,
+    )
+    assert count == 0
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_backfill_includes_incomplete_exercises_in_completed_session(db_transaction):
+    """
+    Test that exercises with NULL completed_at are STILL backfilled
+    if they're part of a completed session.
+    
+    Rule: Check performed_session.completed_at, not individual exercise completed_at
+    """
+    # Arrange: Create completed session with incomplete exercise
+    app_user_id = uuid.uuid4()
+    await create_test_user(
+        db_transaction,
+        app_user_id,
+        f"user-{uuid.uuid4()}@example.com",
+        name="Test User",
+    )
+
+    plan_id = await db_transaction.fetchval(
+        "INSERT INTO plan (name) VALUES ($1) RETURNING plan_id",
+        "Test Plan",
+    )
+
+    session_schedule_id = await db_transaction.fetchval(
+        """
+        INSERT INTO session_schedule (plan_id, name)
+        VALUES ($1, $2)
+        RETURNING session_schedule_id
+        """,
+        plan_id,
+        "Test Session",
+    )
+
+    base_exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO base_exercise (name)
+        VALUES ($1)
+        RETURNING base_exercise_id
+        """,
+        "Deadlift",
+    )
+
+    exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO exercise (
+            base_exercise_id,
+            session_schedule_id,
+            reps,
+            sets,
+            rest,
+            sort_order
+        )
+        VALUES ($1, $2, 5, 3, interval '00:03:00', 1)
+        RETURNING exercise_id
+        """,
+        base_exercise_id,
+        session_schedule_id,
+    )
+
+    # Create COMPLETED session
+    performed_session_id = await db_transaction.fetchval(
+        """
+        INSERT INTO performed_session (
+            session_schedule_id,
+            app_user_id,
+            started_at,
+            completed_at
+        )
+        VALUES ($1, $2, $3, $4)
+        RETURNING performed_session_id
+        """,
+        session_schedule_id,
+        app_user_id,
+        datetime.now() - timedelta(hours=1),
+        datetime.now(),  # Session IS completed
+    )
+
+    # Create performed exercise WITHOUT completed_at (skipped/incomplete)
+    performed_exercise_id = await db_transaction.fetchval(
+        """
+        INSERT INTO performed_exercise (
+            performed_session_id,
+            exercise_id,
+            name,
+            reps,
+            weight,
+            started_at,
+            completed_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING performed_exercise_id
+        """,
+        performed_session_id,
+        exercise_id,
+        "Deadlift",
+        [5, 5, 5],
+        150000,
+        datetime.now() - timedelta(minutes=30),
+        None,  # Exercise NOT completed (maybe skipped last set?)
+    )
+
+    # Act: Backfill (should include this exercise because session is completed)
+    await db_transaction.execute(
+        """
+        WITH pe_data AS (
+            SELECT
+                pe.performed_exercise_id,
+                pe.weight,
+                pe.reps,
+                pe.rest,
+                pe.started_at,
+                COALESCE(pe.completed_at, ps.completed_at) as completed_at,  -- Use session time if exercise incomplete
+                pe.sets,
+                (COALESCE(pe.completed_at, ps.completed_at) - pe.started_at) / pe.sets AS set_duration
+            FROM performed_exercise pe
+            JOIN performed_session ps ON pe.performed_session_id = ps.performed_session_id
+            WHERE pe.performed_exercise_id = $1
+              AND ps.completed_at IS NOT NULL  -- Session must be completed
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM performed_exercise_set pes
+                  JOIN performed_exercise pe2 ON pes.performed_exercise_id = pe2.performed_exercise_id
+                  WHERE pe2.performed_session_id = pe.performed_session_id
+              )
+        )
+        INSERT INTO performed_exercise_set (
+            performed_exercise_id,
+            exercise_set_type,
+            weight,
+            reps,
+            rest,
+            "order",
+            started_at,
+            completed_at
+        )
+        SELECT
+            pe_data.performed_exercise_id,
+            'regular',
+            COALESCE(pe_data.weight, 0),
+            rep_value,
+            COALESCE(pe_data.rest[set_index], interval '00:02:00'),
+            set_index,
+            pe_data.started_at + (pe_data.set_duration * (set_index - 1)),
+            pe_data.started_at + (pe_data.set_duration * set_index)
+        FROM pe_data,
+             LATERAL unnest(pe_data.reps) WITH ORDINALITY AS u(rep_value, set_index)
+        """,
+        performed_exercise_id,
+    )
+
+    # Assert: Sets WERE created (session is completed)
+    count = await db_transaction.fetchval(
+        "SELECT COUNT(*) FROM performed_exercise_set WHERE performed_exercise_id = $1",
+        performed_exercise_id,
+    )
+    assert count == 3  # Sets created despite exercise.completed_at = NULL
+
+    # Verify data
+    sets = await db_transaction.fetch(
+        """
+        SELECT weight, reps, "order"
+        FROM performed_exercise_set
+        WHERE performed_exercise_id = $1
+        ORDER BY "order"
+        """,
+        performed_exercise_id,
+    )
+    assert [s["reps"] for s in sets] == [5, 5, 5]
+    assert all(s["weight"] == 150000 for s in sets)
