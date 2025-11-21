@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { WorkoutDetail } from '@/components/workouts/workout-detail'
+import { AuthNavWrapper } from '@/components/nav/auth-nav-wrapper'
 
 export default async function WorkoutDetailPage({
   params,
@@ -68,6 +69,7 @@ export default async function WorkoutDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AuthNavWrapper />
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link
