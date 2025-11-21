@@ -141,3 +141,4 @@ supabase/seed.sql
 backups/
 backups/
 .env.local
+.vercel
