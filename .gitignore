@@ -16,6 +16,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+!web_frontend/lib/
 parts/
 sdist/
 var/
@@ -112,6 +113,9 @@ venv.bak/
 # Claude Code
 .claude/
 
+# Git worktrees
+.worktrees/
+
 .DS_Store
 .env.local
 .env
@@ -137,3 +141,4 @@ supabase/seed.sql
 backups/
 backups/
 .env.local
+.vercel

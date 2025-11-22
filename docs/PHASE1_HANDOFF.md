@@ -1,22 +1,31 @@
-# Password Reset Flow - Handoff Documentation
+# Password Reset Flow - Web App
 
-## Current Status: PARTIALLY WORKING
+## Current Status: MAGIC LINKS WORKING
 
-The password reset redirect URL issue is **FIXED**, but session persistence after callback is **STILL BROKEN**.
+The web app uses **magic link** password reset flow, which is working correctly.
 
-## What Works ✅
+### Multi-Platform Strategy
+- **Web app (this repo):** Magic links via email
+- **React Native app (separate repo):** OTP codes via email
+- **Email template:** Contains both magic link AND OTP code to support both platforms
+
+---
+
+## Web App Flow (Magic Links)
+
+### What Works ✅
 1. Password reset request successfully generates recovery token
-2. Email link now has correct URL with `/auth/callback?type=recovery&next=/update-password`
-3. User is redirected to `/update-password` page after clicking link
-4. `/update-password` page loads and displays form
+2. Email link has correct URL with `/auth/callback?type=recovery&next=/update-password`
+3. User clicks link and is redirected to `/update-password` page
+4. User enters new password and submits
+5. Password is updated successfully
 
-## What's Broken ❌
-**Session cookies from `exchangeCodeForSession` are not persisting after redirect**
-
-Error: `Auth session missing! Auth session missing!`
-
-## Root Cause
-Session created in `/app/auth/callback/route.ts` is not available in Server Action at `/app/(auth)/update-password/actions.ts`. Cookies are being set on response but not persisting.
+### Implementation Files
+- `/app/(auth)/reset-password/page.tsx` - Email input form
+- `/app/(auth)/reset-password/actions.ts` - Sends reset email
+- `/app/auth/callback/route.ts` - Handles magic link callback
+- `/app/(auth)/update-password/page.tsx` - New password form
+- `/app/(auth)/update-password/actions.ts` - Updates password
 
 ## Key Files Modified
 
@@ -58,3 +67,13 @@ docker exec supabase_db_workout_app psql -U postgres -c "SELECT * FROM auth.sess
 
 ## Success Criteria
 User completes full flow: reset request → email link → update password form → submit → login with new password
+
+---
+
+## Notes for React Native App
+
+The React Native app (separate repository) will use OTP codes instead of magic links. The Supabase email template should include **both**:
+- Magic link URL (for web app)
+- OTP code (for mobile app)
+
+This allows both platforms to use the same password reset email endpoint while supporting their respective auth flows.

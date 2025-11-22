@@ -1,0 +1,186 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+import { login } from "@/app/(auth)/login/actions";
+import { verifyMFA } from "@/app/(auth)/login/mfa-actions";
+import { MFAVerify } from "./mfa-verify";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+export function LoginForm({ redirect }: { redirect?: string }) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showMFA, setShowMFA] = useState(false);
+  const [mfaError, setMfaError] = useState<string | null>(null);
+
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  async function onSubmit(values: LoginFormValues) {
+    setLoading(true);
+    setError(null);
+
+    const result = await login(values);
+
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+    } else {
+      // Check if MFA is required
+      if (result.mfaRequired) {
+        setShowMFA(true);
+        setLoading(false);
+      } else {
+        // Validate redirect parameter to prevent open redirect vulnerability
+        const isValidRedirect = (path?: string): path is string => {
+          if (!path) return false;
+          // Must start with / but not // (to prevent protocol-relative URLs)
+          return path.startsWith('/') && !path.startsWith('//');
+        };
+
+        const redirectPath = isValidRedirect(redirect) ? redirect : "/profile";
+        router.push(redirectPath);
+        router.refresh();
+      }
+    }
+  }
+
+  async function handleMFAVerify(code: string) {
+    setLoading(true);
+    setMfaError(null);
+
+    const result = await verifyMFA(code);
+
+    if (result.error) {
+      setMfaError(result.error);
+      setLoading(false);
+    } else {
+      // Validate redirect parameter
+      const isValidRedirect = (path?: string): path is string => {
+        if (!path) return false;
+        return path.startsWith('/') && !path.startsWith('//');
+      };
+
+      const redirectPath = isValidRedirect(redirect) ? redirect : "/profile";
+      router.push(redirectPath);
+      router.refresh();
+    }
+  }
+
+  function handleMFACancel() {
+    setShowMFA(false);
+    setMfaError(null);
+    form.reset();
+  }
+
+  if (showMFA) {
+    return (
+      <div className="mt-8">
+        <MFAVerify
+          onVerify={handleMFAVerify}
+          onCancel={handleMFACancel}
+          loading={loading}
+          error={mfaError}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    data-testid="email-input"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    data-testid="password-input"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex items-center justify-end">
+            <a
+              href="/reset-password"
+              className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            >
+              Forgot your password?
+            </a>
+          </div>
+
+          {error && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading}
+            data-testid="login-button"
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
+}
