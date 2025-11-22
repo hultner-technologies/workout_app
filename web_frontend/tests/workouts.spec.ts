@@ -64,11 +64,15 @@ test.describe('Workout Filtering', () => {
     await expect(emptyMessage).toContainText('No workouts found matching your search');
   });
 
-  test('should clear filter and show default empty message', async ({ page }) => {
+  test('should clear filter and restore workouts or show default state', async ({ page }) => {
     await page.goto('/workouts');
 
     const searchInput = page.getByTestId('workout-search-input');
     const emptyMessage = page.getByTestId('empty-workouts-message');
+    const workoutList = page.getByTestId('workout-list');
+
+    // Check initial state (whether user has workouts or not)
+    const initiallyHasWorkouts = await workoutList.isVisible().catch(() => false);
 
     // Filter to show no results
     await searchInput.fill('ZZZZNONEXISTENT999');
@@ -78,9 +82,16 @@ test.describe('Workout Filtering', () => {
     // Clear the search
     await searchInput.clear();
 
-    // Should show default empty message (not search-specific)
-    await expect(emptyMessage).toBeVisible();
-    await expect(emptyMessage).not.toContainText('No workouts found matching your search');
+    // Should restore to initial state (either workout list or default empty message)
+    if (initiallyHasWorkouts) {
+      // If user had workouts, they should be visible again
+      await expect(workoutList).toBeVisible();
+      await expect(emptyMessage).not.toBeVisible();
+    } else {
+      // If user had no workouts, should show default empty message (not search-specific)
+      await expect(emptyMessage).toBeVisible();
+      await expect(emptyMessage).not.toContainText('No workouts found matching your search');
+    }
   });
 
   test('should restore workout list when clearing filter', async ({ page }) => {
